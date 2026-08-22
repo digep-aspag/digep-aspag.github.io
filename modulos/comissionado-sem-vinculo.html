@@ -1,0 +1,2965 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema de Acerto — Cargos Comissionados (SEM vínculo)</title>
+<style>
+/* ============================================================
+   RESET / BASE
+============================================================ */
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:1rem;line-height:1.5;color:#212529;background:#f5f7fa}
+strong{font-weight:700}
+small{font-size:.875em}
+em{font-style:italic}
+
+/* ============================================================
+   LAYOUT / GRID (substitui o grid do Bootstrap, só o necessário)
+============================================================ */
+.container{width:100%;margin:0 auto;padding:0 1rem}
+.app-container{max-width:1400px}
+.my-4{margin-top:1.5rem;margin-bottom:1.5rem}
+.row{display:flex;flex-wrap:wrap;margin-left:-.5rem;margin-right:-.5rem}
+.row>*{padding-left:.5rem;padding-right:.5rem;width:100%}
+.row.g-3{row-gap:1rem}
+.align-items-end{align-items:flex-end}
+.d-flex{display:flex!important}
+.d-none{display:none!important}
+.flex-wrap{flex-wrap:wrap}
+.gap-2{gap:.5rem}
+.ms-auto{margin-left:auto}
+@media(min-width:768px){
+  .col-md-3{width:25%}
+  .col-md-4{width:33.3333%}
+}
+@media(min-width:992px){
+  .col-lg-3{width:25%}
+  .col-lg-4{width:33.3333%}
+  .col-lg-5{width:41.6667%}
+  .col-lg-6{width:50%}
+  .offset-lg-9{margin-left:75%}
+  .d-lg-block{display:block!important}
+}
+
+/* ============================================================
+   UTILIDADES DE ESPAÇAMENTO / TEXTO
+============================================================ */
+.mb-0{margin-bottom:0}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:1rem}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:1rem}
+.pt-3{padding-top:1rem}
+.py-2{padding-top:.5rem;padding-bottom:.5rem}
+.px-3{padding-left:1rem;padding-right:1rem}
+.me-1{margin-right:.25rem}
+.fw-bold{font-weight:700}.fw-semibold{font-weight:600}.fw-normal{font-weight:400}
+.fs-5{font-size:1.25rem}.fs-6{font-size:1rem}
+.text-muted{color:#6c757d}
+.text-danger{color:#7c3aed}
+.text-success{color:#198754}
+.text-end{text-align:right}
+
+/* ============================================================
+   CABEÇALHO / IDENTIDADE DO APP
+============================================================ */
+.app-title{color:#6b21a8;font-weight:700;margin:0}
+.section-title{
+  color:#6b21a8;
+  font-size:1.2rem;
+  font-weight:700;
+  letter-spacing:.02em;
+  margin-bottom:.85rem;
+  padding-bottom:.4rem;
+  border-bottom:2px solid #6b21a8;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  flex-wrap:wrap;
+}
+.app-subtitle{color:#6c757d;font-size:.95rem}
+.rule{border-top:2px solid #6b21a8;margin-top:.4rem}
+
+/* ============================================================
+   ABAS (substitui nav-tabs + tab-content do Bootstrap)
+============================================================ */
+.nav{display:flex;list-style:none;margin:.25rem 0 0;padding:0;flex-wrap:wrap}
+.nav-tabs{border-bottom:1px solid #dee2e6}
+.nav-item{margin-bottom:-1px}
+.nav-link{display:block;padding:.5rem 1rem;border:1px solid transparent;
+  border-top-left-radius:.375rem;border-top-right-radius:.375rem;
+  cursor:pointer;background:#f8f9fa;color:#0d6efd;font:inherit}
+.nav-link.active{color:#212529;background:#fff;border-color:#dee2e6 #dee2e6 #fff}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ============================================================
+   CARD
+============================================================ */
+.card{background:#fff;border:1px solid rgba(0,0,0,.125);border-radius:.5rem}
+.card.shadow-sm{box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
+.card-body{padding:1rem 1.25rem}
+.card-title{margin:0 0 .5rem;font-size:1.25rem;font-weight:500}
+
+/* ============================================================
+   ALERTAS
+============================================================ */
+.alert{padding:.75rem 1rem;border:1px solid transparent;border-radius:.375rem}
+.alert-info{color:#055160;background:#cff4fc;border-color:#b6effb}
+.alert-warning{color:#664d03;background:#fff3cd;border-color:#ffecb5}
+.alert-primary{color:#084298;background:#cfe2ff;border-color:#b6d4fe}
+.alert-danger{color:#5b21b6;background:#f3e8ff;border-color:#d8b4fe}
+
+/* ============================================================
+   FORMULÁRIOS
+============================================================ */
+.form-label{font-weight:600;display:block;margin-bottom:.25rem}
+.form-control{display:block;width:100%;padding:.375rem .75rem;font-size:1rem;
+  border:1px solid #ced4da;border-radius:.375rem;background:#fff;color:#212529;
+  transition:border-color .1s,box-shadow .1s}
+.form-control:focus{outline:0;border-color:#86b7fe;box-shadow:0 0 0 .2rem rgba(13,110,253,.15)}
+.form-control-sm{padding:.25rem .5rem;font-size:.875rem;border-radius:.25rem}
+.form-control.is-invalid{border-color:#7c3aed}
+.form-control.is-valid{border-color:#198754}
+.form-check-input{width:1rem;height:1rem;margin:0;vertical-align:middle}
+.form-check-label{font-size:.9rem;vertical-align:middle}
+
+/* ============================================================
+   BOTÕES
+============================================================ */
+.btn{display:inline-block;padding:.375rem .75rem;font-size:1rem;border-radius:.375rem;
+  border:1px solid transparent;cursor:pointer;text-align:center;user-select:none;
+  transition:background-color .1s,border-color .1s,opacity .1s}
+.btn:disabled{opacity:.65;cursor:not-allowed}
+.btn-sm{padding:.25rem .5rem;font-size:.875rem;border-radius:.25rem}
+.btn-lg{padding:.65rem 1.75rem;font-size:1.2rem;border-radius:.5rem;font-weight:600}
+.btn-primary{background:#0d6efd;border-color:#0d6efd;color:#fff}
+.btn-primary:hover:not(:disabled){background:#0b5ed7;border-color:#0a58ca}
+.btn-secondary{background:#6c757d;border-color:#6c757d;color:#fff}
+.btn-secondary:hover:not(:disabled){background:#5c636a}
+.btn-success{background:#198754;border-color:#198754;color:#fff}
+.btn-success:hover:not(:disabled){background:#157347}
+.btn-dark{background:#212529;border-color:#212529;color:#fff}
+.btn-dark:hover:not(:disabled){background:#1c1f23}
+.btn-outline-primary{background:transparent;border-color:#0d6efd;color:#0d6efd}
+.btn-outline-primary:hover:not(:disabled){background:#0d6efd;color:#fff}
+.btn-outline-secondary{background:transparent;border-color:#6c757d;color:#6c757d}
+.btn-outline-secondary:hover:not(:disabled){background:#6c757d;color:#fff}
+.btn-outline-danger{background:transparent;border-color:#7c3aed;color:#7c3aed}
+.btn-outline-danger:hover:not(:disabled){background:#7c3aed;color:#fff}
+.spinner-border{display:inline-block;width:1rem;height:1rem;border:.2em solid currentColor;
+  border-right-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:-.125em}
+.spinner-border-sm{width:.875rem;height:.875rem;border-width:.15em}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============================================================
+   TABELAS
+============================================================ */
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.5rem;vertical-align:top;border-bottom:1px solid #dee2e6}
+.table-bordered th,.table-bordered td{border:1px solid #dee2e6}
+.table-success th{background:#d1e7dd}
+.table-responsive{overflow-x:auto}
+.align-middle td,.align-middle th{vertical-align:middle}
+
+/* ============================================================
+   ESTILOS ORIGINAIS ESPECÍFICOS DO SISTEMA
+============================================================ */
+.uppercase{text-transform:uppercase}
+.ferias-table{table-layout:fixed;width:100%;border-collapse:separate;border-spacing:0}
+.ferias-table th,.ferias-table td{padding:6px 8px;font-size:13px;vertical-align:middle;text-align:center;border:1px solid #dee2e6}
+.ferias-table th{background:#6b21a8;color:#fff;white-space:nowrap}
+.col-aquisitivo{width:16%}.col-usufruto-1{width:24%}.col-usufruto-2{width:24%}.col-usufruto-3{width:24%}.col-total-dias{width:12%}
+.periodo-ferias-container{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end}
+.periodo-ferias label{display:block;font-size:11px;color:#6c757d;margin-bottom:3px}
+.periodo-ferias input[type="date"]{padding:4px 6px;font-size:13px}
+.periodo-aquisitivo{padding:6px 8px;font-size:13px}
+.terco-ferias-checkbox{display:flex;align-items:center;gap:6px;margin-top:6px}
+.ferias-table .dias-usufruidos{width:80px;text-align:right;padding:4px 6px;font-size:13px;margin:0 auto}
+.th-wrap{display:inline-block;line-height:1.2}
+.valor-positivo{color:#198754!important;font-weight:700}
+.valor-negativo{color:#dc3545!important;font-weight:700}
+
+/* Colunas de valor monetário (tabela de resultados de cada cargo e Resumo
+   Geral) alinhadas à direita, com algarismos tabulares para melhor leitura */
+.results-body td:nth-child(3),
+#resumo-table td:nth-child(3),
+#resumo-table th:nth-child(3),
+.results-table thead th:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.manual-valor{ text-align:right; font-variant-numeric: tabular-nums; }
+
+/* Linha "TOTAL LÍQUIDO (todos os cargos) ..... valor", no estilo de um
+   sumário/índice, com pontilhado ligando o rótulo ao valor */
+.linha-total-pontilhada{
+  display:flex;align-items:baseline;gap:.4rem;width:100%;
+}
+.linha-total-rotulo{white-space:nowrap}
+.linha-total-pontos{
+  flex:1 1 auto;border-bottom:2px dotted #999;
+  position:relative;top:-.35rem;min-width:1.5rem;
+}
+.linha-total-valor{white-space:nowrap;font-variant-numeric: tabular-nums}
+.calculation-details,.rubricas-dias-trabalhados{border:1px solid #dee2e6;border-radius:.5rem;padding:12px;background:#f8f9fa;font-size:.9rem}
+.simbolo-feedback{min-height:18px}
+.manual-row td{background:#fffdf5}
+.manual-resumo-row td{background:#fffdf5}
+.manual-row td[contenteditable]{cursor:text;outline:none}
+.manual-row td[contenteditable]:focus{background:#fff3cd;box-shadow:inset 0 0 0 1px #ffc107}
+.manual-row .manual-codigo:empty::before{content:'código';color:#adb5bd;font-style:italic}
+.manual-row .manual-descricao:empty::before{content:'descrição (opcional)';color:#adb5bd;font-style:italic}
+
+/* Observações de campo: ficam ocultas e só aparecem quando o usuário
+   clica/foca em algum campo do respectivo grupo (:focus-within). */
+.field-hint-group .field-hint{display:none}
+.field-hint-group:focus-within .field-hint{display:block}
+
+/* ============================================================
+   IMPRESSÃO / GERAÇÃO DE PDF (via Ctrl+P do navegador)
+============================================================ */
+.print-header-injetado{display:none}
+.folha-oficial{display:none}
+.fo-info-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.fo-info-table td{padding:3px 6px;vertical-align:top}
+.fo-info-table .fo-label{font-weight:700;white-space:nowrap;width:1%}
+.fo-section-title{background:#6b21a8;color:#fff;font-weight:700;padding:5px 8px;font-size:13px;margin:10px 0 0}
+.fo-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+.fo-table th,.fo-table td{border:1px solid #dee2e6;padding:4px 8px}
+.fo-table thead th{background:#f3e8ff;color:#3b0764;text-align:left;font-size:12px}
+.fo-table td:last-child,.fo-table th:last-child{text-align:right;white-space:nowrap}
+.fo-total-row{background:#f3e8ff;font-weight:700;display:flex;justify-content:space-between;padding:6px 8px;border:1px solid #dee2e6;border-top:none;font-size:13px}
+.fo-total-usufruido{font-size:12px;margin:2px 0 4px;color:#495057}
+@media print{
+  @page{size:portrait;margin:14mm}
+  body *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+  .nav-tabs{display:none !important}
+  header.mb-3{display:none !important}
+  #pane-pessoais{display:none !important}
+  .tab-pane{display:none !important}
+  .tab-pane.print-include{display:block !important;break-after:page;page-break-after:always}
+  #pane-resumo.print-include{break-after:auto;page-break-after:auto}
+  .btn,button,.simbolo-feedback,datalist{display:none !important}
+  .print-force-show{display:block !important}
+  .print-header-injetado{display:block;margin-bottom:10px;font-family:Arial,Helvetica,sans-serif}
+  .print-header-injetado h2{color:#6b21a8;margin:0 0 4px;font-size:1.3rem}
+  .print-header-injetado .meta{font-size:.85rem;color:#495057;margin:0 0 4px}
+  .print-header-injetado h4{margin:6px 0 2px;color:#212529}
+  .pane-print-oficial > .card{display:none !important}
+  .pane-print-oficial > .folha-oficial{display:block !important}
+  .folha-oficial{font-family:Arial,Helvetica,sans-serif}
+  #pane-resumo.print-include .card-title{font-size:14px;color:#6b21a8;font-family:Arial,Helvetica,sans-serif}
+  #pane-resumo.print-include p.text-muted{display:none !important}
+  #pane-resumo.print-include #resumo-table{font-family:Arial,Helvetica,sans-serif;font-size:12px}
+  #pane-resumo.print-include #resumo-table th{background:#f3e8ff !important;color:#3b0764;font-size:12px;padding:4px 8px;font-weight:700}
+  #pane-resumo.print-include #resumo-table td{padding:4px 8px;font-size:12px}
+  #pane-resumo.print-include #resumo-total{font-size:13px;font-family:Arial,Helvetica,sans-serif}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+  }
+  html, body{ background:var(--paper) !important; padding:0 !important; margin:0 !important; }
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif !important; font-size:1.1rem; font-weight:600; color:#fff !important; margin:0.3rem 0 0 !important; text-align:left !important; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; font-family:'IBM Plex Sans',sans-serif; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.6rem 1.8rem 3rem; }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+  }
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html" class="ativo"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div class="conteudo-modulo">
+<div id="banner-edicao" style="display:none;background:#FBF3E3;border:1px solid #E9CE9C;color:#5B4A28;padding:0.7rem 1rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.2rem;font-family:'IBM Plex Sans',sans-serif;"></div>
+<div class="container app-container my-4">
+  <header class="mb-3">
+    <h1 class="app-title">Sistema de Acerto — Cargos Comissionados (SEM vínculo)</h1>
+    <div class="app-subtitle">Servidor SEM vínculo efetivo com o GDF (segurado obrigatório do RGPS) • Cálculos conforme LC 840/2011 • Avos com quinzena (≥15 dias) • Cada cargo calculado de forma independente • Incidência de INSS/RGPS sobre remuneração e 13º</div>
+    <div class="rule"></div>
+  </header>
+
+  <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-target="#pane-pessoais" type="button">Dados Pessoais</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c1"  type="button">Cargo 1</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c2"  type="button">Cargo 2</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c3"  type="button">Cargo 3</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c4"  type="button">Cargo 4</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c5"  type="button">Cargo 5</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c6"  type="button">Cargo 6</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c7"  type="button">Cargo 7</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c8"  type="button">Cargo 8</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c9"  type="button">Cargo 9</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c10" type="button">Cargo 10</button></li>
+    <li class="nav-item ms-auto"><button class="nav-link" data-target="#pane-resumo" type="button">Resumo</button></li>
+  </ul>
+
+  <div class="tab-content pt-3">
+    <div class="tab-pane active" id="pane-pessoais">
+      <div class="card shadow-sm"><div class="card-body">
+        <h4 class="card-title mb-3">Dados Pessoais</h4>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4"><label class="form-label">Nome</label><input type="text" class="form-control uppercase" id="srv-nome" placeholder="Digite o nome"></div>
+          <div class="col-md-3"><label class="form-label">Matrícula</label><input type="text" class="form-control uppercase" id="srv-matricula" placeholder="Digite a matrícula"></div>
+          <div class="col-md-3"><label class="form-label">Processo SEI</label><input type="text" class="form-control" id="srv-sei" placeholder="00000.00000000/0000-00"></div>
+          <div class="col-md-2"><label class="form-label">Qtd. de Cargos</label>
+            <select class="form-control" id="srv-qtd-cargos">
+              <option value="1">1 cargo</option>
+              <option value="2">2 cargos</option>
+              <option value="3">3 cargos</option>
+              <option value="4">4 cargos</option>
+              <option value="5">5 cargos</option>
+              <option value="6">6 cargos</option>
+              <option value="7">7 cargos</option>
+              <option value="8">8 cargos</option>
+              <option value="9">9 cargos</option>
+              <option value="10" selected>10 cargos</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-dark mt-3 btn-toggle-regras-pessoais" aria-expanded="false">Mostrar regras</button>
+        <div class="alert alert-warning mb-0 mt-2 regras-pessoais-box d-none">
+          <div class="mb-2">Cada cargo é calculado de forma <strong>totalmente independente</strong>.</div>
+          <strong>Regras:</strong><br>
+          • Direito de férias = (PAs vencidos × 30) + (ávos prop. ÷ 12 × 30)<br>
+          • Saldo positivo → devolve • Saldo negativo → recebe<br>
+          • Adiantamento de 13º recebido → <strong>sempre</strong> aparece como devolução (60891)<br>
+          • Múltiplos 1/3: 1º usa ávos disponíveis, demais são integrais<br>
+          • Havendo <strong>mais de 1 cargo</strong>, o cálculo automático do adiantamento (6/12 avos) só fica disponível no <strong>último cargo lançado</strong><br>
+          • Servidor <strong>SEM vínculo</strong> efetivo com o GDF → segurado obrigatório do <strong>RGPS</strong> (Lei 8.212/1991): incide INSS sobre a diferença de remuneração dos dias trabalhados e sobre o 13º salário do acerto (tabela progressiva/teto do RGPS)<br>
+          • Férias indenizadas e o respectivo 1/3 constitucional <strong>não sofrem incidência de INSS</strong> (natureza indenizatória — art. 28, §9º, "d", da Lei 8.212/1991)
+        </div>
+      </div></div>
+    </div>
+
+    <div class="tab-pane" id="pane-c1"></div>
+    <div class="tab-pane" id="pane-c2"></div>
+    <div class="tab-pane" id="pane-c3"></div>
+    <div class="tab-pane" id="pane-c4"></div>
+    <div class="tab-pane" id="pane-c5"></div>
+    <div class="tab-pane" id="pane-c6"></div>
+    <div class="tab-pane" id="pane-c7"></div>
+    <div class="tab-pane" id="pane-c8"></div>
+    <div class="tab-pane" id="pane-c9"></div>
+    <div class="tab-pane" id="pane-c10"></div>
+
+    <div class="tab-pane" id="pane-resumo">
+      <div class="card shadow-sm"><div class="card-body">
+        <h4 class="card-title mb-2">Resumo Geral</h4>
+        <p class="text-muted">Clique em <em>Atualizar Resumo</em> após calcular nas abas de cargos.</p>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle" id="resumo-table">
+            <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:280px">TOTAL R$</th></tr></thead>
+            <tbody>
+              <tr data-code="20015"><td>20015</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20017"><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="INSS_DIAS"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="IR_REMUNERACAO"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="21593"><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="INSS_13"><td>40920</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="IR_13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="20875"><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20857"><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20872"><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20883"><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="60891"><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="20926"><td>20926</td><td>DEVOLUÇÃO DE AUXÍLIO ALIMENTAÇÃO</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20912"><td>20912</td><td>DEVOLUÇÃO DE AUXÍLIO TRANSPORTE</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="30515"><td>30515</td><td>CUSTEIO DE AUXÍLIO TRANSPORTE A RECEBER</td><td class="valor-positivo">0,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="resumo-total" class="mt-2 fw-bold fs-5"></div>
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-primary" id="btn-atualizar-resumo">Atualizar Resumo</button>
+          <button class="btn btn-secondary" id="btn-exportar-resumo">Exportar JSON</button>
+          <button class="btn btn-success" id="btn-imprimir-resumo">🖨️ Imprimir / Gerar PDF</button>
+           <button class="btn btn-secondary" id="salvar-portal" type="button">Salvar no Portal</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
+        </div>
+      </div></div>
+    </div>
+  </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+// Funções utilitárias
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+const serverData = { nome: '', matricula: '', processoSei: '' };
+const TOTAL_CARGOS = 10;
+const cargoPanesSel = Array.from({ length: TOTAL_CARGOS }, (_, i) => `#pane-c${i + 1}`);
+const CODIGOS_RESUMO = ['20015', '20017', '21593', '20875', '20857', '20872', '20883', '60891', '20926', '20912', '30515'];
+let qtdCargos = TOTAL_CARGOS; // quantidade de cargos que serão de fato lançados (padrão: todos visíveis)
+
+/* Tabela oficial GDF/SEPLAG (Unidade de Administração de Carreiras e Empregos
+   Públicos) — Vigência Julho/2023 (Cargos de Natureza Política, Especial, em
+   Comissão, ADASA) e Abril/2022 (Funções Gratificadas Escolares - FGE).
+   Estrutura: { repres: valor da Representação, venc: valor do Vencimento
+   (0 quando o cargo/símbolo não possui parcela de vencimento, ex.: cargos
+   "públicos" sem vínculo, marcados com "-" na tabela oficial). */
+const TABELA_VERBAS = {
+  // Cargos de Natureza Política
+  'CNP-1':  { repres: 29311.94, venc: 0 },
+  'CNP-2':  { repres: 25929.79, venc: 0 },
+  'CNP-3':  { repres: 18038.12, venc: 4509.53 },
+  'CNP-4':  { repres: 14430.49, venc: 3607.62 },
+  // Cargos de Natureza Especial
+  'CDA-01': { repres: 18040.00, venc: 4510.00 },
+  'CNE-01': { repres: 13930.00, venc: 3483.00 },
+  'CNE-02': { repres: 12010.00, venc: 3003.00 },
+  'CNE-03': { repres: 10355.00, venc: 2589.00 },
+  'CNE-04': { repres: 8925.00,  venc: 2231.00 },
+  'CNE-05': { repres: 6510.00,  venc: 1628.00 },
+  'CNE-06': { repres: 5860.00,  venc: 1465.00 },
+  'CNE-07': { repres: 4685.00,  venc: 1171.00 },
+  'CNE-08': { repres: 3915.00,  venc: 979.00  },
+  // Cargos Públicos de Natureza Especial (sem vínculo — sem parcela de vencimento)
+  'CPE-01': { repres: 13930.00, venc: 0 },
+  'CPE-02': { repres: 12010.00, venc: 0 },
+  'CPE-03': { repres: 10355.00, venc: 0 },
+  'CPE-04': { repres: 8925.00,  venc: 0 },
+  'CPE-05': { repres: 6510.00,  venc: 0 },
+  'CPE-06': { repres: 5860.00,  venc: 0 },
+  'CPE-07': { repres: 4685.00,  venc: 0 },
+  'CPE-08': { repres: 3915.00,  venc: 0 },
+  // Cargos em Comissão
+  'CC-08': { repres: 2940.00, venc: 735.00 },
+  'CC-07': { repres: 2555.00, venc: 639.00 },
+  'CC-06': { repres: 2245.00, venc: 561.00 },
+  'CC-05': { repres: 1930.00, venc: 483.00 },
+  'CC-04': { repres: 1620.00, venc: 405.00 },
+  'CC-03': { repres: 1450.00, venc: 363.00 },
+  'CC-02': { repres: 1280.00, venc: 320.00 },
+  'CC-01': { repres: 1110.00, venc: 278.00 },
+  // Cargos Públicos em Comissão (sem vínculo — sem parcela de vencimento)
+  'CPC-08': { repres: 2940.00, venc: 0 },
+  'CPC-07': { repres: 2555.00, venc: 0 },
+  'CPC-06': { repres: 2245.00, venc: 0 },
+  'CPC-05': { repres: 1930.00, venc: 0 },
+  'CPC-04': { repres: 1620.00, venc: 0 },
+  'CPC-03': { repres: 1450.00, venc: 0 },
+  'CPC-02': { repres: 1280.00, venc: 0 },
+  'CPC-01': { repres: 1110.00, venc: 0 },
+  // Cargos em Comissão - ADASA
+  'CD-I':    { repres: 18040.00, venc: 4510.00 },
+  'CD-II':   { repres: 13930.00, venc: 3483.00 },
+  'CGE-I':   { repres: 10193.99, venc: 2677.21 },
+  'CGE-II':  { repres: 9061.32,  venc: 2379.74 },
+  'CGE-III': { repres: 8494.99,  venc: 2231.01 },
+  'CGE-IV':  { repres: 5693.02,  venc: 1495.14 },
+  'CA-I':    { repres: 9061.32,  venc: 2379.74 },
+  'CA-II':   { repres: 8494.99,  venc: 2231.01 },
+  'CA-III':  { repres: 3422.73,  venc: 898.90  },
+  'CA-IV':   { repres: 2123.76,  venc: 557.75  },
+  // Funções Gratificadas - Instituições Educacionais (FGE) — remuneração única,
+  // sem desdobramento oficial em vencimento/representação; lançada integralmente
+  // como Representação (Vencimento = 0)
+  'FGE-06': { repres: 2446.49, venc: 0 },
+  'FGE-05': { repres: 1902.58, venc: 0 },
+  'FGE-04': { repres: 1639.90, venc: 0 },
+  'FGE-03': { repres: 1354.36, venc: 0 },
+  'FGE-02': { repres: 1153.29, venc: 0 },
+  'FGE-01': { repres: 723.50,  venc: 0 }
+};
+
+/* ================================================================
+   SEGURIDADE SOCIAL (INSS/RGPS) — Servidor SEM vínculo efetivo com o GDF
+   Servidor ocupante EXCLUSIVAMENTE de cargo em comissão, sem vínculo
+   efetivo com o GDF, é segurado obrigatório do Regime Geral de
+   Previdência Social (RGPS), nos termos do art. 12, I, "g", da Lei
+   8.212/1991 c/c art. 40, §13, da CF/88. A contribuição é calculada
+   pela tabela progressiva do RGPS, por faixas, respeitado o teto do
+   salário de contribuição.
+   ⚠ Os valores de faixas/teto abaixo devem ser atualizados sempre que
+   houver nova Portaria Interministerial MPS/MF alterando a tabela do
+   RGPS (mesma tabela/parâmetros já utilizados no sistema de referência
+   de Acerto de Brigadistas).
+================================================================ */
+const TETO_RGPS = 8475.55;
+const FAIXAS_RGPS = [
+  { limite: 1621.00, aliquota: 0.075 },
+  { limite: 2902.84, aliquota: 0.09  },
+  { limite: 4354.27, aliquota: 0.12  },
+  { limite: 8475.55, aliquota: 0.14  }
+];
+
+function calcularSeguridadeSocialRGPS(baseRemuneracao) {
+  const baseOriginal = Number(baseRemuneracao) || 0;
+  if (baseOriginal <= 0) {
+    return { total: 0, baseConsiderada: 0, faixa1: 0, faixa2: 0, faixa3: 0, faixa4: 0 };
+  }
+  const base = Math.min(baseOriginal, TETO_RGPS);
+  const faixa1Base = Math.min(base, FAIXAS_RGPS[0].limite);
+  const faixa2Base = base > FAIXAS_RGPS[0].limite ? Math.min(base, FAIXAS_RGPS[1].limite) - FAIXAS_RGPS[0].limite : 0;
+  const faixa3Base = base > FAIXAS_RGPS[1].limite ? Math.min(base, FAIXAS_RGPS[2].limite) - FAIXAS_RGPS[1].limite : 0;
+  const faixa4Base = base > FAIXAS_RGPS[2].limite ? Math.min(base, FAIXAS_RGPS[3].limite) - FAIXAS_RGPS[2].limite : 0;
+
+  const faixa1 = Number((faixa1Base * FAIXAS_RGPS[0].aliquota).toFixed(2));
+  const faixa2 = Number((faixa2Base * FAIXAS_RGPS[1].aliquota).toFixed(2));
+  const faixa3 = Number((faixa3Base * FAIXAS_RGPS[2].aliquota).toFixed(2));
+  const faixa4 = Number((faixa4Base * FAIXAS_RGPS[3].aliquota).toFixed(2));
+  const total = Number((faixa1 + faixa2 + faixa3 + faixa4).toFixed(2));
+
+  return { total, baseConsiderada: base, faixa1, faixa2, faixa3, faixa4 };
+}
+
+/* INSS sobre a diferença de remuneração gerada pelos dias trabalhados no mês
+   da exoneração (rdias.valor). Mesma lógica do sistema de Acerto de
+   Brigadistas: diferença POSITIVA (a receber) sofre desconto normal de INSS
+   (código 40910); diferença NEGATIVA (devolução de dias) gera devolução da
+   DIFERENÇA entre o INSS já recolhido sobre a verba cheia do mês (30 dias) e
+   o INSS proporcional aos dias efetivamente trabalhados (código 30910). */
+function calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlim = 0, diasUtilizadosAuxAlim = 0) {
+  const diffTotal = Number((rdias?.valor || 0).toFixed ? rdias.valor.toFixed(2) : rdias.valor) || 0;
+  const auxAlim = Number(valorAuxAlim) || 0;
+
+  if (Math.abs(diffTotal) < 0.005) {
+    return { codigo: '40910', valor: 0, detalhe: null, diffTotal: 0 };
+  }
+
+  if (diffTotal > 0) {
+    /* Base = diferença a receber ACRESCIDA do Valor do Auxílio
+       Alimentação informado (mesma regra do ramo de devolução abaixo:
+       o auxílio entra apenas na base do INSS/RGPS sobre a diferença de
+       dias trabalhados). */
+    const baseComAuxAlim = diffTotal + auxAlim;
+    const seg = calcularSeguridadeSocialRGPS(baseComAuxAlim);
+    return { codigo: '40910', valor: Number((-seg.total).toFixed(2)), detalhe: { tipo: 'desconto_sobre_diferenca', baseCalculo: diffTotal, auxAlim, baseComAuxAlim, seguridade: seg }, diffTotal };
+  }
+
+  /* Base CHEIA (mês inteiro) = Representação + Vencimento + Valor do
+     Auxílio Alimentação CHEIO — o que foi de fato retido no mês.
+
+     Base PROPORCIONAL (o que o servidor tinha direito até a
+     exoneração):
+       • a verba (Representação + Vencimento) é proporcional aos DIAS
+         TRABALHADOS no mês (convenção de 30 dias);
+       • o Auxílio Alimentação NÃO usa essa mesma proporção — ele é
+         pago com base em 22 dias úteis/mês, então sua parcela
+         proporcional é: (Valor do Aux. Alimentação ÷ 22) × Qtd.
+         utilizados no mês da exoneração (informada na seção Auxílio
+         Alimentação). Se esse número de dias utilizados for maior que
+         22, subtrai-se 22 e usa-se o restante (normaliza para um mês).
+
+     30910 = INSS(base cheia) − INSS(base proporcional). */
+  const diasProporcionais = rdias.diasNoMes || 0;
+  const vv = Number(valorVerba) || 0;
+  const remProporcionalVerba = Number(((vv / 30) * diasProporcionais).toFixed(2));
+
+  const valorDiarioAuxAlim = auxAlim / 22;
+  let diasUtilizAA = Number(diasUtilizadosAuxAlim) || 0;
+  if (diasUtilizAA > 22) diasUtilizAA -= 22;
+  const auxAlimProporcional = Number((valorDiarioAuxAlim * diasUtilizAA).toFixed(2));
+
+  const baseCheia = Number((vv + auxAlim).toFixed(2));
+  const remProporcional = Number((remProporcionalVerba + auxAlimProporcional).toFixed(2));
+
+  const seg30 = calcularSeguridadeSocialRGPS(baseCheia);
+  const segProporcional = calcularSeguridadeSocialRGPS(remProporcional);
+  const diferenca = Number((seg30.total - segProporcional.total).toFixed(2));
+
+  return {
+    codigo: '30910', valor: diferenca, diffTotal,
+    detalhe: {
+      tipo: 'diferenca_devolucao', diasProporcionais, remProporcionalVerba,
+      auxAlim, valorDiarioAuxAlim, diasUtilizAA, auxAlimProporcional,
+      baseCheia, remProporcional, seg30, segProporcional
+    }
+  };
+}
+
+/* INSS sobre o 13º salário apurado no acerto (mesma tabela/percentuais da
+   remuneração). Só há desconto quando há valor de 13º a receber (>0). Código
+   fixo 40920. */
+function calcularInssSobre13Ctx(valor13) {
+  const v13 = Number(valor13) || 0;
+  if (v13 <= 0) return { codigo: '40920', valor: 0, detalhe: null };
+  const seg = calcularSeguridadeSocialRGPS(v13);
+  return { codigo: '40920', valor: Number((-seg.total).toFixed(2)), detalhe: { baseCalculo: v13, seguridade: seg } };
+}
+
+/* ================================================================
+   IMPOSTO DE RENDA RETIDO NA FONTE (IRRF) — normas vigentes em 2026:
+     • Tabela progressiva mensal tradicional, inalterada desde maio/2025
+       (Lei nº 14.663/2023 / IN RFB nº 1.500/2014 atualizada).
+     • Redução do imposto instituída pela Lei nº 15.270/2025 (novo art.
+       3º-A da Lei nº 9.250/1995), regulamentada pela IN RFB nº
+       2.299/2025, em vigor desde janeiro/2026: amplia a isenção efetiva
+       até R$ 5.000,00 de rendimento tributável mensal e reduz o
+       imposto progressivamente até R$ 7.350,00. A própria Receita
+       Federal confirma que essa redução também se aplica ao imposto
+       cobrado exclusivamente na fonte sobre o 13º salário.
+================================================================ */
+const FAIXAS_IRRF_2026 = [
+  { limite: 2428.80, aliquota: 0,     deducao: 0 },
+  { limite: 2826.65, aliquota: 0.075, deducao: 182.16 },
+  { limite: 3751.05, aliquota: 0.15,  deducao: 394.16 },
+  { limite: 4664.68, aliquota: 0.225, deducao: 675.49 },
+  { limite: Infinity, aliquota: 0.275, deducao: 908.73 }
+];
+/* Desconto simplificado mensal (substitui as deduções legais quando mais
+   vantajoso ao contribuinte) = 25% do limite superior da faixa isenta
+   (25% de R$ 2.428,80). */
+const IRRF_DESCONTO_SIMPLIFICADO_MENSAL = 607.20;
+const IRRF_DEDUCAO_POR_DEPENDENTE_MENSAL = 189.59; // valor vigente em 2026 (R$ 2.275,08/ano)
+const IRRF_REDUCAO_LIMITE_INFERIOR = 5000.00; // isenção efetiva até aqui
+const IRRF_REDUCAO_LIMITE_SUPERIOR = 7350.00; // acima disso, sem redução
+
+function calcularTabelaProgressivaIRRF(base) {
+  const b = Number(base) || 0;
+  if (b <= 0) return { aliquota: 0, deducaoFaixa: 0, imposto: 0 };
+  const faixa = FAIXAS_IRRF_2026.find(f => b <= f.limite);
+  const imposto = Math.max(0, Number((b * faixa.aliquota - faixa.deducao).toFixed(2)));
+  return { aliquota: faixa.aliquota, deducaoFaixa: faixa.deducao, imposto };
+}
+
+/* Redução do imposto (art. 3º-A da Lei nº 9.250/1995, incluído pela Lei
+   nº 15.270/2025). REND = rendimento tributável BRUTO sujeito à
+   incidência mensal (antes de qualquer dedução) — é sobre esse valor,
+   e não sobre a base de cálculo já deduzida, que a faixa de R$5.000 a
+   R$7.350 e a fórmula oficial são aplicadas. */
+function calcularReducaoIRRF2026(rend, impostoTradicional) {
+  const r = Number(rend) || 0;
+  const it = Number(impostoTradicional) || 0;
+  if (r <= 0 || it <= 0) return 0;
+  if (r <= IRRF_REDUCAO_LIMITE_INFERIOR) return it; // zera o imposto
+  if (r > IRRF_REDUCAO_LIMITE_SUPERIOR) return 0;
+  const reducao = 978.62 - (0.133145 * r);
+  return Math.max(0, Math.min(Number(reducao.toFixed(2)), it));
+}
+
+/* Calcula o IRRF 2026 completo sobre um rendimento tributável mensal:
+   1) deduz da base a MAIOR entre a dedução legal TOTAL — INSS
+      efetivamente retido sobre esse mesmo rendimento + R$ 189,59 por
+      dependente informado — e o desconto simplificado mensal (que
+      substitui TODAS as deduções, inclusive dependentes) — a fonte
+      pagadora é obrigada a adotar a mais vantajosa ao contribuinte;
+   2) aplica a tabela progressiva tradicional sobre essa base;
+   3) aplica a redução da Lei 15.270/2025 sobre o imposto apurado,
+      usando o rendimento BRUTO (sem deduções) na fórmula/limites. */
+function calcularIRRF2026(rendimentoTributavel, deducaoLegal, numDependentes = 0) {
+  const rend = Number(rendimentoTributavel) || 0;
+  if (rend <= 0.005) return { valor: 0, detalhe: null };
+  const deps = Math.max(0, Math.floor(Number(numDependentes) || 0));
+  const deducaoDependentes = deps * IRRF_DEDUCAO_POR_DEPENDENTE_MENSAL;
+  const deducaoLegalTotal = (Number(deducaoLegal) || 0) + deducaoDependentes;
+  const deducaoUsada = Math.max(deducaoLegalTotal, IRRF_DESCONTO_SIMPLIFICADO_MENSAL);
+  const baseCalculo = Math.max(0, Number((rend - deducaoUsada).toFixed(2)));
+  const trad = calcularTabelaProgressivaIRRF(baseCalculo);
+  const reducao = calcularReducaoIRRF2026(rend, trad.imposto);
+  const valor = Number((trad.imposto - reducao).toFixed(2));
+  return { valor, detalhe: { rendimentoTributavel: rend, numDependentes: deps, deducaoDependentes, deducaoUsada, baseCalculo, ...trad, reducao } };
+}
+
+/* IMPOSTO DE RENDA SOBRE A REMUNERAÇÃO (código fixo 40950) — incide
+   sobre a mesma diferença de dias trabalhados usada no INSS/RGPS
+   (40910/30910), mas SEM somar o Valor do Auxílio Alimentação à base
+   TRIBUTÁVEL (por determinação expressa: essa verba entra na base do
+   INSS/RGPS, não na base tributável do Imposto de Renda). A DEDUÇÃO
+   legal usada, porém, é o INSS REALMENTE apurado no acerto (código
+   40910/30910), que já inclui o auxílio — é o valor que de fato foi
+   retido, não um INSS hipotético recalculado sem ele. Por isso esta
+   função recebe `baseSeg` (o resultado já calculado de
+   calcularBaseSeguridadeSocialCtx) em vez de recalcular o INSS do
+   zero. Espelha a mesma dualidade a receber/devolução do INSS,
+   inclusive trocando de código: 40950 quando o valor é um desconto
+   (negativo) e 30950 quando é um valor a receber/devolver (positivo)
+   — mesmo padrão de 40910/30910. */
+function calcularIRRemuneracaoCtx(valorVerba, rdias, numDependentes = 0, baseSeg = null) {
+  const diffTotal = Number((rdias?.valor || 0).toFixed ? rdias.valor.toFixed(2) : rdias.valor) || 0;
+
+  if (Math.abs(diffTotal) < 0.005) {
+    return { codigo: '40950', valor: 0, detalhe: null, diffTotal: 0 };
+  }
+
+  if (diffTotal > 0) {
+    const inssReal = baseSeg?.detalhe?.seguridade?.total ?? calcularSeguridadeSocialRGPS(diffTotal).total;
+    const ir = calcularIRRF2026(diffTotal, inssReal, numDependentes);
+    const valor = Number((-ir.valor).toFixed(2));
+    return { codigo: valor >= 0 ? '30950' : '40950', valor, detalhe: { tipo: 'desconto_sobre_diferenca', inssReal, ...ir.detalhe }, diffTotal };
+  }
+
+  const diasProporcionais = rdias.diasNoMes || 0;
+  const vv = Number(valorVerba) || 0;
+  const remProporcional = Number(((vv / 30) * diasProporcionais).toFixed(2));
+  /* INSS real (já com Auxílio Alimentação incluído) reaproveitado de
+     baseSeg — não recalculado sem o auxílio. */
+  const inss30 = baseSeg?.detalhe?.seg30?.total ?? calcularSeguridadeSocialRGPS(vv).total;
+  const inssProporcional = baseSeg?.detalhe?.segProporcional?.total ?? calcularSeguridadeSocialRGPS(remProporcional).total;
+  const ir30 = calcularIRRF2026(vv, inss30, numDependentes);
+  const irProporcional = calcularIRRF2026(remProporcional, inssProporcional, numDependentes);
+  const diferenca = Number((ir30.valor - irProporcional.valor).toFixed(2));
+
+  return {
+    codigo: diferenca >= 0 ? '30950' : '40950', valor: diferenca, diffTotal,
+    detalhe: { tipo: 'diferenca_devolucao', diasProporcionais, remProporcional, inss30, inssProporcional, ir30, irProporcional }
+  };
+}
+
+/* IMPOSTO DE RENDA SOBRE O 13º SALÁRIO (código fixo 40951) — tributação
+   exclusiva na fonte sobre o valor de 13º apurado no acerto (valor13),
+   usando a mesma tabela mensal e a mesma redução 2026. Dedução legal =
+   INSS já apurado sobre o 13º (código 40920). */
+function calcularIR13Ctx(valor13, inss13Valor, numDependentes = 0) {
+  const v13 = Number(valor13) || 0;
+  if (v13 <= 0) return { codigo: '40951', valor: 0, detalhe: null };
+  const ir = calcularIRRF2026(v13, Math.abs(Number(inss13Valor) || 0), numDependentes);
+  return { codigo: '40951', valor: Number((-ir.valor).toFixed(2)), detalhe: ir.detalhe };
+}
+
+/* ================================================================
+   AUXÍLIO ALIMENTAÇÃO — apurado apenas no último cargo lançado.
+   Regra: valor diário = valor recebido ÷ 22; saldo de dias = dias
+   recebidos − dias utilizados no mês da exoneração; valor a devolver
+   = saldo de dias × valor diário (código 20926/60926).
+================================================================ */
+function calcularAuxilioAlimentacaoCtx(ctx) {
+  const diasRecebidos = parseInt($('.input-aa-dias-recebidos', ctx)?.value || '0', 10) || 0;
+  const diasUtilizados = parseInt($('.input-aa-dias-utilizados', ctx)?.value || '0', 10) || 0;
+  const valorRecebido = parseValorInput($('.input-aa-valor-recebido', ctx)?.value);
+
+  const valorDiario = valorRecebido / 22;
+  const saldoDias = diasRecebidos - diasUtilizados;
+  // Saldo negativo (mais dias utilizados do que recebidos) não gera valor a
+  // receber nesta rubrica — apenas devolução (nunca abaixo de zero).
+  const valorADevolver = Math.max(0, saldoDias * valorDiario);
+
+  return { diasRecebidos, diasUtilizados, valorRecebido, valorDiario, saldoDias, valorADevolver };
+}
+
+/* ================================================================
+   AUXÍLIO TRANSPORTE — apurado apenas no último cargo lançado.
+   Regra geral: valor a devolver = (dias recebidos − dias utilizados até
+   a exoneração) × valor diário — código 20912/60912.
+   Regra especial: quando o valor do auxílio UTILIZADO (dias utilizados
+   × valor diário) for MENOR que o custeio (6% da soma de Representação
+   + Vencimento), devolve-se o valor recebido INTEGRALMENTE (código
+   60912) e cobra-se o custeio à parte, como valor a receber (código
+   30515).
+================================================================ */
+function calcularAuxilioTransporteCtx(ctx, valorVerba) {
+  const diasRecebidos = parseInt(($('.input-at-dias-recebidos', ctx)?.value || '0').trim() || '0', 10) || 0;
+  const diasUtilizados = parseInt(($('.input-at-dias-utilizados', ctx)?.value || '0').trim() || '0', 10) || 0;
+  const valorDiario = parseValorInput($('.input-at-valor-diario', ctx)?.value);
+
+  // A regra (normal ou especial de custeio/30515) só é apurada quando há
+  // de fato dias RECEBIDOS de auxílio transporte (> 0). Sem isso, não há
+  // auxílio a reconciliar no período, então nada é lançado (nem
+  // devolução, nem custeio a receber) — independentemente de o campo ter
+  // sido deixado em branco ou zerado manualmente.
+  const diasPreenchidos = diasRecebidos > 0;
+
+  const valorRecebido = diasRecebidos * valorDiario;
+  const valorUtilizado = diasUtilizados * valorDiario;
+  const custeio = Number((0.06 * (Number(valorVerba) || 0)).toFixed(2));
+
+  // Valor a devolver "normal": diferença entre dias recebidos e dias
+  // utilizados até a exoneração, multiplicada pelo valor diário.
+  const valorADevolverNormal = Math.max(0, (diasRecebidos - diasUtilizados) * valorDiario);
+
+  let valorADevolver, custeioAReceber, devolucaoIntegral;
+  if (!diasPreenchidos) {
+    valorADevolver = 0;
+    custeioAReceber = 0;
+    devolucaoIntegral = false;
+  } else if (valorUtilizado < custeio) {
+    // Valor utilizado menor que o custeio → devolução INTEGRAL do valor
+    // recebido, e o custeio é cobrado à parte (30515)
+    valorADevolver = valorRecebido;
+    custeioAReceber = custeio;
+    devolucaoIntegral = true;
+  } else {
+    valorADevolver = valorADevolverNormal;
+    custeioAReceber = 0;
+    devolucaoIntegral = false;
+  }
+
+  return {
+    diasRecebidos, diasUtilizados, valorDiario, diasPreenchidos,
+    valorRecebido, valorUtilizado, custeio, valorADevolverNormal,
+    valorADevolver, custeioAReceber, devolucaoIntegral
+  };
+}
+
+const parseDateYMD = ymd => {
+  if (!ymd) return null;
+  const [y, m, d] = ymd.split('-').map(Number);
+  if ([y, m, d].some(isNaN)) return null;
+  return new Date(y, m - 1, d);
+};
+
+const toYMD = d =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const formatarDataBR = ymd => {
+  const d = parseDateYMD(ymd);
+  return d ? `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}` : '';
+};
+
+const addMonths = (d, m) => new Date(d.getFullYear(), d.getMonth() + m, d.getDate());
+
+/* ================================================================
+   FORMATAÇÃO MONETÁRIA (padrão BR: ponto nos milhares, vírgula nos
+   centavos — ex.: 1.000,00). Usada em toda a tabela de resultados e
+   no Resumo Geral.
+================================================================ */
+function formatarMoeda(v) {
+  const n = Number(v) || 0;
+  return Math.abs(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* Faz o caminho inverso: lê um texto já formatado no padrão BR
+   (ex.: "-1.234,56" ou "1.234,56") e devolve o número correspondente.
+   Remove os pontos de milhar antes de trocar a vírgula decimal por
+   ponto, evitando o erro de interpretar "1.234" como 1,234. */
+function parseValorCelula(text) {
+  if (!text) return 0;
+  const limpo = String(text).trim().replace(/[^\d,.\-]/g, '');
+  const semMilhar = limpo.replace(/\./g, '').replace(',', '.');
+  const v = parseFloat(semMilhar);
+  return isNaN(v) ? 0 : v;
+}
+
+/* Lê o valor DIGITADO pelo usuário em campos monetários, aceitando tanto
+   vírgula quanto ponto como separador decimal (ex.: "2928,00", "2928.00"
+   ou "1.234,56"). Necessário porque campos <input type="number"> em
+   navegadores/SO com localidade pt-BR podem exibir o valor digitado com
+   vírgula mas descartar silenciosamente o conteúdo do campo (.value fica
+   vazio) — o que fazia, por exemplo, o Adiantamento de 13º sumir do
+   resultado mesmo com o campo visivelmente preenchido. Por isso os campos
+   monetários digitados manualmente usam type="text" + este parser. */
+function parseValorInput(raw) {
+  if (raw === null || raw === undefined) return 0;
+  let s = String(raw).trim();
+  if (!s) return 0;
+  s = s.replace(/[^\d,.\-]/g, '');
+  if (!s) return 0;
+  const temVirgula = s.includes(',');
+  const temPonto = s.includes('.');
+  if (temVirgula && temPonto) {
+    s = s.replace(/\./g, '').replace(',', '.'); // 1.234,56 → 1234.56
+  } else if (temVirgula) {
+    s = s.replace(',', '.'); // 2928,00 → 2928.00
+  } // só ponto (ou nenhum separador) já está no formato correto
+  const v = parseFloat(s);
+  return isNaN(v) ? 0 : v;
+}
+
+const diffMesesComQuinzena = (iStr, fStr, max12 = false) => {
+  const I = parseDateYMD(iStr), F = parseDateYMD(fStr);
+  if (!I || !F || F < I) return 0;
+  let m = (F.getFullYear() - I.getFullYear()) * 12 + (F.getMonth() - I.getMonth());
+  if (F.getDate() < I.getDate()) m--;
+  m = Math.max(0, m);
+  const cursor = addMonths(I, m);
+  const rest = Math.floor((F - cursor) / (24 * 60 * 60 * 1000)) + 1;
+  if (rest >= 15) m++;
+  if (max12) m = Math.min(m, 12);
+  return m;
+};
+
+const calcularDiferencaDias = (d1, d2) => {
+  const a = parseDateYMD(d1), b = parseDateYMD(d2);
+  if (!a || !b) return 0;
+  return Math.max(0, Math.floor((b - a) / (24 * 60 * 60 * 1000)) + 1);
+};
+
+const clamp2 = el => {
+  const raw = (el.value ?? '').toString().trim();
+  if (!raw) return;
+  const v = parseValorInput(raw);
+  el.value = v.toFixed(2).replace('.', ',');
+};
+const toCodigoNegativo = c => c?.startsWith('2') ? '6' + c.slice(1) : c;
+const toCodigoPositivo = c => c?.startsWith('6') ? '2' + c.slice(1) : c;
+const ajustarCodigo = (c, v) => v < 0 ? toCodigoNegativo(c) : toCodigoPositivo(c);
+
+function comFeedback(btn, fn) {
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Calculando...`;
+  try {
+    fn();
+  } finally {
+    requestAnimationFrame(() => {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    });
+  }
+}
+
+/* Remuneração total do cargo = Representação (verba do símbolo) + Vencimento
+   (informado manualmente). É essa soma que serve de base para 13º, férias e
+   INSS. Os dias trabalhados, a partir de agora, são apurados em separado
+   sobre cada parcela (códigos 20015/60015 e 20017/60017). */
+function obterRepresentacao(ctx) {
+  return parseValorInput($('.input-valor-verba', ctx)?.value);
+}
+function obterVencimento(ctx) {
+  return parseValorInput($('.input-vencimento', ctx)?.value);
+}
+function obterValorVerbaTotal(ctx) {
+  return obterRepresentacao(ctx) + obterVencimento(ctx);
+}
+
+function calcularDiferencaDiasBase(ctx, baseValor){
+  const exoStr=$('.input-exoneracao',ctx)?.value;
+  const admStr=$('.input-admissao',ctx)?.value;
+  const diasInf=parseInt($('.input-dias-trabalhados',ctx)?.value||'0',10)||0;
+  const vv=Number(baseValor)||0;
+  if(!exoStr||!admStr)
+    return {valor:0,diasInformados:0,diasNoMes:0,diferenca:0,tipo:'neutro',valorPorDia:0,totalDiasMes:0};
+  const exo=parseDateYMD(exoStr),adm=parseDateYMD(admStr);
+  if(!exo||!adm) return {valor:0,diasInformados:0,diasNoMes:0,diferenca:0,tipo:'neutro',valorPorDia:0,totalDiasMes:0};
+
+  /* Mês comercial: todo mês é considerado como tendo 30 dias para fins
+     de pagamento. O último dia REAL de qualquer mês (28, 29, 30 ou 31)
+     é tratado como "dia 30 comercial" — assim, um servidor exonerado
+     no dia 31 (ou no último dia de fevereiro) não recebe/devolve o dia
+     "extra" que excederia os 30 dias fechados. */
+  const diaComercial = d => {
+    const ultimoDiaReal = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    return d.getDate() === ultimoDiaReal ? 30 : Math.min(d.getDate(), 30);
+  };
+
+  const tdm = 30; // total de dias do mês comercial (sempre 30)
+  const diaExoComercial = diaComercial(exo);
+  let dm = (adm.getFullYear()===exo.getFullYear()&&adm.getMonth()===exo.getMonth())
+    ? diaExoComercial - diaComercial(adm) + 1 : diaExoComercial;
+  dm=Math.min(dm,tdm); // Dias efetivamente trabalhados no mês da exoneração (limitado ao mês comercial de 30 dias)
+  const vpd=vv/30; // Valor por dia, baseado em 30 dias
+
+  let valor,tipo,diferenca;
+
+  if(diasInf > dm){
+    // Se os dias informados são MAIORES que os dias efetivamente trabalhados no mês
+    diferenca = diasInf - dm;
+    valor = -(diferenca * vpd); // Devolução
+    tipo = 'devolucao';
+  } else if(diasInf < dm){
+    // Se os dias informados são MENORES que os dias efetivamente trabalhados no mês
+    diferenca = dm - diasInf; // Diferença de dias a pagar
+    valor = diferenca * vpd; // Pagamento
+    tipo = 'pagamento';
+  } else {
+    // Se os dias informados são IGUAIS aos dias efetivamente trabalhados no mês
+    valor = 0; // Acerto zerado
+    tipo = 'neutro';
+    diferenca = 0;
+  }
+
+  return {valor,diasInformados:diasInf,diasNoMes:dm,diferenca:diferenca,tipo,valorPorDia:vpd,totalDiasMes:tdm};
+}
+
+/* Mantido por compatibilidade — diferença de dias sobre a remuneração TOTAL
+   (Representação + Vencimento). Usado apenas como base do cálculo de
+   INSS/RGPS (que incide sobre a diferença total, não em separado). */
+function calcularDiasTrabalhados(ctx){
+  return calcularDiferencaDiasBase(ctx, obterValorVerbaTotal(ctx));
+}
+
+function validarDatasFeriasCtx(ctx) {
+  const adm = $('.input-admissao', ctx)?.value;
+  const exo = $('.input-exoneracao', ctx)?.value;
+  const box = $('.ferias-error-box', ctx);
+  const txt = $('.ferias-error-text', ctx);
+  const allInputs = $$('.ferias-body input[type="date"]', ctx);
+
+  // Limpa validações anteriores
+  allInputs.forEach(e => e.classList.remove('is-invalid'));
+
+  if (!adm || !exo) {
+    box.classList.add('d-none');
+    return true;
+  }
+
+  const A = parseDateYMD(adm);
+  const E = parseDateYMD(exo);
+
+  if (!A || !E) {
+    box.classList.add('d-none');
+    return true;
+  }
+
+  const erros = [];
+  $$('.ferias-body tr', ctx).forEach((tr, ri) => {
+    ['1', '2', '3'].forEach(n => {
+      const iEl = $(`.inicio${n}`, tr);
+      const fEl = $(`.fim${n}`, tr);
+      const iv = iEl?.value;
+      const fv = fEl?.value;
+
+      if (!iv && !fv) return;
+
+      if (iv && !fv) {
+        erros.push(`Linha ${ri + 1}, ${n}º: informe o fim.`);
+        fEl?.classList.add('is-invalid');
+        return;
+      }
+      if (!iv && fv) {
+        erros.push(`Linha ${ri + 1}, ${n}º: informe o início.`);
+        iEl?.classList.add('is-invalid');
+        return;
+      }
+
+      const dI = parseDateYMD(iv);
+      const dF = parseDateYMD(fv);
+
+      if (!dI || !dF) return; // Já tratado acima, mas para segurança
+
+      if (dI > dF) {
+        erros.push(`Linha ${ri + 1}, ${n}º: início posterior ao fim.`);
+        iEl?.classList.add('is-invalid');
+        fEl?.classList.add('is-invalid');
+        return;
+      }
+
+      if (dI < A || dI > E || dF < A || dF > E) {
+        erros.push(`Linha ${ri + 1}, ${n}º: datas fora do período do cargo.`);
+        iEl?.classList.add('is-invalid');
+        fEl?.classList.add('is-invalid');
+      }
+    });
+  });
+
+  if (erros.length) {
+    txt.innerHTML = erros.join('<br>');
+    box.classList.remove('d-none');
+    return false;
+  }
+  box.classList.add('d-none');
+  return true;
+}
+
+function calcularAvosGratificacaoNataliciaCtx(ctx) {
+  const adm = $('.input-admissao', ctx)?.value;
+  const exo = $('.input-exoneracao', ctx)?.value;
+  if (!adm || !exo) return 0;
+
+  const A = parseDateYMD(adm);
+  const E = parseDateYMD(exo);
+  if (!A || !E) return 0;
+
+  const ini = new Date(E.getFullYear(), 0, 1); // Início do ano da exoneração
+  const start = (A > ini) ? A : ini; // Pega a data de admissão ou 01/01 do ano da exoneração, o que for mais recente
+  if (start > E) return 0; // Se a admissão for depois da exoneração no mesmo ano, não há avos
+
+  return diffMesesComQuinzena(toYMD(start), toYMD(E), true);
+}
+
+function contarPeriodosCompletosPA(admStr, exoStr) {
+  const A = parseDateYMD(admStr);
+  const E = parseDateYMD(exoStr);
+  if (!A || !E || E < A) return { periodos: 0, boundary: admStr };
+
+  let p = 0;
+  let s = new Date(A.getFullYear(), A.getMonth(), A.getDate()); // Copia a data de admissão
+  while (addMonths(s, 12) <= E) {
+    p++;
+    s = addMonths(s, 12);
+  }
+  return { periodos: p, boundary: toYMD(s) };
+}
+
+function calcularAvosFeriasCtx(ctx) {
+  const adm = ctx.querySelector('.input-admissao')?.value;
+  const exo = ctx.querySelector('.input-exoneracao')?.value;
+  if (!adm || !exo) {
+    return {
+      avosVencidos: 0, avosProporcionais: 0, totalAvos: 0,
+      periodosCompletos: 0, boundary: null, avosUltimoPeriodo: 0, admissaoBase: ''
+    };
+  }
+
+  const { periodos, boundary } = contarPeriodosCompletosPA(adm, exo);
+  const avUlt = diffMesesComQuinzena(boundary, exo, true); // Avos proporcionais do último período
+  const venc = periodos * 12; // Avos vencidos
+
+  return {
+    avosVencidos: venc, avosProporcionais: avUlt, totalAvos: venc + avUlt,
+    periodosCompletos: periodos, boundary, avosUltimoPeriodo: avUlt, admissaoBase: adm
+  };
+}
+
+function totalDiasUsufruidosPorLinha(tr) {
+  let td = 0;
+  ['1', '2', '3'].forEach(n => {
+    const i = $(`.inicio${n}`, tr)?.value;
+    const f = $(`.fim${n}`, tr)?.value;
+    if (i && f) td += calcularDiferencaDias(i, f);
+  });
+  return Math.min(30, td);
+}
+
+function atualizarTotaisDiasUsufruidos(ctx) {
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    const total = totalDiasUsufruidosPorLinha(tr);
+    const totEl = $('.dias-usufruidos', tr);
+    if (totEl) totEl.value = total;
+  });
+}
+
+function totalDiasUsufruidos(ctx) {
+  let total = 0;
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    total += totalDiasUsufruidosPorLinha(tr);
+  });
+  return total;
+}
+
+/* ================================================================
+   NÚCLEO DO CÁLCULO DE FÉRIAS
+================================================================ */
+function calcularFeriasCompleto(ctx, valorVerba, avos) {
+  const vPorDia = valorVerba / 30;
+  const V3 = valorVerba / 3;
+  const diasVencidosDireito = avos.periodosCompletos * 30;
+  const diasProporcDireito = (avos.avosUltimoPeriodo / 12) * 30;
+  const direitoTotal = diasVencidosDireito + diasProporcDireito;
+  const totalUsufruido = totalDiasUsufruidos(ctx);
+  const saldo = totalUsufruido - direitoTotal;
+  const linhasComTerco = $$('.recebeu-terco:checked', ctx).length;
+  const recebeuTerco = linhasComTerco > 0;
+  const avosDisp = avos.avosUltimoPeriodo;
+  const avFaltantes = 12 - avosDisp;
+
+  let valorFeriasVencidas = 0;
+  let valorFeriasProporc = 0;
+
+  /* ══════════════════════════════════════════════════════════════
+     DIAS DE FÉRIAS (indenização) — contagem FIFO.
+     O total de dias usufruídos preenche PRIMEIRO a capacidade do(s)
+     período(s) VENCIDO(S) (diasVencidosDireito) e só o que sobrar
+     "vaza" para preencher a capacidade PROPORCIONAL (diasProporcDireito)
+     — mesmo raciocínio FIFO já usado abaixo na reconciliação do 1/3.
+
+     - diasUsufruidosVencido = usufruído alocado ao período vencido
+       (limitado à própria capacidade vencida)
+     - diasUsufruidosProporc = restante do usufruído, alocado ao
+       proporcional (pode superar a capacidade proporcional se o
+       servidor usufruiu mais dias do que tinha direito no total)
+
+     saldoDiasVencidos = diasVencidosDireito - diasUsufruidosVencido
+       → sempre ≥ 0: dias vencidos NÃO gozados = indenização em
+       FÉRIAS VENCIDAS (20875/60875), a receber.
+     saldoDiasProporc = diasProporcDireito - diasUsufruidosProporc
+       → positivo = dias proporcionais não gozados, a receber em
+       FÉRIAS PROPORCIONAIS (20872/60872); negativo = usufruiu além
+       do direito total, devolve pelo mesmo código.
+  ══════════════════════════════════════════════════════════════ */
+  const diasUsufruidosVencido = Math.min(totalUsufruido, diasVencidosDireito);
+  const diasUsufruidosProporc = totalUsufruido - diasUsufruidosVencido;
+
+  const saldoDiasVencidos = diasVencidosDireito - diasUsufruidosVencido;
+  const saldoDiasProporc = diasProporcDireito - diasUsufruidosProporc;
+
+  if (Math.abs(saldoDiasVencidos) > 0.0001) {
+    valorFeriasVencidas = saldoDiasVencidos * vPorDia;
+  }
+  if (Math.abs(saldoDiasProporc) > 0.0001) {
+    valorFeriasProporc = saldoDiasProporc * vPorDia;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     RECONCILIAÇÃO DO 1/3 DE FÉRIAS — alocação FIFO por linha.
+     Cada linha de usufruto é processada NA ORDEM DA TABELA. Os dias
+     que ela representa preenchem primeiro o(s) período(s) VENCIDO(S)
+     (capacidade total = periodosCompletos × 30 dias) e só depois
+     "vazam" para o período PROPORCIONAL em curso.
+     Se a linha estiver marcada "Recebeu 1/3?", o crédito é imputado
+     ao período em que ela COMEÇA a contar: se, antes desta linha, a
+     capacidade vencida ainda não foi totalmente preenchida, o 1/3
+     desta linha é creditado ao VENCIDO — mesmo que a própria linha
+     continue e acabe "vazando" dias para o proporcional.
+     Resultado positivo = falta pagar (a receber); negativo = deve
+     devolver o que recebeu além do direito.
+  ══════════════════════════════════════════════════════════════ */
+  const capacidadeVencido = avos.periodosCompletos * 30;
+  let cumulativoDias = 0;
+  let recebidoVencidoQtd = 0;
+  let recebidoProporcQtd = 0;
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    const diasLinha = totalDiasUsufruidosPorLinha(tr);
+    const marcouTerco = $('.recebeu-terco', tr)?.checked || false;
+    if (marcouTerco) {
+      if (cumulativoDias < capacidadeVencido) recebidoVencidoQtd++;
+      else recebidoProporcQtd++;
+    }
+    cumulativoDias += diasLinha;
+  });
+
+  const owedProporc = V3 * (avosDisp / 12);
+  const owedVencido = V3 * avos.periodosCompletos;
+  const paidProporc = recebidoProporcQtd * V3;
+  const paidVencido = recebidoVencidoQtd * V3;
+
+  const valorTercoProporc = owedProporc - paidProporc;
+  const valorTercoVencidas = owedVencido - paidVencido;
+
+  return {
+    valorFeriasVencidas, valorTercoVencidas,
+    valorFeriasProporc, valorTercoProporc,
+    direitoTotal, diasVencidosDireito, diasProporcDireito,
+    totalUsufruido, saldo, recebeuTerco, linhasComTerco,
+    avosUlt: avosDisp, avFaltantes,
+    diasUsufruidosVencido, diasUsufruidosProporc,
+    saldoDiasVencidos, saldoDiasProporc
+  };
+}
+
+function setResultRowValueCtx(ctx, baseCode, value) {
+  const tbody = $('.results-body', ctx);
+  if (!tbody) return;
+
+  /* Normaliza para a forma POSITIVA (ex.: '60891' → '20891') e busca a
+     linha comparando com as duas formas (positiva e negativa), não
+     importando qual delas foi passada em baseCode nem qual delas está
+     atualmente na célula (o código na tabela pode ter ficado na forma
+     positiva de um cálculo anterior em que o valor deu zero). */
+  const codPos = toCodigoPositivo(baseCode);
+  const codNeg = toCodigoNegativo(codPos);
+  const row = Array.from(tbody.children).find(tr => {
+    const c = tr.cells?.[0]?.textContent?.trim();
+    return c === codPos || c === codNeg;
+  });
+
+  if (!row) return;
+
+  const v = parseFloat(value) || 0;
+  row.cells[0].textContent = ajustarCodigo(codPos, v);
+  row.cells[2].textContent = (v < 0 ? '-' : '') + formatarMoeda(v);
+  row.cells[2].className = v < 0 ? 'valor-negativo' : 'valor-positivo';
+}
+
+function setInssRowCtx(ctx, rowClass, resultado) {
+  const tr = $(rowClass, ctx);
+  if (!tr) return;
+  const v = Number(resultado?.valor) || 0;
+  tr.cells[0].textContent = resultado.codigo;
+  tr.cells[2].textContent = (v < 0 ? '-' : '') + formatarMoeda(v);
+  tr.cells[2].className = v < 0 ? 'valor-negativo' : 'valor-positivo';
+}
+
+function atualizarTotalResultados(resultsBody) {
+  let total = 0;
+  $$('tr', resultsBody).forEach(tr => {
+    if (tr.classList.contains('total-row')) return;
+    const v = tr.cells?.[2];
+    if (!v) return;
+    const abs = Math.abs(parseValorCelula(v.textContent));
+    total += (v.classList.contains('valor-negativo') ? -1 : 1) * abs;
+  });
+
+  let trow = $('tr.total-row', resultsBody);
+  if (!trow) {
+    trow = document.createElement('tr');
+    trow.className = 'total-row fw-bold';
+    const c1 = document.createElement('td');
+    c1.colSpan = 2;
+    c1.className = 'text-end';
+    c1.textContent = 'TOTAL';
+    const c2 = document.createElement('td');
+    trow.appendChild(c1);
+    trow.appendChild(c2);
+    resultsBody.appendChild(trow);
+  }
+  trow.cells[1].textContent = (total < 0 ? '-' : '') + formatarMoeda(total);
+  trow.cells[1].className = total >= 0 ? 'valor-positivo' : 'valor-negativo';
+  return total;
+}
+
+/* Converte o conteúdo de uma célula contenteditable para CAIXA ALTA,
+   preservando a posição do cursor (o simples replace de textContent
+   move o cursor para o início do texto). */
+function uppercaseContentEditableCaret(el) {
+  const original = el.textContent || '';
+  const upper = original.toUpperCase();
+  if (original === upper) return;
+  const sel = window.getSelection();
+  const range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+  const offset = range && el.contains(range.startContainer) ? range.startOffset : null;
+  el.textContent = upper;
+  if (offset !== null && el.firstChild) {
+    try {
+      const len = el.firstChild.textContent.length;
+      const novoRange = document.createRange();
+      novoRange.setStart(el.firstChild, Math.min(offset, len));
+      novoRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(novoRange);
+    } catch (e) { /* ignora — cursor pode reposicionar no pior caso */ }
+  }
+}
+
+function bindManualRows(ctx) {
+  $$('.manual-row', ctx).forEach(tr => {
+    const codigoCell = $('.manual-codigo', tr);
+    const descricaoCell = $('.manual-descricao', tr);
+    const valorCell = $('.manual-valor', tr);
+
+    /* Código e Descrição sempre em CAIXA ALTA, atualizados em tempo real */
+    codigoCell.addEventListener('input', () => uppercaseContentEditableCaret(codigoCell));
+    codigoCell.addEventListener('blur', () => uppercaseContentEditableCaret(codigoCell));
+    descricaoCell.addEventListener('input', () => uppercaseContentEditableCaret(descricaoCell));
+    descricaoCell.addEventListener('blur', () => uppercaseContentEditableCaret(descricaoCell));
+
+    valorCell.addEventListener('blur', () => {
+      const v = parseValorCelula(valorCell.textContent);
+      valorCell.textContent = (v < 0 ? '-' : '') + formatarMoeda(v);
+      valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
+      const resultsBody = tr.closest('.results-body');
+      if (resultsBody) atualizarTotalResultados(resultsBody);
+    });
+    valorCell.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
+    });
+  });
+}
+
+function lerValorPorClasseNaAba(ctx, className) {
+  const tr = $(className, ctx);
+  if (!tr) return 0;
+  const td = tr.cells?.[2];
+  if (!td) return 0;
+  const abs = Math.abs(parseValorCelula(td.textContent));
+  return td.classList.contains('valor-negativo') ? -abs : abs;
+}
+
+function lerValorDeCodigoNaAba(ctx, code) {
+  const codPos = toCodigoPositivo(code);
+  const codNeg = toCodigoNegativo(codPos);
+  for (const tr of $$('.results-body tr', ctx)) {
+    const c = tr.cells?.[0]?.textContent?.trim();
+    if (!c) continue;
+    if (c === codPos || c === codNeg) {
+      const td = tr.cells[2];
+      if (!td) continue;
+      const abs = Math.abs(parseValorCelula(td.textContent));
+      return td.classList.contains('valor-negativo') ? -abs : abs;
+    }
+  }
+  return 0;
+}
+
+function coletarSnapshotCargo(ctx, idx) {
+  const adm = $('.input-admissao', ctx)?.value || '';
+  const exo = $('.input-exoneracao', ctx)?.value || '';
+  const representacao = parseValorInput($('.input-valor-verba', ctx)?.value);
+  const vencimento = parseValorInput($('.input-vencimento', ctx)?.value);
+  const vv = representacao + vencimento;
+  const ad = parseValorInput($('.input-adiantamento', ctx)?.value);
+  const auxAlimInss = parseValorInput($('.input-aux-alim-inss', ctx)?.value);
+  const avos = calcularAvosFeriasCtx(ctx);
+
+  let total = 0;
+  $$('tr', $('.results-body', ctx)).forEach(tr => {
+    const td = tr.cells?.[2];
+    if (!td) return;
+    const abs = Math.abs(parseValorCelula(td.textContent));
+    total += (td.classList.contains('valor-negativo') ? -1 : 1) * abs;
+  });
+
+  return {
+    servidor: { ...serverData },
+    cargo: `CARGO ${idx}`,
+    simbolo: ($('.input-simbolo', ctx)?.value || '').toUpperCase(),
+    admissao: adm, exoneracao: exo,
+    diasTrabalhadosMes: parseInt($('.input-dias-trabalhados', ctx)?.value || '0', 10) || 0,
+    representacao, vencimento, remuneracaoTotal: vv, adiantamento: ad, auxAlimInss,
+    avosVencidas: avos.avosVencidos, avosProporcionais: avos.avosUltimoPeriodo,
+    avos13: calcularAvosGratificacaoNataliciaCtx(ctx), totalCalculado: total
+  };
+}
+
+function gerarRelatorioHTML(conteudo) {
+  const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Relatório</title>
+  <style>body{font-family:Arial,sans-serif;margin:30px}h2{color:#6b21a8}pre{white-space:pre-wrap;font-size:14px;line-height:1.6}</style>
+  </head><body><h2>RELATÓRIO DE ACERTO</h2><pre>${conteudo}</pre></body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function ensureNomeMatricula() {
+  if (!serverData.nome || !serverData.matricula) {
+    alert('Preencha NOME e MATRÍCULA na aba "Dados Pessoais".');
+    Tabs.showByTarget('#pane-pessoais');
+    return false;
+  }
+  return true;
+}
+
+function cargoTemplate(idx) {
+  const linhas=[1,2,3,4,5,6,7,8,9,10].map(l => `
+    <tr>
+      <td><input type="text" class="form-control form-control-sm periodo-aquisitivo uppercase" placeholder="Ex.: 2023-2024"></td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio1"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim1"></div>
+        </div>
+        <div class="terco-ferias-checkbox">
+          <input type="checkbox" class="form-check-input recebeu-terco" id="r-terco-${idx}-${l}">
+          <label for="r-terco-${idx}-${l}" class="form-check-label">Recebeu 1/3?</label>
+        </div>
+      </td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio2"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim2"></div>
+        </div>
+      </td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio3"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim3"></div>
+        </div>
+      </td>
+      <td><input type="number" min="0" max="30" class="form-control form-control-sm dias-usufruidos" placeholder="0" readonly></td>
+    </tr>`).join('');
+  const opts = Object.keys(TABELA_VERBAS).map(s => `<option value="${s}">`).join('');
+  return `
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h4 class="card-title mb-3">Cargo ${idx} <small class="text-muted fs-6 fw-normal">(independente)</small></h4>
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-6">
+        <label class="form-label">Símbolo (verba)</label>
+        <input type="text" class="form-control uppercase input-simbolo" placeholder="Ex.: CNE-01, CC-05" list="ls-${idx}" autocomplete="off">
+        <datalist id="ls-${idx}">${opts}</datalist>
+        <div class="simbolo-feedback mt-1"></div>
+      </div>
+      <div class="col-lg-3"><label class="form-label">Representação (Mensal) <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" inputmode="decimal" class="form-control input-valor-verba" placeholder="0,00"></div>
+      <div class="col-lg-3"><label class="form-label">Vencimento (Mensal) <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" inputmode="decimal" class="form-control input-vencimento" placeholder="0,00"></div>
+    </div>
+    <div class="row g-3 align-items-end mt-1">
+      <div class="col-lg-3 offset-lg-9"><label class="form-label">Total do Cargo <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" class="form-control fw-bold out-total-cargo" value="0,00" readonly tabindex="-1"></div>
+    </div>
+    <div class="field-hint-group">
+      <div class="row g-3 align-items-end mt-1">
+        <div class="col-lg-3 offset-lg-9"><label class="form-label">Valor do Auxílio Alimentação <small class="text-muted fw-normal">R$</small> <span class="badge bg-secondary aux-badge-ultimo d-none">Somente último cargo</span></label>
+          <input type="text" inputmode="decimal" class="form-control input-aux-alim-inss" placeholder="0,00"></div>
+      </div>
+      <div class="text-muted mt-1 mb-2 field-hint" style="font-size:.8rem">Este valor é somado à remuneração (Representação + Vencimento) apenas como base para o cálculo do INSS/RGPS sobre a diferença de dias trabalhados (códigos 40910/30910) — não entra no cálculo de férias, 13º ou demais rubricas. Em caso de devolução, a parcela proporcional do auxílio usa a "Qtd. utilizados no mês da exoneração" da seção Auxílio Alimentação (÷ 22 dias), não a proporção de dias trabalhados da verba.</div>
+    </div>
+    <div class="row g-3 align-items-end mt-1">
+      <div class="col-lg-3"><label class="form-label">Admissão no cargo</label>
+        <input type="date" class="form-control input-admissao"></div>
+      <div class="col-lg-3"><label class="form-label">Exoneração do cargo</label>
+        <input type="date" class="form-control input-exoneracao"></div>
+      <div class="col-lg-3"><label class="form-label">Dias trabalhados no mês da exoneração
+        <span class="text-danger fw-normal" style="font-size:.8rem">(se > dias → devolução)</span></label>
+        <input type="number" min="0" max="31" value="0" class="form-control input-dias-trabalhados"></div>
+      <div class="col-lg-3 field-hint-group">
+        <label class="form-label">Nº de Dependentes (Imposto de Renda)</label>
+        <input type="number" step="1" min="0" class="form-control input-ir-dependentes" placeholder="0">
+        <div class="text-muted mt-1 field-hint" style="font-size:.8rem">Cada dependente reduz a base de cálculo do Imposto de Renda em R$ 189,59/mês (valor vigente em 2026), usado nos códigos 40950 (remuneração) e 40951 (13º).</div>
+      </div>
+    </div>
+    <div class="field-hint-group">
+      <div class="row g-3 align-items-end mt-1">
+        <div class="col-lg-6" style="flex-grow: 1;">
+          <label class="form-label">Adiantamento recebido (13º)
+            <span class="text-danger fw-normal" style="font-size:.8rem">← sempre gera devolução 60891 (sem INSS)</span>
+          </label>
+          <input type="text" inputmode="decimal" class="form-control input-adiantamento" placeholder="0,00">
+        </div>
+        <div class="col-lg-6" style="flex-grow: 1;"><label class="form-label d-none d-lg-block">&nbsp;</label>
+          <button class="btn btn-primary btn-calcular-60">Calcular Adiantamento (6/12 avos)</button>
+          <div class="hint-60 text-danger mt-1" style="font-size:.8rem"></div>
+        </div>
+      </div>
+      <div class="text-muted mt-2 field-hint" style="font-size:.8rem">O adiantamento de 13º corresponde a 6/12 avos da remuneração (Representação + Vencimento), recebido sem incidência de imposto/INSS. Se o campo estiver zerado/vazio, nenhum valor é lançado na rubrica de adiantamento. Use o botão "Calcular Adiantamento (6/12 avos)" para preencher o valor manualmente quando o servidor tiver recebido.</div>
+    </div>
+    <div class="alert alert-warning mt-3 mb-0 check-dezembro-box d-none">
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input check-exoneracao-dezembro" id="chk-dez-${idx}">
+        <label class="form-check-label" for="chk-dez-${idx}">
+          <span class="text-danger">⚠</span> <strong>Exoneração em dezembro:</strong> confira se os 12 avos do 13º já foram pagos integralmente ao servidor. Se sim, marque esta caixa — o campo "Adiantamento recebido" será <strong>zerado automaticamente</strong> e <strong>nenhum valor de 13º nem de adiantamento de 13º</strong> será calculado, pago ou devolvido neste acerto (códigos 21593 e 60891 ficam zerados). O campo de adiantamento continua <strong>editável manualmente</strong> depois, se precisar registrar algo, mas o valor digitado nele não entrará no cálculo enquanto esta caixa estiver marcada.
+        </label>
+      </div>
+    </div>
+    <div class="alert alert-primary mt-3 mb-0">
+      <strong>Regras:</strong> Férias: direito total vs usufruído •
+      Adiantamento 13º → <strong>sempre</strong> devolvido no acerto (60891), exceto se "Exoneração em dezembro" estiver confirmada
+    </div>
+  </div></div>
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h6 class="section-title">Períodos de usufruto (máx 30 dias por linha):</h6>
+    <div class="alert alert-danger py-2 px-3 d-none ferias-error-box"><strong>ERRO:</strong> <span class="ferias-error-text"></span></div>
+    <div class="table-responsive">
+      <table class="ferias-table table">
+        <thead><tr>
+          <th class="col-aquisitivo"><span class="th-wrap">PERÍODO<br>AQUISITIVO</span></th>
+          <th class="col-usufruto-1"><span class="th-wrap">1º USUFRUTO</span></th>
+          <th class="col-usufruto-2"><span class="th-wrap">2º USUFRUTO</span></th>
+          <th class="col-usufruto-3"><span class="th-wrap">3º USUFRUTO</span></th>
+          <th class="col-total-dias"><span class="th-wrap">DIAS<br>TOTAL</span></th>
+        </tr></thead>
+        <tbody class="ferias-body">${linhas}</tbody>
+      </table>
+    </div>
+    <div class="alert alert-info py-2 px-3 mb-2">Marque "Recebeu 1/3?" em cada linha onde o servidor recebeu.</div>
+  </div></div>
+
+  <div class="card shadow-sm mb-3"><div class="card-body field-hint-group">
+    <h6 class="section-title">Auxílio Alimentação <span class="badge bg-secondary aux-badge-ultimo d-none">Somente último cargo</span></h6>
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-3"><label class="form-label">Qtd. dias recebidos</label>
+        <input type="number" step="1" min="0" class="form-control input-aa-dias-recebidos" placeholder="0"></div>
+      <div class="col-lg-3"><label class="form-label">Qtd. utilizados no mês da exoneração</label>
+        <input type="number" step="1" min="0" class="form-control input-aa-dias-utilizados" placeholder="0"></div>
+      <div class="col-lg-3"><label class="form-label">Valor recebido <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" inputmode="decimal" class="form-control input-aa-valor-recebido" placeholder="0,00"></div>
+      <div class="col-lg-3"><label class="form-label">Valor a Devolver <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" class="form-control fw-bold out-aa-devolver" value="0,00" readonly tabindex="-1"></div>
+    </div>
+    <div class="text-muted mt-2 field-hint" style="font-size:.8rem">Cálculo: valor recebido ÷ 22 = valor diário; (dias recebidos − dias utilizados) × valor diário = valor a devolver (código 20926/60926).</div>
+  </div></div>
+
+  <div class="card shadow-sm mb-3"><div class="card-body field-hint-group">
+    <h6 class="section-title">Auxílio Transporte <span class="badge bg-secondary aux-badge-ultimo d-none">Somente último cargo</span></h6>
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-4"><label class="form-label">Qtd. dias recebidos</label>
+        <input type="number" step="1" min="0" class="form-control input-at-dias-recebidos" placeholder="0"></div>
+      <div class="col-lg-4"><label class="form-label">Qtd. utilizados até a exoneração</label>
+        <input type="number" step="1" min="0" class="form-control input-at-dias-utilizados" placeholder="0"></div>
+      <div class="col-lg-4"><label class="form-label">Valor Diário <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" inputmode="decimal" class="form-control input-at-valor-diario" placeholder="0,00"></div>
+    </div>
+    <div class="row g-3 align-items-end mt-1">
+      <div class="col-lg-6"><label class="form-label">Valor do Custeio (6% Repres.+Venc.) <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" class="form-control fw-bold out-at-custeio" value="0,00" readonly tabindex="-1"></div>
+      <div class="col-lg-6"><label class="form-label">Valor a Devolver <small class="text-muted fw-normal">R$</small></label>
+        <input type="text" class="form-control fw-bold out-at-devolver" value="0,00" readonly tabindex="-1"></div>
+    </div>
+    <div class="alert alert-warning py-2 px-3 mt-2 mb-0 d-none aux-transp-detalhe"></div>
+    <div class="text-muted mt-2 field-hint" style="font-size:.8rem">Cálculo: (dias recebidos − dias utilizados até a exoneração) × valor diário = valor a devolver (código 20912/60912). Se o valor UTILIZADO (dias utilizados × valor diário) for MENOR que o custeio, devolve-se o valor recebido integralmente e cobra-se o custeio à parte (código 30515).</div>
+  </div></div>
+
+  <div class="d-flex flex-wrap justify-content-center gap-3 mt-3 mb-3">
+    <button class="btn btn-lg btn-primary btn-calcular-acerto">Calcular Acerto</button>
+    <button class="btn btn-lg btn-outline-danger btn-limpar">Limpar</button>
+  </div>
+
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h4 class="card-title mb-3">Resultados — Cargo ${idx}</h4>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <button class="btn btn-sm btn-dark btn-toggle-detalhes" disabled aria-expanded="false">Mostrar detalhes</button>
+      <button class="btn btn-sm btn-outline-primary btn-calcular-avos">Calcular Ávos</button>
+      <button class="btn btn-sm btn-success btn-gerar-relatorio">Gerar Relatório</button>
+      <button class="btn btn-sm btn-outline-secondary btn-exportar">Exportar JSON</button>
+    </div>
+    <div class="calculation-details detalhes-calculo d-none"><strong>Detalhes:</strong><div class="detalhes-texto mt-1"></div></div>
+    <div class="rubricas-dias-trabalhados detalhes-rubricas d-none" data-hascontent="0"><strong>Dias Trabalhados:</strong><div class="detalhes-rubricas-texto mt-1"></div></div>
+    <div class="field-hint-group">
+      <div class="table-responsive mt-2">
+        <table class="table table-bordered results-table">
+          <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th></tr></thead>
+          <tbody class="results-body">
+            <tr><td>20015</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td></tr>
+            <tr><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td></tr>
+            <tr class="row-inss-dias"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td></tr>
+            <tr class="row-ir-remuneracao"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td></tr>
+            <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
+            <tr class="row-inss-13"><td>40920</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+            <tr class="row-ir-13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td></tr>
+            <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+            <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+            <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+            <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+            <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+            <tr class="row-aa-devolucao"><td>20926</td><td>DEVOLUÇÃO DE AUXÍLIO ALIMENTAÇÃO</td><td class="valor-positivo">0,00</td></tr>
+            <tr class="row-at-devolucao"><td>20912</td><td>DEVOLUÇÃO DE AUXÍLIO TRANSPORTE</td><td class="valor-positivo">0,00</td></tr>
+            <tr class="row-at-custeio"><td>30515</td><td>CUSTEIO DE AUXÍLIO TRANSPORTE A RECEBER</td><td class="valor-positivo">0,00</td></tr>
+            ${[1,2,3,4,5,6].map(() => `
+            <tr class="manual-row">
+              <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0,00</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="text-muted mt-1 field-hint" style="font-size:.8rem">As 6 linhas em branco acima são editáveis — clique para inserir código, descrição e valor manualmente (use "-" na frente do valor para devolução). Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais).</div>
+    </div>
+  </div></div>`;
+}
+
+/* ================================================================
+   INICIALIZAÇÃO DO PAINEL DE CARGO
+================================================================ */
+function posInitCargoPane(ctx, idx) {
+  // Cache de elementos DOM para evitar múltiplas consultas
+  const elements = {
+    inputSimb: $('.input-simbolo', ctx),
+    inputVerba: $('.input-valor-verba', ctx),
+    feedbackEl: $('.simbolo-feedback', ctx),
+    btnToggle: $('.btn-toggle-detalhes', ctx),
+    detBox: $('.detalhes-calculo', ctx),
+    detRub: $('.detalhes-rubricas', ctx),
+    detRubTxt: $('.detalhes-rubricas-texto', ctx),
+    btnCalcular60: $('.btn-calcular-60', ctx),
+    btnCalcularAvos: $('.btn-calcular-avos', ctx),
+    btnCalcularAcerto: $('.btn-calcular-acerto', ctx),
+    btnExportar: $('.btn-exportar', ctx),
+    btnLimpar: $('.btn-limpar', ctx),
+    btnGerarRelatorio: $('.btn-gerar-relatorio', ctx),
+    inputAdmissao: $('.input-admissao', ctx),
+    inputExoneracao: $('.input-exoneracao', ctx),
+    checkDezembroBox: $('.check-dezembro-box', ctx),
+    checkExoneracaoDezembro: $('.check-exoneracao-dezembro', ctx),
+    inputAdiantamento: $('.input-adiantamento', ctx),
+    inputDiasTrabalhados: $('.input-dias-trabalhados', ctx),
+    outTotalCargo: $('.out-total-cargo', ctx),
+    inputAuxAlimInss: $('.input-aux-alim-inss', ctx),
+    inputIrDependentes: $('.input-ir-dependentes', ctx),
+    resultsBody: $('.results-body', ctx),
+    feriasErrorBox: $('.ferias-error-box', ctx),
+    feriasTableInputs: $$('.ferias-table input', ctx),
+    uppercaseInputs: $$('.uppercase', ctx),
+    clampInputs: $$('.input-valor-verba, .input-vencimento, .input-adiantamento, .input-aa-valor-recebido, .input-at-valor-diario, .input-aux-alim-inss', ctx),
+    feriasDateInputs: $$('.inicio1, .fim1, .inicio2, .fim2, .inicio3, .fim3', ctx),
+    // Auxílio Alimentação
+    inputAaDiasRecebidos: $('.input-aa-dias-recebidos', ctx),
+    inputAaDiasUtilizados: $('.input-aa-dias-utilizados', ctx),
+    inputAaValorRecebido: $('.input-aa-valor-recebido', ctx),
+    outAaDevolver: $('.out-aa-devolver', ctx),
+    // Auxílio Transporte
+    inputAtDiasRecebidos: $('.input-at-dias-recebidos', ctx),
+    inputAtDiasUtilizados: $('.input-at-dias-utilizados', ctx),
+    inputAtValorDiario: $('.input-at-valor-diario', ctx),
+    outAtCusteio: $('.out-at-custeio', ctx),
+    outAtDevolver: $('.out-at-devolver', ctx),
+    auxBadgesUltimo: $$('.aux-badge-ultimo', ctx),
+    auxAlimInputs: $$('.input-aa-dias-recebidos, .input-aa-dias-utilizados, .input-aa-valor-recebido', ctx),
+    auxTranspInputs: $$('.input-at-dias-recebidos, .input-at-dias-utilizados, .input-at-valor-diario', ctx)
+  };
+
+  elements.uppercaseInputs.forEach(el => {
+    const up = () => el.value = (el.value || '').toUpperCase();
+    el.addEventListener('input', up);
+    el.addEventListener('blur', up);
+    up(); // Executa uma vez para garantir que valores iniciais sejam uppercase
+  });
+
+  elements.clampInputs.forEach(el => el.addEventListener('blur', () => clamp2(el)));
+
+  bindManualRows(ctx);
+
+  elements.feriasDateInputs.forEach(el => {
+    el.addEventListener('change', () => {
+      atualizarTotaisDiasUsufruidos(ctx);
+      validarDatasFeriasCtx(ctx);
+    });
+  });
+
+  /* Mostra, de forma transparente, o valor "normal" a devolver, o valor
+     utilizado, o custeio e — quando a regra especial é acionada — o
+     motivo pelo qual o valor final devolvido é o total recebido (e não
+     apenas a diferença normal). Evita a impressão de que o campo "Valor
+     a Devolver" e o código 60912/30515 lançados no acerto estão em
+     desacordo. */
+  function renderDetalheAuxTransp(at) {
+    const box = $('.aux-transp-detalhe', ctx);
+    if (!box) return;
+    if (at.diasRecebidos === 0 && at.diasUtilizados === 0 && at.valorDiario === 0) {
+      box.classList.add('d-none');
+      box.innerHTML = '';
+      return;
+    }
+    if (at.devolucaoIntegral) {
+      box.innerHTML = `⚠️ Valor utilizado (dias utilizados × valor diário) = ` +
+        `<strong>R$ ${formatarMoeda(at.valorUtilizado)}</strong>. ` +
+        `Como esse valor é <strong>MENOR</strong> que o custeio (R$ ${formatarMoeda(at.custeio)}), ` +
+        `devolve-se o valor recebido <strong>integralmente</strong> ` +
+        `(R$ ${formatarMoeda(at.valorRecebido)} — código 60912) ` +
+        `e cobra-se o custeio à parte (R$ ${formatarMoeda(at.custeioAReceber)} — código 30515). ` +
+        `(Valor normal que seria devolvido: R$ ${formatarMoeda(at.valorADevolverNormal)}.)`;
+      box.classList.remove('d-none');
+    } else {
+      box.innerHTML = `Valor utilizado (R$ ${formatarMoeda(at.valorUtilizado)}) não é menor que o custeio ` +
+        `(R$ ${formatarMoeda(at.custeio)}) → devolve-se apenas a diferença ` +
+        `normal (R$ ${formatarMoeda(at.valorADevolverNormal)} — código 20912/60912), sem cobrança de custeio à parte.`;
+      box.classList.remove('d-none');
+    }
+  }
+
+  /* Atualiza os campos de exibição (readonly) de Auxílio Alimentação e
+     Auxílio Transporte, e o Total do Cargo (Representação + Vencimento),
+     sempre que o usuário alterar algum dado — apenas como retorno visual
+     imediato; o lançamento oficial nos códigos 20926/60926, 20912/60912
+     e 30515 só ocorre ao clicar em "Calcular Acerto" (mesmo botão de
+     sempre). */
+  function atualizarPreviewAuxilios() {
+    if (elements.outTotalCargo) elements.outTotalCargo.value = formatarMoeda(obterValorVerbaTotal(ctx));
+
+    const aa = calcularAuxilioAlimentacaoCtx(ctx);
+    if (elements.outAaDevolver) elements.outAaDevolver.value = formatarMoeda(aa.valorADevolver);
+
+    const at = calcularAuxilioTransporteCtx(ctx, obterValorVerbaTotal(ctx));
+    if (elements.outAtCusteio) elements.outAtCusteio.value = formatarMoeda(at.custeio);
+    if (elements.outAtDevolver) elements.outAtDevolver.value = formatarMoeda(at.valorADevolver);
+    renderDetalheAuxTransp(at);
+  }
+  [...elements.auxAlimInputs, ...elements.auxTranspInputs, elements.inputVerba, $('.input-vencimento', ctx)]
+    .filter(Boolean)
+    .forEach(el => { el.addEventListener('input', atualizarPreviewAuxilios); el.addEventListener('blur', atualizarPreviewAuxilios); });
+  atualizarPreviewAuxilios();
+
+  /* Autopreenchimento pelo símbolo (Representação + Vencimento) */
+  function aplicarTabelaVerba() {
+    const s = (elements.inputSimb.value || '').trim().toUpperCase();
+    const v = TABELA_VERBAS[s];
+    const inputVenc = $('.input-vencimento', ctx);
+    if (v !== undefined) {
+      elements.inputVerba.value = v.repres.toFixed(2).replace('.', ',');
+      if (inputVenc) inputVenc.value = v.venc.toFixed(2).replace('.', ',');
+      elements.inputVerba.classList.remove('is-invalid');
+      elements.inputVerba.classList.add('is-valid');
+      elements.inputSimb.classList.remove('is-invalid');
+      elements.inputSimb.classList.add('is-valid');
+      const vencTxt = v.venc > 0
+        ? ` • Venc. R$ ${v.venc.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+        : ' • sem parcela de vencimento';
+      elements.feedbackEl.innerHTML = `<span class="text-success fw-semibold">✔ ${s} — Repres. ` +
+        `R$ ${v.repres.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}${vencTxt} ` +
+        `<small class="text-muted">(Jul/2023)</small></span>`;
+    } else if (s.length > 0) {
+      elements.inputVerba.classList.remove('is-valid');
+      elements.inputSimb.classList.remove('is-valid');
+      elements.feedbackEl.innerHTML = `<span class="text-warning">⚠ Símbolo não encontrado. Informe os valores manualmente.</span>`;
+    } else {
+      elements.inputVerba.classList.remove('is-valid', 'is-invalid');
+      elements.inputSimb.classList.remove('is-valid', 'is-invalid');
+      elements.feedbackEl.innerHTML = '';
+    }
+    atualizarPreviewAuxilios();
+  }
+  elements.inputSimb.addEventListener('input', aplicarTabelaVerba);
+  elements.inputSimb.addEventListener('blur', aplicarTabelaVerba);
+  elements.inputSimb.addEventListener('change', aplicarTabelaVerba);
+
+  /* Toggle detalhes */
+  elements.btnToggle.addEventListener('click', () => {
+    const open = elements.btnToggle.getAttribute('aria-expanded') === 'true';
+    elements.btnToggle.setAttribute('aria-expanded', String(!open));
+    elements.btnToggle.textContent = open ? 'Mostrar detalhes' : 'Esconder detalhes';
+    elements.detBox.classList.toggle('d-none', open);
+    if (elements.detRub.dataset.hascontent === '1') elements.detRub.classList.toggle('d-none', open);
+  });
+
+  /* ═══════════════════════════════════════════════════════
+     EXONERAÇÃO EM DEZEMBRO
+     O aviso/checkbox só aparece quando a data de Exoneração cai em
+     dezembro (mês 12) — sinal de que os 12 avos do 13º podem já ter
+     sido pagos integralmente ao servidor ao longo do ano. Quando o
+     usuário confirma isso marcando a caixa:
+       • o campo "Adiantamento recebido" é zerado automaticamente
+         (mas continua editável manualmente depois — só não entra
+         no cálculo enquanto a caixa estiver marcada);
+       • nenhum valor de 13º (21593) nem de adiantamento de 13º
+         (60891) é calculado, pago ou devolvido neste acerto.
+  ═══════════════════════════════════════════════════════ */
+  function atualizarVisibilidadeCheckDezembro() {
+    if (!elements.checkDezembroBox) return;
+    const exoDate = parseDateYMD(elements.inputExoneracao?.value);
+    const emDezembro = !!exoDate && (exoDate.getMonth() + 1) === 12;
+    elements.checkDezembroBox.classList.toggle('d-none', !emDezembro);
+    if (!emDezembro && elements.checkExoneracaoDezembro) {
+      elements.checkExoneracaoDezembro.checked = false;
+    }
+  }
+  elements.inputExoneracao?.addEventListener('change', atualizarVisibilidadeCheckDezembro);
+  elements.inputExoneracao?.addEventListener('input', atualizarVisibilidadeCheckDezembro);
+
+  elements.checkExoneracaoDezembro?.addEventListener('change', () => {
+    if (elements.checkExoneracaoDezembro.checked && elements.inputAdiantamento) {
+      elements.inputAdiantamento.value = '';
+    }
+  });
+
+
+  elements.btnCalcular60.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    const exo = elements.inputExoneracao?.value;
+    if (!exo) { alert('Informe a Exoneração.'); return; }
+    const exoDate = parseDateYMD(exo);
+    const me = exoDate ? exoDate.getMonth() + 1 : null;
+    if (!me || me <= 6) {
+      alert(`Não é possível calcular o adiantamento.\nO adiantamento de 6/12 avos só se aplica quando a exoneração ocorre APÓS junho (mês da exoneração informado: ${me ?? '—'}).`);
+      return;
+    }
+    const verba = obterValorVerbaTotal(ctx);
+    if (verba <= 0) { alert('Informe a Representação e/ou o Vencimento antes.'); return; }
+    const r = (verba * 6 / 12).toFixed(2);
+    elements.inputAdiantamento.value = r.replace('.', ',');
+    alert(`6/12 avos de R$ ${verba.toFixed(2)} (Representação + Vencimento) = R$ ${r}.`);
+  });
+
+  /* Calcular Ávos */
+  elements.btnCalcularAvos.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    comFeedback(this, () => {
+      const av = calcularAvosFeriasCtx(ctx);
+      const av13 = calcularAvosGratificacaoNataliciaCtx(ctx);
+      const ehUltimo = ehUltimoCargoIdx(idx);
+      const tu = totalDiasUsufruidos(ctx);
+      const dirVenc = av.periodosCompletos * 30;
+      const dirProp = (av.avosUltimoPeriodo / 12) * 30;
+      const dirTotal = dirVenc + dirProp;
+      const saldo = tu - dirTotal;
+      const linhasComTerco = $$('.recebeu-terco:checked', ctx).length;
+      const adiant = parseValorInput(elements.inputAdiantamento?.value);
+
+      elements.btnToggle.disabled = false;
+      elements.btnToggle.setAttribute('aria-expanded', 'false');
+      elements.btnToggle.textContent = 'Mostrar detalhes';
+
+      $('.detalhes-texto', ctx).innerHTML = `
+        <strong>Período:</strong> ${formatarDataBR(av.admissaoBase)} a ${formatarDataBR(elements.inputExoneracao?.value)}<br>
+        Períodos completos: ${av.periodosCompletos} • Início último PA: ${formatarDataBR(av.boundary)}<br><br>
+        <strong>Ávos de férias:</strong><br>
+        - Vencidos: ${av.avosVencidos} → ${dirVenc} dias de direito<br>
+        - Proporcionais: ${av.avosUltimoPeriodo}/12 → ${dirProp.toFixed(4)} dias de direito<br>
+        - <strong>Direito total: ${dirTotal.toFixed(4)} dias</strong><br>
+        - Total usufruído: ${tu} dias<br>
+        - Saldo: ${saldo >= 0 ? '+' : ''}${saldo.toFixed(4)} dias
+        ${saldo > 0.001 ? '→ <span class="valor-negativo">DEVOLUÇÃO</span>' :
+          saldo < -0.001 ? '→ <span class="valor-positivo">A RECEBER</span>' : '→ zerado'}<br>
+        - "Recebeu 1/3?" marcado em: <strong>${linhasComTerco} linha(s)</strong><br>
+        - Adiantamento 13º informado: <strong>R$ ${adiant.toFixed(2)}</strong>
+        ${adiant > 0 ? ' → <span class="valor-negativo">será devolvido (60891)</span>' : ''}<br><br>
+        <strong>13º (ano exoneração):</strong> ${av13} ávos
+        ${ehUltimo ? '' : ` → <span class="text-danger">não pago neste cargo (só no último — Cargo ${qtdCargos})</span>`}
+        ${elements.checkExoneracaoDezembro?.checked ? ` → <span class="text-danger"><strong>ZERADO</strong>: exoneração em dezembro confirmada, 12 avos já pagos (13º e adiantamento não entram no acerto)</span>` : ''}
+      `;
+    });
+  });
+
+  /* ============================================================
+     CALCULAR ACERTO
+  ============================================================ */
+  elements.btnCalcularAcerto.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    const adm = elements.inputAdmissao?.value;
+    const exo = elements.inputExoneracao?.value;
+    if (!adm || !exo) { alert('Informe Admissão e Exoneração.'); return; }
+
+    elements.clampInputs.forEach(el => clamp2(el));
+    const valorVerba = obterValorVerbaTotal(ctx);
+    if (valorVerba <= 0) { alert('Informe a Representação (Mensal) e/ou o Vencimento (Mensal).'); return; }
+
+    comFeedback(this, () => {
+      const avos = calcularAvosFeriasCtx(ctx);
+      const ehUltimo = ehUltimoCargoIdx(idx);
+      const exoneracaoDezembroConfirmada = !!elements.checkExoneracaoDezembro?.checked;
+      const av13 = (ehUltimo && !exoneracaoDezembroConfirmada) ? calcularAvosGratificacaoNataliciaCtx(ctx) : 0;
+
+      /* Dias trabalhados apurados EM SEPARADO sobre cada parcela da
+         remuneração (Representação e Vencimento) — códigos 20015/60015
+         e 20017/60017. O INSS/RGPS, porém, continua incidindo sobre a
+         diferença TOTAL (soma das duas parcelas). */
+      const rdiasRepres = calcularDiferencaDiasBase(ctx, obterRepresentacao(ctx));
+      const rdiasVenc = calcularDiferencaDiasBase(ctx, obterVencimento(ctx));
+      const rdias = { valor: rdiasRepres.valor + rdiasVenc.valor, diasNoMes: rdiasRepres.diasNoMes || rdiasVenc.diasNoMes };
+
+      /* ═══════════════════════════════════════════════════════
+         ADIANTAMENTO DE 13º
+         Regra: o adiantamento corresponde a 6/12 avos da remuneração
+         (Representação + Vencimento) SOMENTE quando o servidor
+         efetivamente o recebeu, sem incidência de imposto/INSS.
+         O campo NUNCA é preenchido automaticamente ao clicar em
+         "Calcular Acerto" — se estiver zerado/vazio, nenhum valor é
+         lançado na rubrica (60891/20891). O preenchimento de 6/12
+         avos só ocorre quando o usuário clica manualmente no botão
+         "Calcular Adiantamento (6/12 avos)".
+         SE o servidor recebeu adiantamento (valor > 0), o valor
+         SEMPRE gera devolução no acerto (código 60891), sem incidência
+         de INSS sobre essa devolução.
+         EXCEÇÃO: se "Exoneração em dezembro" estiver confirmada (os 12
+         avos já foram pagos integralmente ao longo do ano), o valor
+         digitado no campo é ignorado neste cálculo — nenhum
+         adiantamento é lançado, mesmo que o campo tenha algo digitado.
+      ═══════════════════════════════════════════════════════ */
+      const adiantRecebido = exoneracaoDezembroConfirmada ? 0 : parseValorInput(elements.inputAdiantamento?.value);
+      const adiantamento = adiantRecebido > 0 ? -adiantRecebido : 0;
+      /* valor negativo → setResultRowValueCtx converte para 60891 automaticamente */
+      /* Observação: este valor NUNCA sofre incidência de INSS — o cálculo de
+         INSS/RGPS (mais abaixo) incide apenas sobre a diferença de dias
+         trabalhados e sobre o 13º apurado no acerto (valor13), nunca sobre
+         o adiantamento. */
+
+      const valor13 = (valorVerba / 12) * av13;
+      const fc = calcularFeriasCompleto(ctx, valorVerba, avos);
+
+      /* ═══════════════════════════════════════════════════════
+         INSS/RGPS — servidor SEM vínculo efetivo com o GDF
+         (segurado obrigatório do RGPS, art. 12, I, "g", Lei 8.212/1991)
+         Incide sobre a diferença TOTAL de dias (Representação + Vencimento)
+      ═══════════════════════════════════════════════════════ */
+      const valorAuxAlimInss = parseValorInput(elements.inputAuxAlimInss?.value);
+      const diasUtilizadosAuxAlimExo = parseInt($('.input-aa-dias-utilizados', ctx)?.value || '0', 10) || 0;
+      const baseSeg = calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlimInss, diasUtilizadosAuxAlimExo);
+      const inss13 = calcularInssSobre13Ctx(valor13);
+
+      /* ═══════════════════════════════════════════════════════
+         IMPOSTO DE RENDA (IRRF) — normas vigentes em 2026. A base
+         TRIBUTÁVEL da remuneração (40950/30950) NÃO inclui o Valor do
+         Auxílio Alimentação, mas a DEDUÇÃO de INSS usada é a mesma
+         apurada em 40910/30910 acima (que já inclui o auxílio) — é o
+         INSS realmente retido, não um valor hipotético sem ele.
+      ═══════════════════════════════════════════════════════ */
+      const numDependentesIR = parseInt(elements.inputIrDependentes?.value || '0', 10) || 0;
+      const irRemuneracao = calcularIRRemuneracaoCtx(valorVerba, rdias, numDependentesIR, baseSeg);
+      const ir13 = calcularIR13Ctx(valor13, inss13.valor, numDependentesIR);
+
+      /* Atualiza tabela de resultados */
+      setResultRowValueCtx(ctx, '20015', rdiasRepres.valor);
+      setResultRowValueCtx(ctx, '20017', rdiasVenc.valor);
+      setInssRowCtx(ctx, '.row-inss-dias', baseSeg);
+      setInssRowCtx(ctx, '.row-ir-remuneracao', irRemuneracao);
+      setResultRowValueCtx(ctx, '21593', valor13);
+      setInssRowCtx(ctx, '.row-inss-13', inss13);
+      setInssRowCtx(ctx, '.row-ir-13', ir13);
+      setResultRowValueCtx(ctx, '20875', fc.valorFeriasVencidas);
+      setResultRowValueCtx(ctx, '20857', fc.valorTercoVencidas);
+      setResultRowValueCtx(ctx, '20872', fc.valorFeriasProporc);
+      setResultRowValueCtx(ctx, '20883', fc.valorTercoProporc);
+      setResultRowValueCtx(ctx, '60891', adiantamento); /* ← sempre negativo se > 0 */
+
+      /* ═══════════════════════════════════════════════════════
+         AUXÍLIO ALIMENTAÇÃO e AUXÍLIO TRANSPORTE
+         Apurados SOMENTE no último cargo lançado (idêntico à regra do
+         13º/adiantamento de 6/12 avos) — nos demais cargos os campos ficam
+         bloqueados e os códigos permanecem zerados.
+      ═══════════════════════════════════════════════════════ */
+      let auxAlim = { valorADevolver: 0 };
+      let auxTransp = { valorADevolver: 0, custeioAReceber: 0 };
+      if (ehUltimo) {
+        auxAlim = calcularAuxilioAlimentacaoCtx(ctx);
+        auxTransp = calcularAuxilioTransporteCtx(ctx, valorVerba);
+      }
+      if (elements.outAaDevolver) elements.outAaDevolver.value = formatarMoeda(auxAlim.valorADevolver);
+      if (elements.outAtCusteio) elements.outAtCusteio.value = formatarMoeda(auxTransp.custeio || 0);
+      if (elements.outAtDevolver) elements.outAtDevolver.value = formatarMoeda(auxTransp.valorADevolver);
+      renderDetalheAuxTransp(auxTransp);
+
+      setResultRowValueCtx(ctx, '20926', -auxAlim.valorADevolver);   /* devolução → 60926 */
+      setResultRowValueCtx(ctx, '20912', -auxTransp.valorADevolver); /* devolução → 60912 */
+      setResultRowValueCtx(ctx, '30515', auxTransp.custeioAReceber); /* custeio a receber (só na regra especial) */
+
+      /* TOTAL */
+      atualizarTotalResultados(elements.resultsBody);
+
+      /* ── DETALHES ── */
+      const vPorDia = valorVerba / 30;
+      const saldo = fc.saldo;
+
+      const representacaoAtual = parseValorInput(elements.inputVerba?.value);
+      const vencimentoAtual = parseValorInput($('.input-vencimento', ctx)?.value);
+
+      let html = `<strong>Período:</strong> ${formatarDataBR(avos.admissaoBase)} a ${formatarDataBR(exo)}<br>`;
+      html += `Períodos vencidos: ${avos.periodosCompletos} • Ávos prop.: ${avos.avosUltimoPeriodo}/12<br><br>`;
+      html += `<strong>Remuneração total:</strong> Representação R$ ${representacaoAtual.toFixed(2)} + `;
+      html += `Vencimento R$ ${vencimentoAtual.toFixed(2)} = <strong>R$ ${valorVerba.toFixed(2)}</strong><br><br>`;
+
+      if (ehUltimo) {
+        html += `<strong>13º:</strong> ${av13} ávos × R$ ${(valorVerba / 12).toFixed(4)} = `;
+        html += `<span class="valor-positivo">R$ ${valor13.toFixed(2)}</span><br>`;
+      } else {
+        html += `<strong>13º:</strong> <span class="valor-positivo">R$ 0.00</span> `;
+        html += `← este não é o último cargo lançado (Cargo ${qtdCargos}); o 13º deste ano só é apurado no acerto do último cargo<br>`;
+      }
+
+      /* INSS/RGPS sobre a diferença de dias trabalhados */
+      html += `<br><strong>INSS/RGPS sobre diferença de dias trabalhados:</strong> `;
+      if (Math.abs(baseSeg.diffTotal) < 0.005) {
+        html += `sem diferença na remuneração do mês → sem incidência (código 40910, R$ 0,00)<br>`;
+      } else if (baseSeg.diffTotal > 0) {
+        if (baseSeg.detalhe.auxAlim > 0) {
+          html += `diferença a receber R$ ${baseSeg.diffTotal.toFixed(2)} + auxílio alimentação R$ ${baseSeg.detalhe.auxAlim.toFixed(2)} `;
+          html += `= base R$ ${baseSeg.detalhe.baseComAuxAlim.toFixed(2)} → desconto normal de INSS pela tabela RGPS = `;
+        } else {
+          html += `diferença a receber R$ ${baseSeg.diffTotal.toFixed(2)} → desconto normal de INSS pela tabela RGPS = `;
+        }
+        html += `<span class="valor-negativo">- R$ ${Math.abs(baseSeg.valor).toFixed(2)}</span> (código 40910)<br>`;
+      } else {
+        html += `diferença a devolver R$ ${Math.abs(baseSeg.diffTotal).toFixed(2)} → devolução da diferença entre o INSS já `;
+        if (baseSeg.detalhe.auxAlim > 0) {
+          html += `recolhido sobre a base cheia (verba R$ ${valorVerba.toFixed(2)} + auxílio alimentação cheio R$ ${baseSeg.detalhe.auxAlim.toFixed(2)} = `;
+          html += `R$ ${baseSeg.detalhe.baseCheia.toFixed(2)} → INSS R$ ${baseSeg.detalhe.seg30.total.toFixed(2)}) e o INSS sobre a base proporcional (verba pelos `;
+          html += `${baseSeg.detalhe.diasProporcionais} dia(s) trabalhado(s) = R$ ${baseSeg.detalhe.remProporcionalVerba.toFixed(2)} + auxílio alimentação proporcional `;
+          html += `— R$ ${baseSeg.detalhe.valorDiarioAuxAlim.toFixed(4)}/dia × ${baseSeg.detalhe.diasUtilizAA} dia(s) utilizado(s) até a exoneração = R$ ${baseSeg.detalhe.auxAlimProporcional.toFixed(2)} `;
+          html += `→ base proporcional R$ ${baseSeg.detalhe.remProporcional.toFixed(2)} → INSS `;
+        } else {
+          html += `recolhido sobre a verba cheia (R$ ${baseSeg.detalhe.seg30.total.toFixed(2)}) e o INSS proporcional aos dias `;
+          html += `efetivamente trabalhados `;
+        }
+        html += `R$ ${baseSeg.detalhe.segProporcional.total.toFixed(2)}) = `;
+        html += `<span class="valor-positivo">R$ ${baseSeg.valor.toFixed(2)}</span> (código 30910)<br>`;
+      }
+
+      /* Imposto de Renda sobre a remuneração */
+      html += `<strong>Imposto de Renda sobre a remuneração:</strong> `;
+      if (Math.abs(irRemuneracao.diffTotal || 0) < 0.005) {
+        html += `sem diferença na remuneração do mês → sem incidência (código 40950, R$ 0,00)<br>`;
+      } else {
+        html += `mesma lógica do INSS acima (base tributável SEM o auxílio alimentação, mas usando o INSS `;
+        html += `REAL já apurado acima — que inclui o auxílio — como dedução legal) → `;
+        if (irRemuneracao.valor >= 0) {
+          html += `<span class="valor-positivo">R$ ${irRemuneracao.valor.toFixed(2)}</span> (código 30950)<br>`;
+        } else {
+          html += `<span class="valor-negativo">- R$ ${Math.abs(irRemuneracao.valor).toFixed(2)}</span> (código 40950)<br>`;
+        }
+      }
+
+      /* INSS/RGPS sobre o 13º do acerto */
+      html += `<strong>INSS/RGPS sobre o 13º do acerto:</strong> `;
+      if (valor13 > 0) {
+        html += `R$ ${valor13.toFixed(2)} × tabela RGPS = `;
+        html += `<span class="valor-negativo">- R$ ${Math.abs(inss13.valor).toFixed(2)}</span> (código 40920)<br>`;
+      } else if (exoneracaoDezembroConfirmada) {
+        html += `sem incidência (código 40920, R$ 0,00) → <strong>exoneração em dezembro confirmada</strong>: os 12 avos já foram pagos integralmente ao longo do ano, então não há 13º nem adiantamento a apurar neste acerto (códigos 21593 e 60891 zerados)<br>`;
+      } else {
+        html += `sem 13º apurado neste cargo → sem incidência (código 40920, R$ 0,00)<br>`;
+      }
+
+      /* Adiantamento */
+      if (adiantRecebido > 0) {
+        html += `<strong>Adiantamento 13º (60891):</strong> `;
+        html += `<span class="valor-negativo">- R$ ${adiantRecebido.toFixed(2)}</span> `;
+        html += `← servidor recebeu e deve devolver no acerto<br>`;
+      }
+      html += `<br>`;
+
+      html += `<strong>FÉRIAS — Cálculo completo:</strong><br>`;
+      html += `- Direito PAs vencidos: ${avos.periodosCompletos} × 30 = <strong>${fc.diasVencidosDireito} dias</strong><br>`;
+      html += `- Direito proporcional: (${avos.avosUltimoPeriodo}/12) × 30 = <strong>${fc.diasProporcDireito.toFixed(4)} dias</strong><br>`;
+      html += `- <strong>Direito total: ${fc.direitoTotal.toFixed(4)} dias</strong><br>`;
+      html += `- Total usufruído: <strong>${fc.totalUsufruido} dias</strong><br>`;
+
+      html += `- Alocação FIFO do usufruído: ${fc.diasUsufruidosVencido.toFixed(4)} dia(s) no período vencido `;
+      html += `+ ${fc.diasUsufruidosProporc.toFixed(4)} dia(s) no proporcional<br>`;
+
+      /* Saldo de dias VENCIDOS (20875/60875) — sempre a receber (indenização) ou zero */
+      if (Math.abs(fc.saldoDiasVencidos) < 0.001) {
+        html += `- Saldo de dias vencidos: <strong>zero</strong> (período vencido totalmente gozado)<br>`;
+      } else {
+        html += `- Saldo de dias vencidos: <span class="valor-positivo">${fc.saldoDiasVencidos.toFixed(4)} dias a RECEBER</span><br>`;
+        html += `- ${fc.saldoDiasVencidos.toFixed(4)} × R$ ${vPorDia.toFixed(4)} = `;
+        html += `<span class="valor-positivo">R$ ${Math.abs(fc.valorFeriasVencidas).toFixed(2)}</span> (20875/60875)<br>`;
+      }
+
+      /* Saldo de dias PROPORCIONAIS (20872/60872) — pode ser a receber ou a devolver */
+      if (Math.abs(fc.saldoDiasProporc) < 0.001) {
+        html += `- Saldo de dias proporcionais: <strong>zero</strong><br>`;
+      } else if (fc.saldoDiasProporc > 0) {
+        html += `- Saldo de dias proporcionais: <span class="valor-positivo">${fc.saldoDiasProporc.toFixed(4)} dias a RECEBER</span><br>`;
+        html += `- ${fc.saldoDiasProporc.toFixed(4)} × R$ ${vPorDia.toFixed(4)} = `;
+        html += `<span class="valor-positivo">R$ ${Math.abs(fc.valorFeriasProporc).toFixed(2)}</span> (20872/60872)<br>`;
+      } else {
+        html += `- Saldo de dias proporcionais: <span class="valor-negativo">${Math.abs(fc.saldoDiasProporc).toFixed(4)} dias a DEVOLVER</span> `;
+        html += `(usufruiu além do direito total)<br>`;
+        html += `- ${Math.abs(fc.saldoDiasProporc).toFixed(4)} × R$ ${vPorDia.toFixed(4)} = `;
+        html += `<span class="valor-negativo">- R$ ${Math.abs(fc.valorFeriasProporc).toFixed(2)}</span> (20872/60872)<br>`;
+      }
+
+      /* ── 1/3 de férias: reconciliação única, sempre exibida ── */
+      const V3 = valorVerba / 3;
+      html += `<br><strong>1/3 de férias — reconciliação (${fc.linhasComTerco} marcação${fc.linhasComTerco !== 1 ? 'ões' : ''} de "Recebeu 1/3?"):</strong><br>`;
+      html += `- Direito vencidas: ${avos.periodosCompletos} período(s) × R$ ${V3.toFixed(2)} = <strong>R$ ${(V3 * avos.periodosCompletos).toFixed(2)}</strong><br>`;
+      html += `- Direito proporcional: (${avos.avosUltimoPeriodo}/12) × R$ ${V3.toFixed(2)} = <strong>R$ ${(V3 * avos.avosUltimoPeriodo / 12).toFixed(2)}</strong><br>`;
+      if (Math.abs(fc.valorTercoVencidas) > 0.001) {
+        const cls = fc.valorTercoVencidas >= 0 ? 'valor-positivo' : 'valor-negativo';
+        const sinal = fc.valorTercoVencidas >= 0 ? '' : '- ';
+        html += `- 1/3 vencidas (20857/60857): <span class="${cls}">${sinal}R$ ${Math.abs(fc.valorTercoVencidas).toFixed(2)}</span> `;
+        html += fc.valorTercoVencidas >= 0 ? '← faltou pagar<br>' : '← recebeu além do direito, devolve<br>';
+      }
+      if (Math.abs(fc.valorTercoProporc) > 0.001) {
+        const cls = fc.valorTercoProporc >= 0 ? 'valor-positivo' : 'valor-negativo';
+        const sinal = fc.valorTercoProporc >= 0 ? '' : '- ';
+        html += `- 1/3 proporcional (20883/60883): <span class="${cls}">${sinal}R$ ${Math.abs(fc.valorTercoProporc).toFixed(2)}</span> `;
+        html += fc.valorTercoProporc >= 0 ? '← faltou pagar<br>' : '← recebeu além do direito, devolve<br>';
+      }
+      if (Math.abs(fc.valorTercoVencidas) <= 0.001 && Math.abs(fc.valorTercoProporc) <= 0.001) {
+        html += `- 1/3 recebido bate exatamente com o direito acumulado, nenhum ajuste necessário.<br>`;
+      }
+
+      $('.detalhes-texto', ctx).innerHTML = html;
+
+      /* Detalhes dias trabalhados (Representação e Vencimento em separado) */
+      const temDetalheDias = ['devolucao', 'pagamento'].includes(rdiasRepres.tipo) ||
+        ['devolucao', 'pagamento'].includes(rdiasVenc.tipo);
+      if (temDetalheDias) {
+        const nome = `CARGO ${idx}`;
+        const simb = (elements.inputSimb?.value || '').toUpperCase();
+        let rhtml = `<strong>${nome}${simb ? ' [' + simb + ']' : ''}:</strong><br>`;
+
+        const linhaParcela = (rot, r, codigoBase) => {
+          if (r.tipo === 'neutro') return '';
+          let l = '';
+          if (r.tipo === 'devolucao') {
+            l += `<div class="alert alert-warning py-2 px-3 mb-2">⚠️ <strong>${rot} — Devolução:</strong> ` +
+              `informados <strong>${r.diasInformados} dias</strong>, máximo: <strong>${r.diasNoMes} dias</strong>. ` +
+              `Diferença: <strong>${r.diferenca} dias</strong>.</div>`;
+            l += `${rot}: ${r.diferenca} × R$ ${r.valorPorDia.toFixed(4)} = `;
+            l += `<span class="valor-negativo">- R$ ${Math.abs(r.valor).toFixed(2)}</span><br>`;
+            l += `<strong>Total <span class="valor-negativo">6${codigoBase}</span>: ` +
+              `<span class="valor-negativo">- R$ ${Math.abs(r.valor).toFixed(2)}</span></strong><br><br>`;
+          } else {
+            l += `${rot}: ${r.diasInformados} × R$ ${r.valorPorDia.toFixed(4)} = `;
+            l += `<span class="valor-positivo">R$ ${r.valor.toFixed(2)}</span><br>`;
+            l += `<strong>Total <span class="valor-positivo">2${codigoBase}</span>: ` +
+              `<span class="valor-positivo">R$ ${r.valor.toFixed(2)}</span></strong><br><br>`;
+          }
+          return l;
+        };
+
+        rhtml += linhaParcela('Representação', rdiasRepres, '0015');
+        rhtml += linhaParcela('Vencimento', rdiasVenc, '0017');
+
+        elements.detRubTxt.innerHTML = rhtml;
+        elements.detRub.dataset.hascontent = '1';
+        elements.detRub.classList.add('d-none');
+      } else {
+        elements.detRubTxt.innerHTML = '';
+        elements.detRub.dataset.hascontent = '0';
+        elements.detRub.classList.add('d-none');
+      }
+
+      elements.btnToggle.disabled = false;
+      elements.detBox.classList.add('d-none');
+      elements.btnToggle.setAttribute('aria-expanded', 'false');
+      elements.btnToggle.textContent = 'Mostrar detalhes';
+    });
+  });
+
+  /* Exportar JSON */
+  elements.btnExportar.addEventListener('click', () => {
+    const dados = coletarSnapshotCargo(ctx, idx);
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `acerto_cargo${idx}_${serverData.matricula || 'dados'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  /* Limpar */
+  elements.btnLimpar.addEventListener('click', () => {
+    // Limpa inputs principais
+    elements.inputSimb.value = '';
+    elements.inputVerba.value = '';
+    if ($('.input-vencimento', ctx)) $('.input-vencimento', ctx).value = '';
+    if (elements.outTotalCargo) elements.outTotalCargo.value = '0,00';
+    if (elements.inputAuxAlimInss) elements.inputAuxAlimInss.value = '';
+    if (elements.inputIrDependentes) elements.inputIrDependentes.value = '';
+    elements.inputAdmissao.value = '';
+    elements.inputExoneracao.value = '';
+    if (elements.checkExoneracaoDezembro) elements.checkExoneracaoDezembro.checked = false;
+    if (elements.checkDezembroBox) elements.checkDezembroBox.classList.add('d-none');
+    elements.inputAdiantamento.value = '';
+    elements.inputDiasTrabalhados.value = '0';
+
+    // Limpa campos de Auxílio Alimentação e Auxílio Transporte
+    elements.auxAlimInputs.forEach(el => el.value = '');
+    elements.auxTranspInputs.forEach(el => el.value = '');
+    if (elements.outAaDevolver) elements.outAaDevolver.value = '0,00';
+    if (elements.outAtCusteio) elements.outAtCusteio.value = '0,00';
+    if (elements.outAtDevolver) elements.outAtDevolver.value = '0,00';
+    const detalheAtLimpar = $('.aux-transp-detalhe', ctx);
+    if (detalheAtLimpar) { detalheAtLimpar.classList.add('d-none'); detalheAtLimpar.innerHTML = ''; }
+
+    // Limpa feedback do símbolo
+    if (elements.feedbackEl) elements.feedbackEl.innerHTML = '';
+    elements.inputSimb?.classList.remove('is-valid', 'is-invalid');
+    elements.inputVerba?.classList.remove('is-valid', 'is-invalid');
+
+    // Limpa inputs da tabela de férias
+    elements.feriasTableInputs.forEach(el => {
+      if (el.type === 'number') el.value = '0';
+      else if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+      el.classList.remove('is-invalid'); // Limpa validação
+    });
+
+    // Reseta a tabela de resultados
+    $$('tr', elements.resultsBody).forEach(tr => {
+      if (tr.classList.contains('total-row')) return;
+      if (tr.classList.contains('manual-row')) {
+        $('.manual-codigo', tr).textContent = '';
+        $('.manual-descricao', tr).textContent = '';
+        const mv = $('.manual-valor', tr);
+        mv.textContent = '0,00';
+        mv.className = 'manual-valor valor-positivo';
+        return;
+      }
+      const v = tr.cells[2];
+      const c = tr.cells[0];
+      if (v) {
+        v.textContent = '0,00';
+        v.className = c.textContent.startsWith('6') ? 'valor-negativo' : 'valor-positivo';
+      }
+      if (c && c.textContent.startsWith('6')) c.textContent = '2' + c.textContent.slice(1);
+    });
+    $('tr.total-row', elements.resultsBody)?.remove();
+
+    // Reseta explicitamente as linhas de INSS/RGPS (códigos não seguem o padrão 2xxxx/6xxxx)
+    setInssRowCtx(ctx, '.row-inss-dias', { codigo: '40910', valor: 0 });
+    setInssRowCtx(ctx, '.row-inss-13', { codigo: '40920', valor: 0 });
+
+    // Esconde caixas de erro e detalhes
+    elements.feriasErrorBox.classList.add('d-none');
+    elements.detBox.classList.add('d-none');
+    elements.detRub.classList.add('d-none');
+    elements.detRub.dataset.hascontent = '0';
+
+    // Reseta botão de toggle
+    elements.btnToggle.disabled = true;
+    elements.btnToggle.setAttribute('aria-expanded', 'false');
+    elements.btnToggle.textContent = 'Mostrar detalhes';
+
+    alert(`Dados do Cargo ${idx} foram limpos.`);
+  });
+
+  /* Gerar Relatório */
+  elements.btnGerarRelatorio.addEventListener('click', () => {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    const snap = coletarSnapshotCargo(ctx, idx);
+    const avos = calcularAvosFeriasCtx(ctx);
+    const fc = calcularFeriasCompleto(ctx, snap.remuneracaoTotal, avos);
+    const rdiasRepres = calcularDiferencaDiasBase(ctx, snap.representacao);
+    const rdiasVenc = calcularDiferencaDiasBase(ctx, snap.vencimento);
+    const adiantRecebido = parseValorInput(elements.inputAdiantamento?.value);
+
+    const rows = $$('tr', elements.resultsBody)
+      .filter(tr => !tr.classList.contains('total-row'))
+      .map(tr => `${tr.cells?.[0]?.textContent?.trim()} - ` +
+        `${tr.cells?.[1]?.textContent?.trim()}: R$ ` +
+        `${tr.cells?.[2]?.textContent?.trim()}`);
+
+    let rel = `RELATÓRIO DE ACERTO - CARGO ${idx}\n`;
+    rel += `=============================================\n\n`;
+    rel += `DATA: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+    rel += `SERVIDOR\n`;
+    rel += `- Nome: ${serverData.nome}\n`;
+    rel += `- Matrícula: ${serverData.matricula}\n`;
+    rel += `- Processo SEI: ${serverData.processoSei || '—'}\n\n`;
+    rel += `DADOS DO CARGO\n`;
+    rel += `- Cargo: ${snap.cargo}\n`;
+    rel += `- Símbolo: ${snap.simbolo || '—'}\n`;
+    rel += `- Período: ${formatarDataBR(snap.admissao)} a ${formatarDataBR(snap.exoneracao)}\n`;
+    rel += `- Dias trabalhados informados: ${snap.diasTrabalhadosMes}\n`;
+    if (rdiasRepres.tipo === 'devolucao')
+      rel += `- ⚠ DEVOLUÇÃO dias (Representação): ${rdiasRepres.diferenca} dias (max ${rdiasRepres.diasNoMes})\n`;
+    if (rdiasVenc.tipo === 'devolucao')
+      rel += `- ⚠ DEVOLUÇÃO dias (Vencimento): ${rdiasVenc.diferenca} dias (max ${rdiasVenc.diasNoMes})\n`;
+    rel += `\nFÉRIAS\n`;
+    rel += `- Direito total: ${fc.direitoTotal.toFixed(2)} dias\n`;
+    rel += `- Total usufruído: ${fc.totalUsufruido} dias\n`;
+    rel += `- Saldo: ${fc.saldo >= 0 ? '+' : ''}${fc.saldo.toFixed(2)} dias ` +
+         `${fc.saldo > 0.001 ? '(DEVOLUÇÃO)' : fc.saldo < -0.001 ? '(A RECEBER)' : '(zerado)'}\n`;
+    if (fc.linhasComTerco > 0) {
+      rel += `- 1/3 recebido: ${fc.linhasComTerco} vez(es)\n`;
+      rel += `  1º: devolve ${fc.avFaltantes}/12\n`;
+      if (fc.linhasComTerco > 1)
+        rel += `  + ${fc.linhasComTerco - 1}x 1/3 integral\n`;
+    }
+    rel += `\nREMUNERAÇÃO (SEM vínculo — segurado obrigatório do RGPS)\n`;
+    rel += `- Representação (mensal): R$ ${snap.representacao.toFixed(2)}\n`;
+    rel += `- Vencimento (mensal): R$ ${snap.vencimento.toFixed(2)}\n`;
+    rel += `- Remuneração total (base de cálculo): R$ ${snap.remuneracaoTotal.toFixed(2)}\n`;
+    if (snap.auxAlimInss > 0)
+      rel += `- Valor do Auxílio Alimentação (base do INSS/RGPS sobre diferença de dias): R$ ${snap.auxAlimInss.toFixed(2)}\n`;
+    if (adiantRecebido > 0)
+      rel += `- Adiantamento 13º recebido: R$ ${adiantRecebido.toFixed(2)} → devolução (60891)\n`;
+    rel += `\nÁVOS\n`;
+    rel += `- Férias vencidas: ${snap.avosVencidas}\n`;
+    rel += `- Férias proporcionais: ${snap.avosProporcionais}\n`;
+    rel += `- 13º: ${snap.avos13}\n\n`;
+    rel += `RESULTADOS\n-------------------------\n`;
+    rel += rows.join('\n');
+    rel += `\n\nTOTAL LÍQUIDO: R$ ${snap.totalCalculado.toFixed(2)}\n`;
+    gerarRelatorioHTML(rel);
+  });
+}
+
+/* ================================================================
+   CONTROLADOR DE ABAS (substitui o bootstrap.Tab — puro JS, ~25 linhas)
+================================================================ */
+const Tabs = (() => {
+  const nav = $('#mainTabs');
+  const links = $$('.nav-link', nav);
+  let onShownCb = () => {};
+
+  function activate(link) {
+    links.forEach(l => l.classList.remove('active'));
+    $$('.tab-pane').forEach(p => p.classList.remove('active'));
+    link.classList.add('active');
+    const target = link.getAttribute('data-target');
+    $(target)?.classList.add('active');
+    onShownCb(target);
+  }
+
+  links.forEach(link => link.addEventListener('click', () => activate(link)));
+
+  return {
+    showByTarget(target) {
+      const link = links.find(l => l.getAttribute('data-target') === target);
+      if (link) activate(link);
+    },
+    setOnShown(fn) { onShownCb = fn; }
+  };
+})();
+
+/* Lazy init: só monta o HTML do cargo na primeira vez que a aba é aberta */
+Tabs.setOnShown(target => {
+  const idx = cargoPanesSel.indexOf(target) + 1;
+  if (idx < 1 || idx > TOTAL_CARGOS) return;
+  const pane = $(target);
+  if (pane.dataset.ready === '1') return;
+  pane.innerHTML = cargoTemplate(idx);
+  pane.dataset.ready = '1';
+  posInitCargoPane(pane, idx);
+  aplicarRegra60Ultimo();
+  aplicarRegraAuxiliosUltimo();
+});
+
+/* ================================================================
+   QUANTIDADE DE CARGOS A LANÇAR
+   • Mostra/esconde as abas de Cargo conforme a quantidade escolhida.
+   • Quando houver mais de 1 cargo, o cálculo automático do adiantamento (6/12 avos) só
+     fica habilitado no ÚLTIMO cargo (idx === qtdCargos); nos demais,
+     o botão fica desabilitado e o adiantamento deve ser informado
+     manualmente.
+================================================================ */
+function atualizarVisibilidadeAbas() {
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const link = $(`.nav-link[data-target="${cargoPanesSel[i - 1]}"]`);
+    const li = link?.closest('.nav-item');
+    if (!li) continue;
+    const visivel = i <= qtdCargos;
+    li.classList.toggle('d-none', !visivel);
+    if (!visivel && link.classList.contains('active')) {
+      Tabs.showByTarget('#pane-pessoais');
+    }
+  }
+}
+
+function ehUltimoCargoIdx(idx) {
+  return qtdCargos <= 1 || idx === qtdCargos;
+}
+
+function aplicarRegra60Ultimo() {
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (!pane || pane.dataset.ready !== '1') continue;
+    const btn = $('.btn-calcular-60', pane);
+    const hint = $('.hint-60', pane);
+    if (!btn) continue;
+    const bloqueado = qtdCargos > 1 && i !== qtdCargos;
+    btn.disabled = bloqueado;
+    btn.title = bloqueado
+      ? `O cálculo automático do adiantamento (6/12 avos) só se aplica ao último cargo lançado (Cargo ${qtdCargos}).`
+      : '';
+    if (hint) {
+      hint.textContent = bloqueado
+        ? `🔒 Somente habilitado no último cargo (Cargo ${qtdCargos}). Informe o adiantamento manualmente acima.`
+        : '';
+    }
+  }
+}
+
+/* Auxílio Alimentação e Auxílio Transporte só podem ser preenchidos e
+   calculados no ÚLTIMO cargo lançado. Nos demais cargos os campos ficam
+   bloqueados (disabled) e zerados, e um selo "Somente último cargo" é
+   exibido nos respectivos cards. */
+function aplicarRegraAuxiliosUltimo() {
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (!pane || pane.dataset.ready !== '1') continue;
+    const bloqueado = qtdCargos > 1 && i !== qtdCargos;
+
+    const camposAux = $$(
+      '.input-aa-dias-recebidos, .input-aa-dias-utilizados, .input-aa-valor-recebido, ' +
+      '.input-at-dias-recebidos, .input-at-dias-utilizados, .input-at-valor-diario, ' +
+      '.input-aux-alim-inss',
+      pane
+    );
+    camposAux.forEach(el => {
+      el.disabled = bloqueado;
+      el.title = bloqueado
+        ? `Auxílio Alimentação/Transporte só é apurado no último cargo lançado (Cargo ${qtdCargos}).`
+        : '';
+      if (bloqueado) el.value = '';
+    });
+
+    $$('.aux-badge-ultimo', pane).forEach(b => b.classList.toggle('d-none', !bloqueado));
+
+    if (bloqueado) {
+      const outAa = $('.out-aa-devolver', pane);
+      const outAtC = $('.out-at-custeio', pane);
+      const outAtD = $('.out-at-devolver', pane);
+      const detalheAt = $('.aux-transp-detalhe', pane);
+      if (outAa) outAa.value = '0,00';
+      if (outAtC) outAtC.value = '0,00';
+      if (outAtD) outAtD.value = '0,00';
+      if (detalheAt) { detalheAt.classList.add('d-none'); detalheAt.innerHTML = ''; }
+      setResultRowValueCtx(pane, '20926', 0);
+      setResultRowValueCtx(pane, '20912', 0);
+      setResultRowValueCtx(pane, '30515', 0);
+      atualizarTotalResultados($('.results-body', pane));
+    }
+  }
+}
+
+function atualizarQuantidadeCargos(novaQtd) {
+  qtdCargos = Math.min(TOTAL_CARGOS, Math.max(1, parseInt(novaQtd, 10) || TOTAL_CARGOS));
+  atualizarVisibilidadeAbas();
+  aplicarRegra60Ultimo();
+  aplicarRegraAuxiliosUltimo();
+}
+
+$('#srv-qtd-cargos').addEventListener('change', e => atualizarQuantidadeCargos(e.target.value));
+
+/* ================================================================
+   DADOS PESSOAIS
+================================================================ */
+(function bindPessoais() {
+  const nome = $('#srv-nome');
+  const mat = $('#srv-matricula');
+  const sei = $('#srv-sei');
+
+  const toUp = el => el.value = (el.value || '').toUpperCase();
+  const sync = () => {
+    serverData.nome = (nome.value || '').trim().toUpperCase();
+    serverData.matricula = (mat.value || '').trim().toUpperCase();
+    serverData.processoSei = (sei.value || '').trim();
+  };
+
+  nome.addEventListener('input', () => { toUp(nome); sync(); });
+  nome.addEventListener('blur', () => { toUp(nome); sync(); });
+  mat.addEventListener('input', () => { toUp(mat); sync(); });
+  mat.addEventListener('blur', () => { toUp(mat); sync(); });
+  sei.addEventListener('input', sync);
+  sei.addEventListener('blur', sync);
+
+  toUp(nome);
+  toUp(mat);
+  sync();
+})();
+
+/* ================================================================
+   RESUMO GERAL
+================================================================ */
+$('#btn-atualizar-resumo').addEventListener('click', () => {
+  const totals = Object.fromEntries(CODIGOS_RESUMO.map(c => [c, 0]));
+  let totalInssDias = 0, totalInss13 = 0, totalIrRemuneracao = 0, totalIr13 = 0;
+  const manualAgregado = new Map(); // código -> { descricao, total }
+
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (!pane || pane.dataset.ready !== '1') continue;
+    CODIGOS_RESUMO.forEach(c => { totals[c] += lerValorDeCodigoNaAba(pane, c); });
+    totalInssDias += lerValorPorClasseNaAba(pane, '.row-inss-dias');
+    totalInss13 += lerValorPorClasseNaAba(pane, '.row-inss-13');
+    totalIrRemuneracao += lerValorPorClasseNaAba(pane, '.row-ir-remuneracao');
+    totalIr13 += lerValorPorClasseNaAba(pane, '.row-ir-13');
+
+    /* Lançamentos manuais (código/descrição opcionais) — agregados por
+       código em CAIXA ALTA. Linhas sem código preenchido são ignoradas
+       (não há chave para agrupar o lançamento). */
+    $$('.manual-row', pane).forEach(tr => {
+      const codigo = ($('.manual-codigo', tr)?.textContent || '').trim().toUpperCase();
+      if (!codigo) return;
+      const descricao = ($('.manual-descricao', tr)?.textContent || '').trim().toUpperCase();
+      const valorCell = $('.manual-valor', tr);
+      const abs = Math.abs(parseValorCelula(valorCell?.textContent || '0'));
+      const valor = valorCell?.classList.contains('valor-negativo') ? -abs : abs;
+
+      const atual = manualAgregado.get(codigo) || { descricao: '', total: 0 };
+      if (!atual.descricao && descricao) atual.descricao = descricao;
+      atual.total += valor;
+      manualAgregado.set(codigo, atual);
+    });
+  }
+
+  const tbody = $('#resumo-table tbody');
+
+  // Remove lançamentos manuais de uma atualização anterior antes de recriar
+  $$('.manual-resumo-row', tbody).forEach(tr => tr.remove());
+
+  $$('tr', tbody).forEach(tr => {
+    const oc = tr.getAttribute('data-code');
+    if (oc === 'INSS_DIAS') {
+      tr.cells[0].textContent = totalInssDias > 0 ? '30910' : '40910';
+      tr.cells[2].textContent = (totalInssDias < 0 ? '-' : '') + formatarMoeda(totalInssDias);
+      tr.cells[2].className = totalInssDias < 0 ? 'valor-negativo' : 'valor-positivo';
+      return;
+    }
+    if (oc === 'INSS_13') {
+      tr.cells[0].textContent = '40920';
+      tr.cells[2].textContent = (totalInss13 < 0 ? '-' : '') + formatarMoeda(totalInss13);
+      tr.cells[2].className = totalInss13 < 0 ? 'valor-negativo' : 'valor-positivo';
+      return;
+    }
+    if (oc === 'IR_REMUNERACAO') {
+      tr.cells[0].textContent = '40950';
+      tr.cells[2].textContent = (totalIrRemuneracao < 0 ? '-' : '') + formatarMoeda(totalIrRemuneracao);
+      tr.cells[2].className = totalIrRemuneracao < 0 ? 'valor-negativo' : 'valor-positivo';
+      return;
+    }
+    if (oc === 'IR_13') {
+      tr.cells[0].textContent = '40951';
+      tr.cells[2].textContent = (totalIr13 < 0 ? '-' : '') + formatarMoeda(totalIr13);
+      tr.cells[2].className = totalIr13 < 0 ? 'valor-negativo' : 'valor-positivo';
+      return;
+    }
+    const tot = totals[oc] || 0;
+    tr.cells[0].textContent = ajustarCodigo(oc, tot);
+    tr.cells[2].textContent = (tot < 0 ? '-' : '') + formatarMoeda(tot);
+    tr.cells[2].className = tot < 0 ? 'valor-negativo' : 'valor-positivo';
+  });
+
+  // Insere os lançamentos manuais agregados (um por código distinto)
+  let totalManual = 0;
+  manualAgregado.forEach((info, codigo) => {
+    totalManual += info.total;
+    const tr = document.createElement('tr');
+    tr.className = 'manual-resumo-row';
+    tr.innerHTML =
+      `<td class="fst-italic">${codigo}</td>` +
+      `<td class="fst-italic">${info.descricao || '(sem descrição)'}</td>` +
+      `<td class="${info.total < 0 ? 'valor-negativo' : 'valor-positivo'}">` +
+      `${(info.total < 0 ? '-' : '') + formatarMoeda(info.total)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  let tg = totalInssDias + totalInss13 + totalIrRemuneracao + totalIr13 + totalManual;
+  Object.values(totals).forEach(v => tg += v);
+  $('#resumo-total').innerHTML =
+    `<div class="linha-total-pontilhada">` +
+    `<span class="linha-total-rotulo">TOTAL LÍQUIDO (todos os cargos)</span>` +
+    `<span class="linha-total-pontos"></span>` +
+    `<span class="linha-total-valor ${tg < 0 ? 'valor-negativo' : 'valor-positivo'}">` +
+    `${(tg < 0 ? '-' : '') + formatarMoeda(tg)}</span>` +
+    `</div>`;
+});
+
+const btnToggleRegrasPessoais = $('.btn-toggle-regras-pessoais');
+const regrasPessoaisBox = $('.regras-pessoais-box');
+btnToggleRegrasPessoais?.addEventListener('click', () => {
+  const abrir = regrasPessoaisBox.classList.contains('d-none');
+  regrasPessoaisBox.classList.toggle('d-none', !abrir);
+  btnToggleRegrasPessoais.setAttribute('aria-expanded', String(abrir));
+  btnToggleRegrasPessoais.textContent = abrir ? 'Esconder regras' : 'Mostrar regras';
+});
+
+$('#btn-exportar-resumo').addEventListener('click', () => {
+  $('#btn-atualizar-resumo').click();
+  const tbody = $('#resumo-table tbody');
+  const itens = $$('tr', tbody).map(tr => ({
+    codigo: tr.cells[0].textContent,
+    descricao: tr.cells[1].textContent,
+    valor: tr.cells[2].textContent
+  }));
+  const dados = {
+    servidor: { ...serverData },
+    itens,
+    totalGeralTexto: `TOTAL LÍQUIDO (todos os cargos): ${$('.linha-total-valor')?.textContent || ''}`,
+    dataExportacao: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `resumo_${serverData.matricula || 'dados'}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+/* Monta a folha oficial de um cargo, no layout do "Consulta Simulação
+   do Acerto de Contas" (SIGRHWeb): dados pessoais, dados do cargo,
+   férias usufruídas e o Resultado do Acerto de Contas (só os códigos
+   com valor lançado — sem linhas zeradas, como no documento oficial). */
+function montarFolhaOficialCtx(pane, idx, dataAtual) {
+  const simbolo = ($('.input-simbolo', pane)?.value || '').trim().toUpperCase();
+  const admissao = formatarDataBR($('.input-admissao', pane)?.value) || '—';
+  const exoneracao = formatarDataBR($('.input-exoneracao', pane)?.value) || '—';
+  const diasTrabalhados = $('.input-dias-trabalhados', pane)?.value || '0';
+  const totalCargo = ($('.out-total-cargo', pane)?.value || '0,00');
+
+  /* Férias usufruídas: uma linha por período aquisitivo preenchido, com
+     as datas de cada usufruto (até 3 por período) e o total de dias */
+  const linhasFerias = $$('.ferias-table tbody tr', pane).map(tr => {
+    const periodo = ($('.periodo-aquisitivo', tr)?.value || '').trim();
+    const dias = parseFloat($('.dias-usufruidos', tr)?.value) || 0;
+    const usufrutos = [1, 2, 3].map(n => {
+      const ini = formatarDataBR($(`.inicio${n}`, tr)?.value);
+      const fim = formatarDataBR($(`.fim${n}`, tr)?.value);
+      return ini && fim ? `${n}º: ${ini} a ${fim}` : null;
+    }).filter(Boolean);
+    return { periodo, dias, usufrutos };
+  }).filter(l => l.periodo || l.dias > 0 || l.usufrutos.length > 0);
+  const totalUsufruido = linhasFerias.reduce((s, l) => s + l.dias, 0);
+
+  /* Resultado do Acerto: só linhas (oficiais + manuais) com valor != 0 */
+  const linhasResultado = $$('.results-body tr', pane).filter(tr => !tr.classList.contains('total-row')).map(tr => {
+    const codigo = (tr.cells[0]?.textContent || '').trim();
+    const descricao = (tr.cells[1]?.textContent || '').trim();
+    const celValor = tr.cells[2];
+    const abs = celValor ? Math.abs(parseValorCelula(celValor.textContent)) : 0;
+    const valor = celValor?.classList.contains('valor-negativo') ? -abs : abs;
+    return { codigo, descricao, valor };
+  }).filter(l => l.codigo && Math.abs(l.valor) > 0.004);
+  const totalResultado = linhasResultado.reduce((s, l) => s + l.valor, 0);
+
+  const linhasFeriasHtml = linhasFerias.length
+    ? linhasFerias.map(l => `<tr><td>${l.periodo || '—'}</td><td>${l.usufrutos.length ? l.usufrutos.join('<br>') : '—'}</td><td>${l.dias.toFixed(0)}</td></tr>`).join('')
+    : `<tr><td colspan="3">Nenhuma férias usufruída informada</td></tr>`;
+
+  const linhasResultadoHtml = linhasResultado.length
+    ? linhasResultado.map(l => `<tr><td>${l.codigo}</td><td>${l.descricao}</td><td>${l.valor < 0 ? '-' : ''}${formatarMoeda(l.valor)}</td></tr>`).join('')
+    : `<tr><td colspan="3">Nenhum valor apurado</td></tr>`;
+
+  const div = document.createElement('div');
+  div.className = 'folha-oficial';
+  div.innerHTML = `
+    <div class="print-header-injetado" style="display:block">
+      <h2>Sistema de Acerto — Cargos Comissionados (SEM vínculo)</h2>
+      <div class="meta">Simulação do Acerto de Contas &nbsp;•&nbsp; Emitido em ${dataAtual}</div>
+      <div class="rule"></div>
+    </div>
+    <table class="fo-info-table">
+      <tr><td class="fo-label">Matrícula:</td><td>${serverData.matricula || '—'}</td><td class="fo-label">Processo SEI:</td><td>${serverData.processoSei || '—'}</td></tr>
+      <tr><td class="fo-label">Nome:</td><td colspan="3">${serverData.nome || '—'}</td></tr>
+      <tr><td class="fo-label">Cargo ${idx} — Símbolo:</td><td>${simbolo || '—'}</td><td class="fo-label">Total do Cargo:</td><td>R$ ${totalCargo}</td></tr>
+      <tr><td class="fo-label">Data de Admissão:</td><td>${admissao}</td><td class="fo-label">Data de Exoneração:</td><td>${exoneracao}</td></tr>
+      <tr><td class="fo-label">Dias trabalhados no mês da exoneração:</td><td colspan="3">${diasTrabalhados}</td></tr>
+    </table>
+
+    <div class="fo-section-title">Férias Usufruídas</div>
+    <table class="fo-table">
+      <thead><tr><th>Período Aquisitivo</th><th>Datas de Usufruto</th><th>Dias Usufruídos</th></tr></thead>
+      <tbody>${linhasFeriasHtml}</tbody>
+    </table>
+    <div class="fo-total-usufruido">Total usufruído: ${totalUsufruido.toFixed(0)} dia(s)</div>
+
+    <div class="fo-section-title">Resultado do Acerto de Contas</div>
+    <table class="fo-table">
+      <thead><tr><th>Código</th><th>Descrição</th><th>Valor R$</th></tr></thead>
+      <tbody>${linhasResultadoHtml}</tbody>
+    </table>
+    <div class="fo-total-row"><span>TOTAL DO ACERTO</span><span>${totalResultado < 0 ? '- ' : ''}R$ ${formatarMoeda(Math.abs(totalResultado))}</span></div>
+  `;
+  return div;
+}
+
+
+function prepararImpressao() {
+  const paginas = [];
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (pane && pane.dataset.ready === '1') paginas.push({ pane, idx: i });
+  }
+  if (paginas.length === 0) {
+    alert('Calcule ao menos um cargo (botão "Calcular Acerto") antes de gerar o PDF.');
+    return false;
+  }
+
+  const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+  paginas.forEach(({ pane, idx }) => {
+    pane.classList.add('print-include', 'pane-print-oficial');
+    const folha = montarFolhaOficialCtx(pane, idx, dataAtual);
+    pane.appendChild(folha);
+  });
+
+  const resumoPane = $('#pane-resumo');
+  resumoPane.classList.add('print-include');
+  const headerResumo = document.createElement('div');
+  headerResumo.className = 'print-header-injetado';
+  headerResumo.innerHTML = `
+    <h2>Sistema de Acerto — Cargos Comissionados (SEM vínculo)</h2>
+    <div class="meta"><strong>Servidor:</strong> ${serverData.nome || '—'} &nbsp;•&nbsp; <strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;•&nbsp; <strong>Data:</strong> ${dataAtual}</div>
+    <h4>RESUMO GERAL (TODOS OS CARGOS)</h4>
+    <div class="rule"></div>`;
+  resumoPane.insertBefore(headerResumo, resumoPane.firstChild);
+
+  return true;
+}
+
+function limparImpressao() {
+  $$('.print-include').forEach(el => el.classList.remove('print-include'));
+  $$('.pane-print-oficial').forEach(el => el.classList.remove('pane-print-oficial'));
+  $$('.folha-oficial').forEach(el => el.remove());
+  $$('.print-header-injetado').forEach(el => el.remove());
+  $$('.print-force-show').forEach(el => el.classList.remove('print-force-show'));
+}
+
+$('#btn-imprimir-resumo').addEventListener('click', () => {
+  $('#btn-atualizar-resumo').click();
+  if (!prepararImpressao()) return;
+  window.print();
+});
+
+/* Garante limpeza tanto se o print foi concluído quanto se foi cancelado */
+window.addEventListener('afterprint', limparImpressao);
+</script>
+  <script type="module">
+  import { exigirLogin, salvarAcerto, checkConnection, observarLogin, logout, buscarAcerto, atualizarAcerto } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+
+  function coletarResumo() {
+    const linhas = [];
+    document.querySelectorAll('#resumo-table tbody tr').forEach((tr) => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 3) {
+        linhas.push({
+          codigo: tds[0].textContent.trim(),
+          descricao: tds[1].textContent.trim(),
+          valor: tds[2].textContent.trim()
+        });
+      }
+    });
+    return linhas;
+  }
+
+  // ---- Edição de acerto já salvo ----
+  // Gera uma "chave" estável para cada campo: se tiver id, usa o id.
+  // Se não tiver (caso de tabelas de rubricas/cargos geradas dinamicamente,
+  // que usam só classe), usa o container mais próximo com id + posição do
+  // campo dentro dele (ex: 3º campo da classe X dentro de #rubricas-body).
+  function chaveElemento(el) {
+    if (el.id) return 'id:' + el.id;
+    const container = el.closest('[id]') || document.body;
+    const cls = Array.from(el.classList).join('.');
+    const seletor = el.tagName.toLowerCase() + (cls ? '.' + cls : '');
+    const lista = Array.from(container.querySelectorAll(seletor));
+    const idx = lista.indexOf(el);
+    return 'pos:' + (container.id || '') + '::' + seletor + '::' + idx;
+  }
+
+  function elementoPelaChave(chave) {
+    if (chave.indexOf('id:') === 0) {
+      return document.getElementById(chave.slice(3));
+    }
+    if (chave.indexOf('pos:') === 0) {
+      const partes = chave.slice(4).split('::');
+      const containerId = partes[0];
+      const seletor = partes[1];
+      const idx = parseInt(partes[2], 10);
+      const container = containerId ? document.getElementById(containerId) : document.body;
+      if (!container) return null;
+      const lista = container.querySelectorAll(seletor);
+      return lista[idx] || null;
+    }
+    return null;
+  }
+
+  function coletarEntradas() {
+    const entradas = {};
+    document.querySelectorAll('input, select, textarea').forEach((el) => {
+      const chave = chaveElemento(el);
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        entradas[chave] = el.checked;
+      } else {
+        entradas[chave] = el.value;
+      }
+    });
+    return entradas;
+  }
+
+  function restaurarEntradas(entradas) {
+    if (!entradas) return;
+    Object.keys(entradas).forEach((chave) => {
+      const el = elementoPelaChave(chave);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = entradas[chave];
+      } else {
+        el.value = entradas[chave];
+      }
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const idEdicao = params.get('editar');
+
+  if (idEdicao) {
+    buscarAcerto(idEdicao).then((registro) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      if (registro && registro.dados && registro.dados.entradas) {
+        // Este arquivo só "constrói" os campos de cada cargo na primeira vez que a aba
+        // é aberta (carregamento preguiçoso). Por isso, antes de preencher, forçamos a
+        // abertura de todas as abas de cargo, e só então restauramos os valores.
+        document.querySelectorAll('.nav-link[data-target^="#pane-c"]').forEach((btn) => btn.click());
+        restaurarEntradas(registro.dados.entradas);
+        document.querySelector('.nav-link[data-target="#pane-pessoais"]')?.click();
+        banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule (e clique em "Atualizar Resumo") antes de clicar em "Salvar no Portal" para atualizar este mesmo registro.';
+      } else {
+        banner.textContent = 'Este acerto foi salvo antes da função de edição existir — não é possível recarregar os campos automaticamente. Ao salvar de novo, será criado um registro novo.';
+        banner.style.background = '#FBEAEA';
+        banner.style.borderColor = '#E9B4B4';
+        banner.style.color = '#7A2E2E';
+      }
+    }).catch((err) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      banner.textContent = 'Erro ao carregar o acerto para edição: ' + err.message;
+      banner.style.background = '#FBEAEA';
+      banner.style.borderColor = '#E9B4B4';
+      banner.style.color = '#7A2E2E';
+    });
+  }
+
+  document.getElementById('salvar-portal').addEventListener('click', async () => {
+    const status = document.getElementById('salvar-portal-status');
+    const dados = {
+      nome: document.getElementById('srv-nome').value,
+      matricula: document.getElementById('srv-matricula').value,
+      processoSei: document.getElementById('srv-sei').value,
+      qtdCargos: document.getElementById('srv-qtd-cargos').value,
+      totalGeral: document.getElementById('resumo-total').textContent.trim(),
+      resumo: coletarResumo(),
+      entradas: coletarEntradas()
+    };
+
+    if (!dados.matricula) {
+      status.textContent = 'Preencha ao menos a matrícula antes de salvar.';
+      status.style.color = '#B23B3B';
+      return;
+    }
+
+    status.textContent = 'Salvando...';
+    status.style.color = '';
+    try {
+      if (idEdicao) {
+        await atualizarAcerto(idEdicao, 'comissionado_sem_vinculo', dados);
+        status.textContent = 'Acerto atualizado no portal com sucesso.';
+      } else {
+        await salvarAcerto('comissionado_sem_vinculo', dados);
+        status.textContent = 'Acerto salvo no portal com sucesso.';
+      }
+      status.style.color = '#3E7A4C';
+    } catch (err) {
+      status.textContent = 'Erro ao salvar: ' + err.message;
+      status.style.color = '#B23B3B';
+    }
+  });
+</script>
+</body>
+</html>
