@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualização LPA — Portal de Acertos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --paper-dark:#EAE6DC; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6;
+    --green:#2F8F5B; --red:#C1443B;
+    --lpa:#0F766E; --lpa-escuro:#0B5D53; --lpa-claro:#E4F3F1;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; }
+
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.8rem 2.2rem 3rem; max-width:1100px; }
+  h2.titulo-pagina{ font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; margin:0 0 0.3rem; }
+  p.subtitulo-pagina{ margin:0 0 1.3rem; font-size:0.9rem; color:var(--ink-soft); max-width:720px; line-height:1.55; }
+
+  .aviso{
+    background:#FFF4E5; border:1px solid #F0C36D; color:#8A5A00;
+    padding:12px 16px; border-radius:8px; font-size:13.5px; line-height:1.5; margin-bottom:16px;
+  }
+  .aviso.edicao{ background:var(--lpa-claro); border-color:#9CD3CC; color:var(--lpa-escuro); }
+
+  .painel{
+    background:#fff; border:1px solid var(--line); border-radius:8px;
+    padding:1rem 1.2rem; margin-bottom:1rem;
+  }
+  .controles{ display:flex; flex-wrap:wrap; align-items:end; gap:20px; justify-content:space-between; }
+  .campo-data-final label{
+    display:block; font-size:0.72rem; font-weight:600; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.35rem;
+  }
+  .campo-data-final input{
+    font-family:'IBM Plex Mono', monospace; font-size:0.95rem; padding:0.5rem 0.7rem;
+    border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);
+  }
+  .acoes{ display:flex; gap:0.6rem; flex-wrap:wrap; }
+
+  button{
+    font-family:'IBM Plex Sans', sans-serif; font-size:0.86rem; font-weight:500;
+    padding:0.55rem 1rem; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); cursor:pointer; transition:background 0.15s, border-color 0.15s;
+  }
+  button:hover{ background:var(--paper-dark); }
+  button:disabled{ opacity:0.55; cursor:not-allowed; }
+  button.primaria{ background:var(--sidebar); border-color:var(--sidebar); color:#fff; }
+  button.primaria:hover{ background:var(--sidebar-hover); }
+  button.salvar{ background:var(--lpa); border-color:var(--lpa); color:#fff; }
+  button.salvar:hover{ background:var(--lpa-escuro); }
+
+  .dica{ font-size:0.82rem; color:var(--ink-soft); margin:0 0 1rem; }
+
+  .tabela-wrapper{ background:#fff; border:1px solid var(--line); border-radius:8px; overflow:auto; }
+  table{ border-collapse:collapse; width:100%; min-width:1000px; }
+  thead th{
+    position:sticky; top:0; background:var(--paper-dark); border-bottom:1px solid var(--line);
+    text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-soft); padding:0.6rem 0.7rem; white-space:nowrap;
+  }
+  tbody tr{ border-bottom:1px solid var(--line); }
+  tbody tr:hover{ background:#FAFAF8; }
+  tbody td{ padding:0.45rem 0.55rem; vertical-align:middle; }
+
+  .cell{
+    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:0.85rem;
+    padding:0.4rem 0.5rem; border:1px solid transparent; border-radius:5px;
+    background:transparent; color:var(--ink);
+  }
+  .cell:hover{ border-color:var(--line); }
+  .cell:focus{ outline:none; border-color:var(--lpa); background:#fff; }
+  .cell-matricula, .cell-valor{ font-family:'IBM Plex Mono', monospace; }
+  input.cell-data{ font-family:'IBM Plex Mono', monospace; min-width:150px; }
+  select.cell-indice{ min-width:88px; cursor:pointer; }
+
+  .cell-resultado{ font-family:'IBM Plex Mono', monospace; font-size:0.85rem; white-space:nowrap; padding:0.4rem 0.5rem; position:relative; }
+  .cell-atualizado.erro{ color:var(--red); background:#FBEAE8; border-radius:5px; cursor:help; }
+  .cell-atualizado.encerrado{ color:var(--ink-soft); font-style:italic; }
+  .cell-diferenca.positivo{ color:var(--green); font-weight:600; }
+  .cell-diferenca.negativo{ color:var(--red); font-weight:600; }
+
+  .cell-atualizado[data-tooltip]{ cursor:help; }
+  .cell-atualizado[data-tooltip]:hover::after{
+    content: attr(data-tooltip);
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:var(--sidebar); color:#fff; padding:0.45rem 0.7rem; border-radius:6px;
+    font-family:'IBM Plex Sans', sans-serif; font-size:0.72rem; font-weight:500;
+    white-space:nowrap; z-index:30; box-shadow:0 6px 16px rgba(0,0,0,0.22); pointer-events:none;
+  }
+  .cell-atualizado[data-tooltip]:hover::before{
+    content:''; position:absolute; bottom:calc(100% + 3px); left:50%; transform:translateX(-50%);
+    border:5px solid transparent; border-top-color:var(--sidebar); z-index:30; pointer-events:none;
+  }
+
+  .cell-acoes{ white-space:nowrap; text-align:right; }
+  .icon-btn{ padding:0.35rem 0.55rem; font-size:0.85rem; line-height:1; border-radius:5px; margin-left:0.25rem; }
+  .btn-del:hover{ background:#FBEAE8; border-color:#E7B4AF; color:var(--red); }
+
+  .rodape-tabela{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0.6rem 1rem 0.2rem; font-size:0.76rem; color:var(--ink-soft);
+  }
+  .resumo-totais{
+    display:flex; gap:1.4rem; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:0.8rem;
+  }
+  .resumo-totais strong{ color:var(--ink); }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--sidebar); color:#fff; padding:0.6rem 1.1rem; border-radius:8px;
+    font-size:0.82rem; box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    opacity:0; pointer-events:none; transition:opacity 0.25s ease; z-index:50; max-width:90vw; text-align:center;
+  }
+  .toast.visivel{ opacity:1; }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html" class="ativo"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+
+    <div class="conteudo-modulo">
+      <h2 class="titulo-pagina">Atualização LPA</h2>
+      <p class="subtitulo-pagina">
+        Correção monetária automática de parcelas de Licença-Prêmio por Assiduidade, com base na
+        metodologia oficial da Calculadora do Cidadão do Banco Central (produtório dos índices
+        mensais entre a data da aposentadoria e a data final de referência).
+      </p>
+
+      <div class="aviso" id="avisoArquivo" hidden>
+        Este arquivo foi aberto diretamente do disco (<code>file://</code>). Alguns navegadores bloqueiam
+        chamadas à API do Banco Central nesse modo. Sirva-o por um servidor local ou acesse pelo GitHub Pages.
+      </div>
+
+      <div class="aviso edicao" id="avisoEdicao" hidden></div>
+
+      <div class="painel">
+        <div class="controles">
+          <div class="campo-data-final">
+            <label for="dataFinalGlobal">Data final de referência (mês-base da atualização)</label>
+            <input type="month" id="dataFinalGlobal">
+          </div>
+          <div class="acoes">
+            <button id="btnAddRow">+ Adicionar linha</button>
+            <button id="btnUpdateAll" class="primaria">Atualizar todos</button>
+            <button id="btnLimpar">Limpar tudo</button>
+            <button id="btnExport">Exportar CSV</button>
+            <button id="btnSalvarMes" class="salvar">Salvar mês no histórico</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="dica">
+        Você pode colar (Ctrl+V) dados copiados diretamente do Excel — Matrícula, Nome, Data da
+        aposentadoria, Mês fim das parcelas (opcional) e Valor da parcela, nessa ordem — para
+        importar várias linhas de uma vez.
+      </p>
+
+      <div class="tabela-wrapper" id="tabelaWrapper">
+        <table id="lpaTable">
+          <thead>
+            <tr>
+              <th>Matrícula</th>
+              <th>Nome</th>
+              <th>Índice</th>
+              <th>Data da aposentadoria</th>
+              <th>Mês fim das parcelas</th>
+              <th>Valor da parcela</th>
+              <th>Valor atualizado</th>
+              <th>Diferença</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="rodape-tabela">
+        <span id="contadorLinhas">0 linha(s)</span>
+        <div class="resumo-totais" id="resumoTotais"></div>
+      </div>
+      <p class="dica" style="margin-top:0.4rem;">Passe o mouse sobre um valor atualizado para ver o índice, o período e o fator aplicado.</p>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import {
+    exigirLogin, checkConnection, observarLogin, logout,
+    salvarAcerto, buscarAcerto, atualizarAcerto
+  } from '../assets/firebase-init.js';
+
+  // -------------------------------------------------------------------
+  // Constantes de metodologia (BCB / Calculadora do Cidadão)
+  // -------------------------------------------------------------------
+  const CODIGO_IPCA = 433;
+  const CODIGO_INPC = 188;
+  const CODIGO_IGPM_NOVA_SERIE = 28655; // válida a partir de 12/04/2021 (3 casas decimais)
+  const CODIGO_IGPM_SERIE_ANTIGA = 189; // válida até 11/04/2021 (2 casas decimais)
+  const DATA_TRANSICAO_IGPM = new Date(2021, 3, 12); // 12/04/2021
+
+  function codigoSerieIGPM(){
+    const hoje = new Date();
+    return hoje >= DATA_TRANSICAO_IGPM ? CODIGO_IGPM_NOVA_SERIE : CODIGO_IGPM_SERIE_ANTIGA;
+  }
+  function codigoSerie(indice){
+    if(indice === 'IPCA') return CODIGO_IPCA;
+    if(indice === 'INPC') return CODIGO_INPC;
+    if(indice === 'IGPM') return codigoSerieIGPM();
+    throw new Error('Índice desconhecido: ' + indice);
+  }
+  function labelIndice(indice){ return indice === 'IGPM' ? 'IGP-M' : indice; }
+
+  // -------------------------------------------------------------------
+  // Estado
+  // -------------------------------------------------------------------
+  const rows = new Map();
+  const cacheFatores = new Map();
+  let contadorId = 0;
+  let editandoId = null;
+
+  const tbody = document.getElementById('tbody');
+  const tabelaWrapper = document.getElementById('tabelaWrapper');
+  const dataFinalGlobalInput = document.getElementById('dataFinalGlobal');
+  const contadorLinhas = document.getElementById('contadorLinhas');
+  const resumoTotais = document.getElementById('resumoTotais');
+  const toastEl = document.getElementById('toast');
+  const btnSalvarMes = document.getElementById('btnSalvarMes');
+  let toastTimeout = null;
+
+  // -------------------------------------------------------------------
+  // Utilitários
+  // -------------------------------------------------------------------
+  function escapeAttr(str){
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function formatarMoeda(numero){
+    if(numero == null || Number.isNaN(numero)) return '';
+    return numero.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  }
+  function parseMoeda(str){
+    if(!str) return null;
+    let s = String(str).replace(/[^\d,.-]/g, '').trim();
+    if(!s) return null;
+    if(s.includes(',') && s.includes('.')){ s = s.replace(/\./g, '').replace(',', '.'); }
+    else if(s.includes(',')){ s = s.replace(',', '.'); }
+    const n = parseFloat(s);
+    return Number.isNaN(n) ? null : n;
+  }
+  function formatarPeriodo(yyyyMM){
+    if(!yyyyMM) return '';
+    const [ano, mes] = yyyyMM.split('-');
+    return `${mes}/${ano}`;
+  }
+  function primeiroDiaMes(yyyyMM){
+    const [ano, mes] = yyyyMM.split('-');
+    return `01/${mes}/${ano}`;
+  }
+  function normalizarDataAposentadoria(texto){
+    texto = (texto || '').trim();
+    if(!texto) return '';
+    let m = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) return `${m[3]}-${m[2].padStart(2,'0')}`;
+    m = texto.match(/^(\d{1,2})\/(\d{4})$/);
+    if(m) return `${m[2]}-${m[1].padStart(2,'0')}`;
+    m = texto.match(/^(\d{4})-(\d{1,2})$/);
+    if(m) return `${m[1]}-${m[2].padStart(2,'0')}`;
+    return '';
+  }
+  function mostrarAviso(mensagem){
+    toastEl.textContent = mensagem;
+    toastEl.classList.add('visivel');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastEl.classList.remove('visivel'), 3600);
+  }
+  function atualizarContador(){
+    contadorLinhas.textContent = `${rows.size} linha(s)`;
+    const calculadas = Array.from(rows.values()).filter(r => r.valorAtualizado != null);
+    if(calculadas.length === 0){ resumoTotais.textContent = ''; return; }
+    const totalOriginal = calculadas.reduce((s,r)=>s+r.valorOriginal,0);
+    const totalAtualizado = calculadas.reduce((s,r)=>s+r.valorAtualizado,0);
+    const totalDiferenca = totalAtualizado - totalOriginal;
+    resumoTotais.innerHTML =
+      `<span>Original: <strong>${formatarMoeda(totalOriginal)}</strong></span>` +
+      `<span>Atualizado: <strong>${formatarMoeda(totalAtualizado)}</strong></span>` +
+      `<span>Diferença: <strong style="color:${totalDiferenca>=0?'var(--green)':'var(--red)'}">${formatarMoeda(totalDiferenca)}</strong></span>`;
+  }
+
+  // -------------------------------------------------------------------
+  // Cálculo via API do Banco Central (SGS)
+  // -------------------------------------------------------------------
+  async function obterFatorAcumulado(indice, dataInicialYYYYMM, dataFinalYYYYMM){
+    const codigo = codigoSerie(indice);
+    const dataInicialStr = primeiroDiaMes(dataInicialYYYYMM);
+    const dataFinalStr = primeiroDiaMes(dataFinalYYYYMM);
+    const chave = `${codigo}|${dataInicialStr}|${dataFinalStr}`;
+    if(cacheFatores.has(chave)) return cacheFatores.get(chave);
+
+    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json&dataInicial=${dataInicialStr}&dataFinal=${dataFinalStr}`;
+    let resposta;
+    try{ resposta = await fetch(url); }
+    catch(err){ throw new Error('Não foi possível acessar a API do Banco Central (falha de rede/CORS). Se o arquivo estiver aberto via file://, sirva-o por um servidor local.'); }
+    if(!resposta.ok) throw new Error(`API do BCB retornou erro HTTP ${resposta.status}.`);
+
+    const dados = await resposta.json();
+    if(!Array.isArray(dados) || dados.length === 0) throw new Error('Nenhum índice retornado pelo BCB para o período informado.');
+
+    let fator = 1;
+    for(const item of dados){
+      const valor = parseFloat(String(item.valor).replace(',', '.'));
+      if(Number.isNaN(valor)) continue;
+      fator *= (1 + valor/100);
+    }
+    cacheFatores.set(chave, fator);
+    return fator;
+  }
+
+  function preencherResultadoDOM(id){
+    const registro = rows.get(id);
+    const tr = tbody.querySelector(`tr[data-id="${id}"]`);
+    if(!registro || !tr) return;
+    const cellAtualizado = tr.querySelector('.cell-atualizado');
+    const cellDiferenca = tr.querySelector('.cell-diferenca');
+    cellAtualizado.classList.remove('erro', 'encerrado');
+    cellAtualizado.removeAttribute('data-tooltip');
+    cellDiferenca.classList.remove('positivo','negativo');
+    if(registro.erro){
+      cellAtualizado.textContent = 'Erro';
+      cellAtualizado.setAttribute('data-tooltip', registro.erro);
+      cellAtualizado.classList.add('erro');
+      cellDiferenca.textContent = '—';
+      return;
+    }
+    if(registro.status === 'encerrado'){
+      cellAtualizado.textContent = 'Parcela encerrada';
+      cellAtualizado.setAttribute('data-tooltip', `Mês fim das parcelas: ${formatarPeriodo(registro.mesFim)}`);
+      cellAtualizado.classList.add('encerrado');
+      cellDiferenca.textContent = '—';
+      return;
+    }
+    if(registro.valorAtualizado == null){
+      cellAtualizado.textContent = '—';
+      cellDiferenca.textContent = '—';
+      return;
+    }
+    cellAtualizado.textContent = formatarMoeda(registro.valorAtualizado);
+    if(registro.periodo){
+      cellAtualizado.setAttribute('data-tooltip', `Índice: ${labelIndice(registro.indice)} | Período: ${registro.periodo} | Fator aplicado: ${(registro.fator||0).toFixed(7).replace('.', ',')}`);
+    }
+    cellDiferenca.textContent = formatarMoeda(registro.diferenca);
+    cellDiferenca.classList.add(registro.diferenca >= 0 ? 'positivo' : 'negativo');
+  }
+
+  async function atualizarLinha(id){
+    const registro = rows.get(id);
+    if(!registro) return;
+    registro.erro = null;
+    registro.status = null;
+
+    const dataFinalGlobal = dataFinalGlobalInput.value;
+    if(!dataFinalGlobal){ registro.erro = 'Defina a data final de referência no topo da página.'; }
+    else if(!registro.dataAposentadoria){ registro.erro = 'Informe a data da aposentadoria desta linha.'; }
+    else if(registro.valorOriginal == null){ registro.erro = 'Informe o valor original da parcela.'; }
+    else if(registro.dataAposentadoria > dataFinalGlobal){ registro.erro = 'A data da aposentadoria é posterior à data final de referência.'; }
+    else if(registro.mesFim && dataFinalGlobal > registro.mesFim){
+      // Não é erro: este servidor simplesmente já não recebe mais a parcela neste mês-base.
+      registro.status = 'encerrado';
+      registro.valorAtualizado = null;
+      registro.diferenca = null;
+      registro.fator = null;
+      registro.periodo = null;
+    }
+
+    if(registro.erro || registro.status === 'encerrado'){ preencherResultadoDOM(id); atualizarContador(); return; }
+
+    const tr = tbody.querySelector(`tr[data-id="${id}"]`);
+    tr.querySelector('.cell-atualizado').textContent = '…';
+
+    try{
+      const fator = await obterFatorAcumulado(registro.indice, registro.dataAposentadoria, dataFinalGlobal);
+      registro.fator = fator;
+      registro.valorAtualizado = registro.valorOriginal * fator;
+      registro.diferenca = registro.valorAtualizado - registro.valorOriginal;
+      registro.periodo = `${formatarPeriodo(registro.dataAposentadoria)} a ${formatarPeriodo(dataFinalGlobal)}`;
+    }catch(err){
+      registro.erro = err.message || 'Erro desconhecido ao calcular.';
+    }
+    preencherResultadoDOM(id);
+    atualizarContador();
+  }
+
+  async function atualizarTodas(){
+    const ids = Array.from(rows.keys());
+    if(ids.length === 0) return;
+    const btn = document.getElementById('btnUpdateAll');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Atualizando…';
+    try{ await Promise.allSettled(ids.map(id => atualizarLinha(id))); }
+    finally{ btn.disabled = false; btn.textContent = original; }
+  }
+
+  // -------------------------------------------------------------------
+  // Linhas da tabela
+  // -------------------------------------------------------------------
+  function gerarId(){ contadorId += 1; return 'r' + contadorId + '_' + Date.now().toString(36); }
+
+  function criarLinha(dados){
+    dados = dados || {};
+    const id = gerarId();
+    const registro = {
+      id,
+      matricula: dados.matricula || '',
+      nome: dados.nome || '',
+      indice: dados.indice || 'IPCA',
+      dataAposentadoria: dados.dataAposentadoria || '',
+      mesFim: dados.mesFim || '',
+      valorOriginal: (dados.valorOriginal != null && !Number.isNaN(dados.valorOriginal)) ? dados.valorOriginal : null,
+      valorAtualizado: (dados.valorAtualizado != null) ? dados.valorAtualizado : null,
+      diferenca: (dados.diferenca != null) ? dados.diferenca : null,
+      fator: (dados.fator != null) ? dados.fator : null,
+      periodo: dados.periodo || null,
+      status: dados.status || null,
+      erro: null,
+    };
+    rows.set(id, registro);
+
+    const tr = document.createElement('tr');
+    tr.dataset.id = id;
+    tr.innerHTML = `
+      <td><input type="text" class="cell cell-matricula" placeholder="Matrícula" value="${escapeAttr(registro.matricula)}"></td>
+      <td><input type="text" class="cell cell-nome" placeholder="Nome do servidor" value="${escapeAttr(registro.nome)}"></td>
+      <td>
+        <select class="cell cell-indice">
+          <option value="IPCA">IPCA</option>
+          <option value="INPC">INPC</option>
+          <option value="IGPM">IGP-M</option>
+        </select>
+      </td>
+      <td><input type="month" class="cell cell-data" value="${registro.dataAposentadoria}"></td>
+      <td><input type="month" class="cell cell-mesfim" value="${registro.mesFim}" title="Deixe em branco se o servidor continua recebendo a parcela"></td>
+      <td><input type="text" inputmode="decimal" class="cell cell-valor" placeholder="0,00" value="${registro.valorOriginal != null ? formatarMoeda(registro.valorOriginal) : ''}"></td>
+      <td class="cell-resultado cell-atualizado">—</td>
+      <td class="cell-resultado cell-diferenca">—</td>
+      <td class="cell-acoes">
+        <button type="button" class="icon-btn btn-recalc" title="Recalcular esta linha">&#8635;</button>
+        <button type="button" class="icon-btn btn-del" title="Excluir linha">&#10005;</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelector('.cell-indice').value = registro.indice;
+
+    tr.querySelector('.cell-matricula').addEventListener('input', e => { registro.matricula = e.target.value; });
+    tr.querySelector('.cell-nome').addEventListener('input', e => { registro.nome = e.target.value; });
+    tr.querySelector('.cell-indice').addEventListener('change', e => { registro.indice = e.target.value; });
+    tr.querySelector('.cell-data').addEventListener('change', e => { registro.dataAposentadoria = e.target.value; });
+    tr.querySelector('.cell-mesfim').addEventListener('change', e => { registro.mesFim = e.target.value; });
+    tr.querySelector('.cell-valor').addEventListener('change', e => {
+      registro.valorOriginal = parseMoeda(e.target.value);
+      e.target.value = registro.valorOriginal != null ? formatarMoeda(registro.valorOriginal) : '';
+    });
+    tr.querySelector('.btn-recalc').addEventListener('click', () => atualizarLinha(id));
+    tr.querySelector('.btn-del').addEventListener('click', () => excluirLinha(id));
+
+    preencherResultadoDOM(id);
+    atualizarContador();
+    return id;
+  }
+
+  function excluirLinha(id){
+    const registro = rows.get(id);
+    if(!registro) return;
+    const nomeRef = registro.nome || registro.matricula || 'esta linha';
+    if(!confirm(`Excluir "${nomeRef}" da tabela?`)) return;
+    const tr = tbody.querySelector(`tr[data-id="${id}"]`);
+    if(tr) tr.remove();
+    rows.delete(id);
+    atualizarContador();
+  }
+
+  function limparTudo(){
+    if(rows.size > 0 && !confirm('Limpar todas as linhas da tabela? Isso não afeta registros já salvos no histórico.')) return;
+    tbody.innerHTML = '';
+    rows.clear();
+    editandoId = null;
+    document.getElementById('avisoEdicao').hidden = true;
+    btnSalvarMes.textContent = 'Salvar mês no histórico';
+    atualizarContador();
+  }
+
+  // -------------------------------------------------------------------
+  // Importação por colar (Ctrl+V)
+  // -------------------------------------------------------------------
+  function importarTexto(texto){
+    const linhas = texto.split(/\r\n|\r|\n/).filter(l => l.trim() !== '');
+    let importadas = 0;
+    for(const linha of linhas){
+      let colunas = linha.split('\t');
+      if(colunas.length < 2) colunas = linha.split(';');
+      if(colunas.length < 2) continue;
+      if(/matr[ií]cula/i.test(colunas[0] || '')) continue;
+
+      let matriculaBruta, nomeBruta, dataBruta, mesFimBruto, valorBruto;
+      if(colunas.length >= 5){
+        [matriculaBruta, nomeBruta, dataBruta, mesFimBruto, valorBruto] = colunas;
+      }else{
+        [matriculaBruta, nomeBruta, dataBruta, valorBruto] = colunas;
+        mesFimBruto = '';
+      }
+
+      criarLinha({
+        matricula: (matriculaBruta || '').trim(),
+        nome: (nomeBruta || '').trim(),
+        dataAposentadoria: normalizarDataAposentadoria(dataBruta || ''),
+        mesFim: normalizarDataAposentadoria(mesFimBruto || ''),
+        valorOriginal: parseMoeda(valorBruto || ''),
+      });
+      importadas++;
+    }
+    return importadas;
+  }
+
+  tabelaWrapper.addEventListener('paste', function(e){
+    const texto = (e.clipboardData || window.clipboardData).getData('text');
+    if(!texto) return;
+    if(texto.includes('\n') || texto.includes('\t')){
+      e.preventDefault();
+      const n = importarTexto(texto);
+      if(n > 0) mostrarAviso(`${n} linha(s) importada(s) da área de transferência.`);
+    }
+  });
+
+  // -------------------------------------------------------------------
+  // Exportação CSV
+  // -------------------------------------------------------------------
+  function exportarCSV(){
+    const linhas = [['Matrícula','Nome','Índice','Data Aposentadoria','Mês Fim','Valor Original','Valor Atualizado','Diferença','Fator','Situação'].join(';')];
+    for(const registro of rows.values()){
+      linhas.push([
+        registro.matricula, registro.nome, labelIndice(registro.indice),
+        registro.dataAposentadoria ? formatarPeriodo(registro.dataAposentadoria) : '',
+        registro.mesFim ? formatarPeriodo(registro.mesFim) : '',
+        registro.valorOriginal != null ? registro.valorOriginal.toFixed(2).replace('.', ',') : '',
+        registro.valorAtualizado != null ? registro.valorAtualizado.toFixed(2).replace('.', ',') : '',
+        registro.diferenca != null ? registro.diferenca.toFixed(2).replace('.', ',') : '',
+        registro.fator != null ? registro.fator.toFixed(7).replace('.', ',') : '',
+        registro.status === 'encerrado' ? 'Parcela encerrada' : (registro.erro ? 'Erro' : (registro.valorAtualizado != null ? 'Calculado' : ''))
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
+    }
+    const conteudo = '\uFEFF' + linhas.join('\r\n');
+    const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `atualizacao_lpa_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    mostrarAviso('CSV exportado.');
+  }
+
+  // -------------------------------------------------------------------
+  // Salvar mês no histórico (Firestore, via acertos)
+  // -------------------------------------------------------------------
+  async function salvarMes(){
+    const dataFinalGlobal = dataFinalGlobalInput.value;
+    if(!dataFinalGlobal){ mostrarAviso('Defina a data final de referência antes de salvar.'); return; }
+    if(rows.size === 0){ mostrarAviso('Adicione ao menos um servidor antes de salvar.'); return; }
+
+    const pendentes = Array.from(rows.values()).filter(r =>
+      r.erro || (r.status !== 'encerrado' && r.valorAtualizado == null)
+    );
+    if(pendentes.length > 0){
+      mostrarAviso(`${pendentes.length} linha(s) sem cálculo válido. Clique em "Atualizar todos" antes de salvar.`);
+      return;
+    }
+
+    const servidores = Array.from(rows.values()).map(r => ({
+      matricula: r.matricula, nome: r.nome, indice: r.indice,
+      dataAposentadoria: r.dataAposentadoria, mesFim: r.mesFim || '',
+      valorOriginal: r.valorOriginal, valorAtualizado: r.valorAtualizado,
+      diferenca: r.diferenca, fator: r.fator, periodo: r.periodo, status: r.status || null
+    }));
+    const calculados = servidores.filter(s => s.valorAtualizado != null);
+    const totalOriginal = calculados.reduce((s,r)=>s+r.valorOriginal,0);
+    const totalAtualizado = calculados.reduce((s,r)=>s+r.valorAtualizado,0);
+    const totalDiferenca = totalAtualizado - totalOriginal;
+
+    const dados = {
+      competencia: dataFinalGlobal,
+      competenciaLabel: formatarPeriodo(dataFinalGlobal),
+      totalServidores: servidores.length,
+      totalOriginal, totalAtualizado, totalDiferenca,
+      totalFinal: formatarMoeda(totalAtualizado),
+      servidores
+    };
+
+    btnSalvarMes.disabled = true;
+    const original = btnSalvarMes.textContent;
+    btnSalvarMes.textContent = 'Salvando…';
+    try{
+      if(editandoId){
+        await atualizarAcerto(editandoId, 'atualizacao-lpa', dados);
+        mostrarAviso('Registro atualizado no histórico.');
+      }else{
+        editandoId = await salvarAcerto('atualizacao-lpa', dados);
+        mostrarAviso('Mês salvo no histórico com sucesso.');
+        btnSalvarMes.textContent = 'Salvar alterações';
+        if(editandoId){
+          const params = new URLSearchParams(location.search);
+          params.set('editar', editandoId);
+          history.replaceState(null, '', location.pathname + '?' + params.toString());
+        }
+      }
+    }catch(err){
+      mostrarAviso('Erro ao salvar: ' + err.message);
+    }finally{
+      btnSalvarMes.disabled = false;
+      if(btnSalvarMes.textContent === 'Salvando…') btnSalvarMes.textContent = original;
+    }
+  }
+
+  async function carregarParaEdicao(id){
+    try{
+      const registro = await buscarAcerto(id);
+      if(!registro || !registro.dados) throw new Error('Registro não encontrado.');
+      const d = registro.dados;
+      dataFinalGlobalInput.value = d.competencia || '';
+      tbody.innerHTML = '';
+      rows.clear();
+      (d.servidores || []).forEach(s => criarLinha(s));
+      editandoId = id;
+      const avisoEdicao = document.getElementById('avisoEdicao');
+      const dataFmt = registro.criadoEm && registro.criadoEm.toDate ? registro.criadoEm.toDate().toLocaleString('pt-BR') : '—';
+      avisoEdicao.textContent = `Editando lote salvo em ${dataFmt} por ${registro.criadoPor || 'desconhecido'}.`;
+      avisoEdicao.hidden = false;
+      btnSalvarMes.textContent = 'Salvar alterações';
+      atualizarContador();
+    }catch(err){
+      mostrarAviso('Erro ao carregar registro: ' + err.message);
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Inicialização
+  // -------------------------------------------------------------------
+  document.getElementById('btnAddRow').addEventListener('click', () => criarLinha());
+  document.getElementById('btnUpdateAll').addEventListener('click', atualizarTodas);
+  document.getElementById('btnExport').addEventListener('click', exportarCSV);
+  document.getElementById('btnSalvarMes').addEventListener('click', salvarMes);
+  document.getElementById('btnLimpar').addEventListener('click', limparTudo);
+
+  if(location.protocol === 'file:'){ document.getElementById('avisoArquivo').hidden = false; }
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if(ok){ dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else{ text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if(usuario){
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+
+  exigirLogin(async () => {
+    const params = new URLSearchParams(location.search);
+    const idParaEditar = params.get('editar');
+    if(idParaEditar){
+      await carregarParaEdicao(idParaEditar);
+    }else{
+      criarLinha();
+      criarLinha();
+      criarLinha();
+    }
+  });
+</script>
+
+</body>
+</html>
