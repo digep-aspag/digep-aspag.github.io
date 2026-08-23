@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Acertos de Contas — DIGEP/IBRAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D;
+    --sidebar-hover:#17415C;
+    --accent:#E8A33D;
+    --accent-soft:#F4D9A8;
+    --teal:#1F6F62;
+    --terracota:#C1443B;
+    --paper:#F6F4EF;
+    --card:#FFFFFF;
+    --ink:#1C2530;
+    --ink-soft:#62707C;
+    --line:#E4E0D6;
+    --green:#2F8F5B;
+    --red:#C1443B;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; }
+
+  .shell{ display:flex; min-height:100vh; }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem;
+  }
+  .brand{ padding:0 0.5rem 1.4rem; }
+  .brand .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.66rem; letter-spacing:0.14em; text-transform:uppercase; color:#8FA6B5; }
+  .brand h1{ font-family:'Fraunces',serif; font-size:1.28rem; font-weight:600; margin:0.35rem 0 0; line-height:1.25; }
+
+  .curva{ width:100%; height:14px; margin:0.9rem 0 1.3rem; }
+
+  nav.menu{ display:flex; flex-direction:column; gap:0.25rem; flex:1; }
+  nav.menu a{
+    display:flex; align-items:center; gap:0.7rem; text-decoration:none; color:#C9D6DE;
+    padding:0.6rem 0.65rem; border-radius:7px; font-size:0.87rem; font-weight:500;
+    transition:background .12s ease, color .12s ease;
+  }
+  nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .selo{
+    width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.62rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  nav.menu .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.7rem 0.6rem; }
+
+  .sidebar-footer{ padding:0.6rem; font-size:0.72rem; color:#7C93A2; line-height:1.5; }
+
+  /* ---------- MAIN ---------- */
+  .main{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:1rem 2rem; border-bottom:1px solid var(--line); background:var(--card);
+  }
+  .status-pill{
+    display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.76rem; color:var(--ink-soft);
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:flex; align-items:center; gap:0.9rem; font-size:0.82rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .content{ padding:2.2rem 2rem 3rem; max-width:1080px; }
+  .content h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.7rem; margin:0 0 0.4rem; }
+  .content > p.lead{ color:var(--ink-soft); font-size:0.95rem; max-width:56ch; margin:0 0 2rem; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:1rem; }
+
+  a.card{
+    display:block; text-decoration:none; color:inherit; background:var(--card);
+    border:1px solid var(--line); border-radius:12px; padding:1.3rem 1.35rem;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  a.card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px -14px rgba(15,42,61,0.35); border-color:transparent; }
+  a.card .selo{ margin-bottom:0.9rem; width:38px; height:38px; font-size:0.7rem; }
+  a.card h3{ font-family:'Fraunces',serif; font-size:1.08rem; font-weight:600; margin:0 0 0.35rem; }
+  a.card p{ font-size:0.85rem; color:var(--ink-soft); line-height:1.5; margin:0; }
+  a.card .seta{ display:inline-block; margin-top:0.8rem; font-size:0.8rem; font-weight:600; color:var(--teal); }
+
+  /* cores por tipo */
+  .selo.g54{ background:#8B0000; }
+  .selo.sv{ background:#6B21A8; }
+  .selo.cv{ background:#556B2F; }
+  .selo.ef{ background:#0B5394; }
+  .selo.hx{ background:var(--accent); color:var(--sidebar); }
+  .selo.sub{ background:#2F6FA5; }
+  .selo.cf{ background:#C1560C; }
+  .selo.inss{ background:#B45309; }
+  .selo.lpa{ background:#0F766E; }
+
+  /* menu mobile */
+  .hamburguer{ display:none; }
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; flex-direction:row; align-items:center; padding:0.9rem 1rem; }
+    .brand{ padding:0; flex:1; }
+    .brand h1{ font-size:1.05rem; }
+    .curva{ display:none; }
+    .sidebar-footer{ display:none; }
+    nav.menu{ display:none; }
+    nav.menu.aberto{ display:flex; position:absolute; top:64px; left:0; right:0; background:var(--sidebar); padding:0.6rem; z-index:20; flex-direction:column; }
+    .hamburguer{
+      display:block; background:none; border:1px solid rgba(255,255,255,0.25); color:#fff; border-radius:6px;
+      padding:0.4rem 0.6rem; font-size:1rem; cursor:pointer;
+    }
+    .content{ padding:1.6rem 1.2rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <img src="assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.9rem;width:100%;max-width:190px;height:auto;background:#fff;border-radius:12px;padding:10px 14px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1>Portal de Acertos</h1>
+    </div>
+
+    <svg class="curva" viewBox="0 0 220 14" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 12 C 60 -4, 160 -4, 220 12" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+
+    <button class="hamburguer" id="btn-menu" aria-label="Abrir menu">☰ Menu</button>
+
+    <nav class="menu" id="menu">
+      <a href="modulos/historico.html"><span class="selo hx">⏱</span> Histórico de acertos</a>
+      <a href="modulos/legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="status-pill">
+        <span class="dot" id="conn-dot"></span>
+        <span id="conn-text">verificando conexão…</span>
+      </div>
+      <div class="login-info" id="login-info" style="display:none;">
+        <span id="login-text"></span>
+        <a href="#" id="btn-sair">Sair</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <h2>Selecione o tipo de acerto</h2>
+      <p class="lead">Ferramentas de cálculo para os quatro tipos de acerto de contas. Escolha o módulo correspondente ao vínculo do servidor, ou consulte o histórico de acertos já salvos.</p>
+
+      <div class="grid">
+        <a class="card" href="modulos/brigadistas.html">
+          <span class="selo g54">G54</span>
+          <h3>Brigadistas</h3>
+          <p>Acerto de contas para bombeiros civis / brigadistas temporários.</p>
+          <span class="seta">Abrir módulo →</span>
+        </a>
+
+        <a class="card" href="modulos/comissionado-sem-vinculo.html">
+          <span class="selo sv">SV</span>
+          <h3>Comissionado sem vínculo</h3>
+          <p>Servidor ocupante de cargo em comissão sem vínculo efetivo com o GDF.</p>
+          <span class="seta">Abrir módulo →</span>
+        </a>
+
+        <a class="card" href="modulos/comissionado-com-vinculo.html">
+          <span class="selo cv">CV</span>
+          <h3>Comissionado com vínculo</h3>
+          <p>Servidor efetivo em exercício de cargo em comissão.</p>
+          <span class="seta">Abrir módulo →</span>
+        </a>
+
+        <a class="card" href="modulos/efetivos.html">
+          <span class="selo ef">EF</span>
+          <h3>Servidores efetivos</h3>
+          <p>Acerto de contas para servidores do quadro efetivo do GDF.</p>
+          <span class="seta">Abrir módulo →</span>
+        </a>
+
+        <a class="card" href="modulos/substituicoes.html">
+          <span class="selo sub">SUB</span>
+          <h3>Substituições</h3>
+          <p>Registro de gratificações por substituição em cargos comissionados.</p>
+          <span class="seta">Abrir →</span>
+        </a>
+
+        <a class="card" href="modulos/correcao-folha-v09.html">
+          <span class="selo cf">CF</span>
+          <h3>Correção de folha</h3>
+          <p>Correção de faltas e repouso remunerado por competência (SIGRH v09).</p>
+          <span class="seta">Abrir →</span>
+        </a>
+
+        <a class="card" href="modulos/inss.html">
+          <span class="selo inss">INSS</span>
+          <h3>Memória de Cálculo — INSS</h3>
+          <p>Memória de cálculo do INSS Patronal por competência, versão e grupo.</p>
+          <span class="seta">Abrir →</span>
+        </a>
+
+        <a class="card" href="modulos/atualizacao-lpa.html">
+          <span class="selo lpa">LPA</span>
+          <h3>Atualização LPA</h3>
+          <p>Correção monetária de parcelas de LPA por competência, com índices IPCA/INPC/IGP-M.</p>
+          <span class="seta">Abrir →</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { checkConnection, observarLogin, logout } from './assets/firebase-init.js';
+
+  checkConnection().then(ok => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) {
+      dot.classList.add('ok');
+      text.textContent = 'conectado ao banco de dados';
+    } else {
+      text.textContent = 'sem conexão — configure assets/firebase-config.js';
+    }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+
+  document.getElementById('btn-menu').addEventListener('click', () => {
+    document.getElementById('menu').classList.toggle('aberto');
+  });
+</script>
+
+</body>
+</html>
