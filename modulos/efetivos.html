@@ -1,0 +1,2989 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Acerto de Contas - Servidor com Vínculo (Cargo Efetivo)</title>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif}
+    body{background:#f5f7fa;color:#333;line-height:1.6;padding:20px}
+    .container{max-width:1500px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 10px 28px -18px rgba(15,42,61,.25);padding:30px;border:1px solid #EDEAE0}
+    header{text-align:center;margin-bottom:30px;border-bottom:2px solid #0b5394;padding-bottom:15px}
+    h1{color:#0b5394;margin-bottom:10px;font-size:28px}
+    .subtitle{color:#666;font-size:16px}
+    .section{margin-bottom:30px;padding:20px;background:#f9fafc;border-radius:8px;border-left:4px solid #0b5394}
+    h2{color:#0b5394;margin-bottom:15px;font-size:20px}
+    .row{display:flex;flex-wrap:wrap;margin:0 -10px}
+    .col{flex:1;padding:0 10px;min-width:200px}
+    .col-small{flex:.5;padding:0 10px;min-width:150px}
+    .form-group{margin-bottom:15px}
+    label{display:block;margin-bottom:5px;font-weight:600;color:#444}
+
+    input[type="text"],input[type="date"],input[type="number"],select{
+      width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:16px;transition:border .3s
+    }
+    input:focus,select:focus{border-color:#0b5394;outline:none}
+    .w-100{width:100%}.mt-20{margin-top:20px}
+
+    .table-base{width:100%;border-collapse:collapse;margin-top:10px}
+    .table-base th,.table-base td{padding:12px 15px;text-align:left;border-bottom:1px solid #ddd;vertical-align:top}
+    .rubricas-table tr:hover{background:#f9f0f0}
+    .rubrica-codigo-input{width:120px;text-align:center;font-variant-numeric:tabular-nums}
+    .codigo-com-toggle{display:flex;align-items:center;gap:6px}
+    .rubrica-naosegsocial{width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:#0B5394}
+    .rubrica-valor-input{width:160px;text-align:right;font-variant-numeric:tabular-nums}
+    .rubrica-nome{width:100%}
+
+    .ferias-table th,.ferias-table td{padding:4px 6px;text-align:center;border:1px solid #ddd;font-size:12px}
+    .ferias-table input{padding:3px;border:1px solid #ddd;border-radius:3px;font-size:11px}
+    .ferias-table-wrapper{max-height:560px;overflow-y:auto;border:1px solid #ddd;border-radius:6px}
+    .ferias-table-wrapper table{margin-top:0}
+    .ferias-table-wrapper thead th{position:sticky;top:0;z-index:1}
+    .periodo-aquisitivo{width:100px !important;text-align:center}
+    .periodo-ferias-container{display:flex;gap:3px;flex-wrap:nowrap;justify-content:center;align-items:center}
+    .periodo-ferias{width:auto}
+    .periodo-ferias input[type="date"]{width:112px;padding:3px 4px}
+    .terco-ferias-checkbox{margin:0;display:flex;align-items:center;gap:2px;white-space:nowrap}
+    .terco-ferias-checkbox input{margin:0;width:auto}
+    .terco-ferias-checkbox label{font-size:10px;margin:0;font-weight:400;color:#666}
+    .ferias-periodo-completo{display:flex;flex-direction:row;align-items:center;gap:4px;justify-content:center}
+    .dias-usufruidos{width:60px !important;text-align:center}
+    .dias-usufruidos.dias-incompletos{background:#ffe5e5;border:2px solid #dc3545 !important;color:#dc3545;font-weight:700}
+
+    .button-group{display:flex;flex-wrap:wrap;gap:15px;margin-top:20px}
+    .calc-action-bar{
+      display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;
+      margin:32px 0;padding:22px;background:#e8f1fb;border:2px solid #0B5394;border-radius:10px;
+      box-shadow:0 2px 10px rgba(11,83,148,0.15);
+    }
+    .btn-calcular-destaque{
+      font-size:19px;padding:16px 42px;box-shadow:0 3px 10px rgba(11,83,148,0.4);
+      letter-spacing:0.5px;
+    }
+    button{padding:12px 25px;border:none;border-radius:5px;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s ease}
+    .btn-primary{background:#0b5394;color:#fff}.btn-primary:hover{background:#073763}
+    .btn-secondary{background:#0056b3;color:#fff}.btn-secondary:hover{background:#004494}
+    .btn-danger{background:#dc3545;color:#fff}.btn-danger:hover{background:#bd2130}
+    .btn-clear{background:#6c757d;color:#fff}.btn-clear:hover{background:#545b62}
+
+    .results-section{background:#e9f7ef;border-left:4px solid #28a745}
+    .results-table tr:last-child td{border-bottom:none}
+
+    .avos-info{display:flex;gap:30px;margin-top:15px;flex-wrap:wrap}
+    .avos-item{padding:10px 15px;background:#f9f0f0;border-radius:5px;font-weight:600;min-width:200px;border:1px solid #0b5394}
+    .avos-item strong{color:#0b5394}
+
+    .footer{text-align:center;margin-top:30px;color:#666;font-size:14px}
+    .valor-positivo{color:#28a745;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+    .valor-negativo{color:#dc3545;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+
+    /* ✅ Tabela de resultados: valores sempre à direita e em negrito (inclusive
+       os lançamentos manuais); códigos dos lançamentos manuais alinhados à
+       esquerda, igual aos códigos já preenchidos automaticamente. */
+    #tabela-resultados-completa td:nth-child(3){text-align:right}
+    #tabela-resultados-completa .rubrica-valor-input{font-weight:700}
+    #tabela-resultados-completa .manual-codigo{text-align:left}
+
+    .info-box{background:#f0f8ff;border:1px solid #b3d7ff;border-radius:5px;padding:15px;margin:15px 0;font-size:14px}
+    .warning-box{background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:15px;margin:15px 0;font-size:14px}
+    .error-box{background:#f8d7da;border:1px solid #f5c6cb;border-radius:5px;padding:15px;margin:15px 0;font-size:14px;color:#721c24;display:none;white-space:pre-line}
+
+    .calculation-details{background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;padding:15px;margin:15px 0;font-size:13px}
+    .rubricas-dias-trabalhados{background:#fff8e1;border:1px solid #ffd54f;border-radius:5px;padding:15px;margin:15px 0;font-size:13px}
+
+    details.destaque-cargo{background:#fff0f0;border:2px solid #0b5394;border-radius:5px;padding:12px 15px;margin:15px 0}
+    details.destaque-cargo>summary{list-style:none;cursor:pointer;font-weight:800;color:#0b5394;outline:none;user-select:none}
+    details.destaque-cargo>summary::-webkit-details-marker{display:none}
+    details.destaque-cargo>summary::before{content:"▶";display:inline-block;margin-right:8px;transform:translateY(-1px)}
+    details.destaque-cargo[open]>summary::before{content:"▼"}
+    details.collapsible-note{margin:15px 0}
+    details.collapsible-note>summary{cursor:pointer;color:#0b5394;font-weight:600;font-size:13px;padding:8px 12px;background:#eef6ff;border:1px solid #b3d7ff;border-radius:5px;outline:none;user-select:none;list-style:none}
+    details.collapsible-note>summary::-webkit-details-marker{display:none}
+    details.collapsible-note>summary::before{content:"▶";display:inline-block;margin-right:8px}
+    details.collapsible-note[open]>summary::before{content:"▼"}
+    details.collapsible-note>summary:hover{background:#dcedff}
+    details.collapsible-note>.info-box,details.collapsible-note>.warning-box{margin-top:6px}
+    .destaque-content{margin-top:10px}
+
+    #manual-body td{border-bottom:none}
+
+    .ocultar-descricao th:nth-child(2),
+    .ocultar-descricao td:nth-child(2){display:none}
+
+    .print-header{display:none}
+
+    .tabs-nav{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #ddd}
+    input[type="text"]:not(.moeda-mask):not([inputmode="numeric"]){text-transform:uppercase}
+    .tab-btn{background:#eee;color:#555;border:none;padding:12px 22px;font-weight:700;cursor:pointer;border-radius:8px 8px 0 0;font-size:15px;transition:background .2s}
+    .tab-btn:hover{background:#e2e2e2}
+    .tab-btn.active{background:#0b5394;color:#fff}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    @media print{
+      .tabs-nav,.button-group,.calc-action-bar,details.destaque-cargo,details.collapsible-note,.warning-box,.info-box,.error-box{display:none !important}
+      .tab-panel{display:none !important}
+      #tab-panel-2{display:block !important}
+      .print-header{display:block !important;margin-bottom:20px;border-bottom:2px solid #0b5394;padding-bottom:12px}
+      body{padding:0;background:#fff}
+      .container{box-shadow:none;padding:0}
+      input,select{border:1px solid #999 !important}
+      .ferias-table-wrapper{max-height:none !important;overflow:visible !important}
+    }
+
+
+    @media (max-width:768px){
+      .row{flex-direction:column}
+      .col,.col-small{width:100%;margin-bottom:15px}
+      .button-group{flex-direction:column}
+      button{width:100%}
+      .avos-info{flex-direction:column;gap:10px}
+      .avos-item{min-width:100%}
+      .periodo-ferias-container{flex-direction:column}
+      .periodo-ferias{width:100%}
+      .rubrica-codigo-input,.rubrica-valor-input{width:100%;text-align:left}
+    }
+  </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+  }
+  html, body{ background:var(--paper) !important; padding:0 !important; margin:0 !important; }
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif !important; font-size:1.1rem; font-weight:600; color:#fff !important; margin:0.3rem 0 0 !important; text-align:left !important; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; font-family:'IBM Plex Sans',sans-serif; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.6rem 1.8rem 3rem; }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+  }
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html" class="ativo"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div class="conteudo-modulo">
+<div id="banner-edicao" style="display:none;background:#FBF3E3;border:1px solid #E9CE9C;color:#5B4A28;padding:0.7rem 1rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.2rem;font-family:'IBM Plex Sans',sans-serif;"></div>
+<div class="container">
+  <header>
+    <h1>ACERTO DE CONTAS - SERVIDOR COM VÍNCULO (CARGO EFETIVO)</h1>
+    <p class="subtitle">Cálculo de acerto para Servidor com Vínculo (Cargo Efetivo)</p>
+  </header>
+
+  <details class="destaque-cargo" id="caracteristicas-box">
+    <summary>CARACTERÍSTICAS DO CÁLCULO (clique para mostrar/ocultar)</summary>
+    <div class="destaque-content">
+      <ul>
+        <li><strong>Período de cálculo:</strong> Exatamente da data de admissão até a data de desligamento (data a data)</li>
+        <li><strong>Direito a férias proporcionais</strong> do período em que esteve no vínculo efetivo</li>
+        <li><strong>Direito a 13º salário proporcional</strong> ao tempo de exercício no ano do desligamento</li>
+        <li><strong>Férias vencidas:</strong> Todos os avos antes do último período completo</li>
+        <li><strong>Férias proporcionais:</strong> Cálculo considerando avos completos, dias usufruídos e 1/3</li>
+        <li><strong>Cálculo de avos:</strong> Mês a mês (01/jan até 01/fev = 1 avo, 01/jan até 01/mar = 2 avos, etc.)</li>
+        <li><strong>Dias trabalhados:</strong> Valor da remuneração dividido por 30 × dias trabalhados no mês do desligamento</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tabs-nav">
+    <button type="button" class="tab-btn active" id="tab-btn-1" data-tab="1">1. DADOS PESSOAIS</button>
+    <button type="button" class="tab-btn" id="tab-btn-2" data-tab="2">2. ACERTO DE CONTAS</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-panel-1">
+    <section class="section">
+      <h2>DADOS PESSOAIS DO SERVIDOR (CARGO EFETIVO)</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="nome">NOME:</label>
+            <input type="text" id="nome" placeholder="Digite o nome do servidor" />
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="matricula">MATRÍCULA:</label>
+            <input type="text" id="matricula" placeholder="Número da matrícula" />
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="cargo">CARGO/FUNÇÃO:</label>
+            <input type="text" id="cargo" placeholder="Nome do cargo/função" />
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="nascimento">DATA DE NASCIMENTO:</label>
+            <input type="date" id="nascimento" />
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="processo-sei">PROCESSO SEI (opcional):</label>
+            <input type="text" id="processo-sei" placeholder="Ex: 00000-00000000/0000-00" />
+          </div>
+        </div>
+      </div>
+
+      <details class="collapsible-note">
+        <summary>Observações (clique para exibir)</summary>
+      <div class="info-box">
+        <strong>Atenção:</strong> preencha nome, matrícula e data de nascimento antes de prosseguir para o acerto de contas. Esses dados são obrigatórios para liberar a aba "ACERTO DE CONTAS". O Processo SEI é opcional e não impede o prosseguimento.
+      </div>
+      </details>
+
+      <div class="button-group">
+        <button class="btn-primary" id="ir-para-acerto">IR PARA ACERTO DE CONTAS →</button>
+        <button class="btn-danger" id="limpar-dados-tab1">LIMPAR TODOS OS DADOS</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="tab-panel" id="tab-panel-2">
+    <div class="print-header" id="print-header">
+      <h1 style="color:#0b5394;font-size:22px;margin-bottom:8px;">ACERTO DE CONTAS - SERVIDOR COM VÍNCULO (CARGO EFETIVO)</h1>
+      <div id="print-header-dados" style="font-size:14px;"></div>
+    </div>
+
+    <section class="section">
+      <h2>PERÍODO DO VÍNCULO E CÁLCULO DE AVOS</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="admissao">ADMISSÃO:</label>
+            <input type="date" id="admissao" />
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="exoneracao">DESLIGAMENTO/EXONERAÇÃO:</label>
+            <input type="date" id="exoneracao" />
+          </div>
+        </div>
+
+        <div class="col-small">
+          <div class="form-group">
+            <label for="dias-trabalhados-mes">DIAS RECEBIDOS NO MÊS DO DESLIGAMENTO:</label>
+            <input type="number" id="dias-trabalhados-mes" placeholder="0" min="-31" max="31" step="1" value="0" class="w-100" />
+          </div>
+        </div>
+
+        <div class="col-small">
+          <div class="form-group">
+            <label for="adiantamento-13">ADIANTAMENTO DE 13º SALÁRIO (R$):</label>
+            <input type="text" inputmode="decimal" id="adiantamento-13" placeholder="0,00" value="0,00" class="w-100 moeda-mask" />
+            <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-weight:400;font-size:13px;color:#444;">
+              <input type="checkbox" id="adiantamento-13-nao-recebeu" style="width:16px;height:16px;accent-color:#0B5394;">
+              Não recebeu o adiantamento?
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <details class="collapsible-note">
+        <summary>Observações (clique para exibir)</summary>
+      <div class="info-box">
+        <strong>Nota sobre o adiantamento de 13º:</strong> este campo só é preenchido automaticamente quando a exoneração ocorrer NO MÊS SEGUINTE ao mês de aniversário do servidor (data de nascimento) OU DEPOIS dele, DENTRO DO MESMO ANO da exoneração — ou seja, quando o adiantamento já teria sido pago pela folha antes da exoneração, nesse ano civil — com valor de 60% do total lançado na Remuneração (Base do Cálculo), ao clicar em "Calcular Acerto" (você pode ajustar manualmente se o valor recebido tiver sido diferente). Esse valor entra no resumo como devolução (código 61140), sem incidência de Seguridade Social. Se a caixinha "Não recebeu o adiantamento?" estiver marcada, nenhuma devolução aparece no Resultado do Acerto, independentemente do valor preenchido no campo.
+      </div>
+      </details>
+
+      <details class="collapsible-note">
+        <summary>Observações (clique para exibir)</summary>
+      <div class="info-box">
+        <strong>Informações:</strong>
+        <ul>
+          <li><strong>Período de cálculo:</strong> Data de admissão até data de desligamento (data a data)</li>
+          <li><strong>Cálculo de avos:</strong> Mês a mês (01/jan até 01/fev = 1 avo, 01/jan até 01/mar = 2 avos)</li>
+          <li><strong>Regra dos 15 dias:</strong> um mês só conta como 1 avo se tiver 15 dias ou mais efetivamente trabalhados. Nos meses de admissão e desligamento isso já é verificado automaticamente pelas datas informadas.</li>
+          <li><strong>Férias vencidas:</strong> Todos os avos antes do último período completo</li>
+          <li><strong>Férias proporcionais:</strong> Cálculo considerando avos completos, dias usufruídos e 1/3</li>
+          <li><strong>13º salário:</strong> Proporcional ao tempo no ano do desligamento</li>
+          <li><strong>Dias trabalhados:</strong> (Valor da 2ª rubrica ÷ 30) × dias trabalhados</li>
+        </ul>
+      </div>
+      </details>
+
+      <div class="avos-info">
+        <div class="avos-item"><strong>FÉRIAS VENCIDAS:</strong> <span id="avos-ferias-vencidas">0</span> AVOS</div>
+        <div class="avos-item"><strong>FÉRIAS PROPORCIONAIS:</strong> <span id="avos-ferias-proporcionais">0</span> AVOS</div>
+        <div class="avos-item"><strong>GRATIFICAÇÃO NATALÍCIA (13º):</strong> <span id="avos-gratificacao">0</span> AVOS</div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" id="calcular-avos">CALCULAR AVOS</button>
+      </div>
+    </section>
+
+  <section class="section">
+    <h2>REMUNERAÇÃO (BASE DO CÁLCULO)</h2>
+
+    <table class="rubricas-table table-base">
+      <thead>
+        <tr>
+          <th style="background:#0B5394;color:#fff;font-weight:600;width:150px;">CÓDIGO (5 dígitos)</th>
+          <th style="background:#0B5394;color:#fff;font-weight:600;">DESCRIÇÃO DA VERBA</th>
+          <th style="background:#0B5394;color:#fff;font-weight:600;width:220px;">VALOR R$</th>
+        </tr>
+      </thead>
+      <tbody id="rubricas-body">
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00" value="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00" value="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><span class="codigo-com-toggle"><input type="checkbox" class="rubrica-naosegsocial" title="Não incide Seguridade Social (nem sobre o 13º)"><input type="text" class="rubrica-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></span></td>
+          <td><input type="text" class="rubrica-nome" placeholder="DESCRIÇÃO DA VERBA" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="rubrica-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:bold;background:#f8f9fa;">
+          <td colspan="2" style="text-align:right;">TOTAL DA REMUNERAÇÃO</td>
+          <td id="total-remuneracao-valor">0,00</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="col-small">
+        <div class="form-group">
+          <label for="ir-dependentes">Nº DE DEPENDENTES (p/ Imposto de Renda):</label>
+          <input type="number" id="ir-dependentes" placeholder="0" min="0" step="1" value="0" style="max-width:120px;" />
+        </div>
+      </div>
+
+      <div class="col-small" style="margin-left:60px;">
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="df-previcom-check" style="width:18px;height:18px;accent-color:#0B5394;">
+            ADERIU AO DF-PREVICOM?
+          </label>
+        </div>
+      </div>
+      <div class="col-small">
+        <div class="form-group">
+          <label for="df-previcom-percentual">PERCENTUAL DF-PREVICOM (máx. 8,5%):</label>
+          <input type="number" id="df-previcom-percentual" placeholder="0,0" min="0" max="8.5" step="0.1" style="max-width:120px;" />
+        </div>
+      </div>
+    </div>
+
+    <details class="collapsible-note">
+      <summary>Observações (clique para exibir)</summary>
+    <div class="info-box">
+      <strong>Nota sobre o DF-PREVICOM:</strong> quando "Aderiu ao DF-PREVICOM?" estiver marcada, a Seguridade Social (sobre a remuneração e sobre o 13º) passa a ser calculada assim: se a base de cálculo for até R$ 8.475,55, aplica-se 14% sobre ela inteira (código 40901 - RPPS IPREV / 40924 - RPPS IPREV - GRAT. NATALÍCIA); se for maior que R$ 8.475,55, o RPPS IPREV continua aparecendo — mas limitado a 14% do teto (R$ 8.475,55) — e, adicionalmente, calcula-se o percentual informado acima (até 8,5%) sobre a diferença entre a base e R$ 8.475,55 (código 41940 - PREVICOM - COMPLEMENTAR / 41943 - PREVICOM - COMPLEMENTAR GRAT. NATALÍCIA) — os dois valores aparecem juntos nesse caso. Se a caixinha não estiver marcada, o cálculo padrão de 14% sobre a Seguridade Social continua sendo usado normalmente.
+    </div>
+    </details>
+
+    <details class="collapsible-note">
+      <summary>Observações (clique para exibir)</summary>
+    <div class="info-box">
+      <strong>Nota:</strong> preencha manualmente o código (5 dígitos) e a descrição de cada verba. A <strong>1ª rubrica</strong> é usada no cálculo do 1º resultado (DIF./DEV. proporcional aos dias) e a <strong>2ª rubrica</strong> no cálculo dos dias trabalhados no mês do desligamento. Todas as verbas lançadas entram na remuneração total, usada como base das férias, do 1/3 de férias, do 13º e da Seguridade Social. As demais rubricas (3ª em diante) aparecem no RESULTADO DO ACERTO com o mesmo cálculo proporcional aos dias — o código é ajustado automaticamente (2 = a receber, 6 = a devolver) e a linha aparece sempre que a verba tiver sido preenchida. <strong>A caixinha ao lado de cada código</strong>, quando marcada, exclui o valor daquela verba do cálculo da Seguridade Social e da Seguridade Social sobre o 13º. O Imposto de Renda continua usando a remuneração <u>total</u> (sem exclusão) como rendimento bruto para a tabela/redutor — mas a Seguridade Social abatida da base do Imposto de Renda reflete a exclusão (menos INSS retido nas verbas excluídas → base do IR maior → IR maior).
+    </div>
+    </details>
+
+    <details class="collapsible-note">
+      <summary>Observações (clique para exibir)</summary>
+    <div class="warning-box mt-20">
+      <strong>Atenção:</strong>
+      <ol>
+        <li>O 1º resultado usa a 1ª rubrica (valor direto) com DIF./DEV. conforme o sinal</li>
+        <li>O 2º resultado usa a 2ª rubrica: (Valor ÷ 30) × Dias Trabalhados</li>
+        <li>O código do resultado sempre começa com 2 (positivo) ou 6 (negativo)</li>
+      </ol>
+    </div>
+    </details>
+  </section>
+
+  <section class="section">
+    <h2>PERÍODO AQUISITIVO DE FÉRIAS (PARA CONTROLE E CÁLCULO)</h2>
+
+    <div class="error-box" id="ferias-error-box">
+      <strong>ERRO: Datas de férias fora do período válido!</strong>
+      <div id="ferias-error-text"></div>
+    </div>
+
+    <div class="ferias-table-wrapper">
+      <table class="ferias-table table-base">
+        <thead>
+          <tr>
+            <th style="background:#0B5394;color:#fff;font-weight:600;">PERÍODO AQUISITIVO</th>
+            <th style="background:#0B5394;color:#fff;font-weight:600;">1º PERÍODO DE USUFRUTO</th>
+            <th style="background:#0B5394;color:#fff;font-weight:600;">2º PERÍODO DE USUFRUTO</th>
+            <th style="background:#0B5394;color:#fff;font-weight:600;">3º PERÍODO DE USUFRUTO</th>
+            <th style="background:#0B5394;color:#fff;font-weight:600;">DIAS USUFR. (TOTAL)</th>
+          </tr>
+        </thead>
+        <tbody id="ferias-body"></tbody>
+      </table>
+    </div>
+
+    <details class="collapsible-note">
+      <summary>Observações (clique para exibir)</summary>
+    <div class="info-box">
+      <strong>Nota:</strong>
+      <ul>
+        <li>36 linhas disponíveis para lançamento dos períodos aquisitivos de férias</li>
+        <li>Preencha até 3 períodos de usufruto por período aquisitivo</li>
+        <li>Marque "Recebeu 1/3?" se o servidor recebeu o adicional de 1/3 durante as férias</li>
+        <li>O sistema calcula automaticamente os dias usufruídos quando preencher as datas</li>
+        <li>As datas de férias devem estar dentro do período entre admissão e desligamento</li>
+        <li>O cálculo considera férias vencidas e proporcionais</li>
+      </ul>
+    </div>
+    </details>
+  </section>
+
+  <section class="section">
+    <h2>AUXÍLIO ALIMENTAÇÃO</h2>
+
+    <div class="row">
+      <div class="col-small">
+        <div class="form-group">
+          <label for="aa-qtd-recebido">QTD. AUX. ALIMENTAÇÃO RECEBIDO:</label>
+          <input type="number" id="aa-qtd-recebido" placeholder="0" min="0" step="1" value="0" class="w-100" />
+        </div>
+      </div>
+      <div class="col-small">
+        <div class="form-group">
+          <label for="aa-qtd-utilizado">QTD. AUX. ALIMENTAÇÃO UTILIZADO:</label>
+          <input type="number" id="aa-qtd-utilizado" placeholder="0" min="0" step="1" value="0" class="w-100" />
+        </div>
+      </div>
+      <div class="col-small">
+        <div class="form-group">
+          <label for="aa-valor-recebido">VALOR EM R$ DO AUX. ALIMENTAÇÃO (RECEBIDO):</label>
+          <input type="text" inputmode="decimal" id="aa-valor-recebido" placeholder="0,00" value="0,00" class="w-100 moeda-mask" />
+        </div>
+      </div>
+      <div class="col-small">
+        <div class="form-group">
+          <label for="aa-valor-devolver">VALOR A DEVOLVER (AUX. ALIMENTAÇÃO):</label>
+          <input type="text" id="aa-valor-devolver" value="0,00" class="w-100" readonly style="background:#f0f0f0;font-weight:600;text-align:right;" />
+        </div>
+      </div>
+    </div>
+
+    <details class="collapsible-note">
+      <summary>Observações (clique para exibir)</summary>
+    <div class="info-box">
+      <strong>Nota:</strong>
+      <ul>
+        <li>Valor de cada unidade de Aux. Alimentação = valor recebido (R$) ÷ 22</li>
+        <li>Quantidade a devolver = quantidade recebida − quantidade utilizada</li>
+        <li><strong>Valor a Devolver de Aux. Alimentação</strong> = quantidade a devolver × valor de cada unidade (calculado automaticamente)</li>
+        <li>O valor calculado entra no RESULTADO DO ACERTO como devolução</li>
+      </ul>
+    </div>
+    </details>
+  </section>
+
+  <div class="calc-action-bar">
+    <button class="btn-primary btn-calcular-destaque" id="calcular-acerto">CALCULAR ACERTO DE CONTAS</button>
+    <button class="btn-secondary" id="gerar-relatorio">GERAR RELATÓRIO COMPLETO</button>
+  </div>
+
+  <section class="section results-section">
+    <h2>RESULTADOS DO ACERTO:</h2>
+
+    <div class="button-group" style="margin-bottom:15px;">
+      <button class="btn-clear" id="toggle-descricao">OCULTAR DETALHES DO CÁLCULO</button>
+    </div>
+
+    <div class="calculation-details" id="detalhes-calculo" style="display:none;">
+      <strong>Detalhes do Cálculo:</strong>
+      <div id="detalhes-texto"></div>
+    </div>
+
+    <div class="rubricas-dias-trabalhados" id="detalhes-rubricas-dias" style="display:none;">
+      <strong>Cálculo dos Dias Trabalhados:</strong>
+      <div id="detalhes-rubricas-texto"></div>
+    </div>
+
+    <table class="results-table table-base" id="tabela-resultados-completa">
+      <thead>
+        <tr>
+          <th style="background:#28a745;color:#fff;font-weight:600;">CÓDIGO</th>
+          <th style="background:#28a745;color:#fff;font-weight:600;">DESCRIÇÃO</th>
+          <th style="background:#28a745;color:#fff;font-weight:600;">VALOR R$</th>
+        </tr>
+      </thead>
+      <tbody id="rubricas-resultado-body"></tbody>
+      <tbody id="results-body">
+        <tr id="resultado-seguridade-social">
+          <td id="res3-codigo">40920</td>
+          <td id="res3-descricao">SEGURIDADE SOCIAL</td>
+          <td id="res3-valor" class="valor-negativo">0,00</td>
+        </tr>
+        <tr id="resultado-rpps-iprev" style="display:none;"><td id="res-rpps-codigo">40901</td><td id="res-rpps-descricao">RPPS IPREV</td><td id="res-rpps-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-previcom-complementar" style="display:none;"><td id="res-previcom-codigo">41940</td><td id="res-previcom-descricao">PREVICOM - COMPLEMENTAR</td><td id="res-previcom-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-ir"><td id="res-ir-codigo">40950</td><td id="res-ir-descricao">IMPOSTO DE RENDA</td><td id="res-ir-valor" class="valor-negativo">0,00</td></tr>
+
+        <tr id="resultado-dif-13"><td id="res-dif13-codigo">20520</td><td id="res-dif13-descricao">DIF. DÉCIMO TERCEIRO</td><td id="res-dif13-valor" class="valor-positivo">0,00</td></tr>
+        <tr id="resultado-inss-13"><td id="res4-codigo">40923</td><td id="res4-descricao">SEGURIDADE SOCIAL SOBRE 13º SALÁRIO</td><td id="res4-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-rpps-iprev-13" style="display:none;"><td id="res-rpps13-codigo">40924</td><td id="res-rpps13-descricao">RPPS IPREV - GRAT. NATALÍCIA</td><td id="res-rpps13-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-previcom-complementar-13" style="display:none;"><td id="res-previcom13-codigo">41943</td><td id="res-previcom13-descricao">PREVICOM - COMPLEMENTAR GRAT. NATALÍCIA</td><td id="res-previcom13-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-ir13"><td id="res-ir13-codigo">40951</td><td id="res-ir13-descricao">IMPOSTO DE RENDA SOBRE 13º</td><td id="res-ir13-valor" class="valor-negativo">0,00</td></tr>
+        <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+        <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+        <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+        <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+        <tr id="resultado-aux-alimentacao" style="display:none;"><td id="res-auxalim-codigo">60926</td><td id="res-auxalim-descricao">DEV. AUXÍLIO ALIMENTAÇÃO</td><td id="res-auxalim-valor" class="valor-negativo">0,00</td></tr>
+        <tr id="resultado-adiantamento-13"><td id="res-adiantamento13-codigo">61140</td><td id="res-adiantamento13-descricao">ADIANTAMENTO DE 13º SALÁRIO</td><td id="res-adiantamento13-valor" class="valor-negativo">0,00</td></tr>
+      </tbody>
+      <tbody id="manual-body" class="manual-body-sem-divisor">
+        <tr>
+          <td><input type="text" class="manual-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></td>
+          <td><input type="text" class="manual-descricao rubrica-nome" placeholder="Descrição do lançamento manual" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="manual-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="manual-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></td>
+          <td><input type="text" class="manual-descricao rubrica-nome" placeholder="Descrição do lançamento manual" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="manual-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="manual-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></td>
+          <td><input type="text" class="manual-descricao rubrica-nome" placeholder="Descrição do lançamento manual" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="manual-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="manual-codigo rubrica-codigo-input" placeholder="00000" inputmode="numeric" maxlength="5" pattern="\d{5}"></td>
+          <td><input type="text" class="manual-descricao rubrica-nome" placeholder="Descrição do lançamento manual" style="width:100%"></td>
+          <td><input type="text" inputmode="decimal" class="manual-valor rubrica-valor-input moeda-mask" placeholder="0,00"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table-base results-table" style="margin-top:10px;">
+      <tbody>
+        <tr style="font-weight:bold;background:#f8f9fa;">
+          <td colspan="2" style="text-align:right;">TOTAL</td>
+          <td id="total-final-valor" style="width:220px;">0,00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="button-group" style="margin-top:20px;">
+      <button class="btn-danger" id="limpar-dados">LIMPAR DADOS</button>
+      <button class="btn-clear" id="exportar-dados">EXPORTAR DADOS</button>
+      <button class="btn-secondary" id="imprimir-pdf">IMPRIMIR / SALVAR PDF</button>
+      <button class="btn-secondary" id="salvar-portal" type="button">SALVAR NO PORTAL</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
+    </div>
+  </section>
+  </div><!-- /tab-panel-2 -->
+
+  <details class="collapsible-note" id="admin-codigos-box" style="margin:30px 0 10px 0;">
+    <summary>⚙️ Gerenciar tabela de códigos (avançado)</summary>
+    <div class="info-box">
+      <p style="margin-top:0;">Total de códigos carregados: <strong id="admin-total-codigos">0</strong>
+        (<span id="admin-total-base">0</span> da tabela padrão + <span id="admin-total-custom">0</span> personalizados).
+        Os códigos personalizados ficam salvos neste navegador e têm prioridade sobre a tabela padrão.</p>
+
+      <p><strong>Adicionar ou editar um código manualmente:</strong></p>
+      <div class="row">
+        <div class="col-small">
+          <input type="text" id="admin-cod-input" placeholder="Código (5 dígitos)" inputmode="numeric" maxlength="5" style="max-width:160px;">
+        </div>
+        <div class="col">
+          <input type="text" id="admin-desc-input" placeholder="Descrição" style="width:100%;">
+        </div>
+        <div class="col-small">
+          <button class="btn-primary" id="admin-add-btn" type="button" style="padding:10px 16px;">SALVAR CÓDIGO</button>
+        </div>
+      </div>
+
+      <p style="margin-top:20px;"><strong>Importar vários códigos de uma vez (colar lista):</strong></p>
+      <p style="font-size:13px;color:#555;">
+        Você pode colar direto do Excel — selecione as colunas da planilha do SIGRH (incluindo o cabeçalho, se quiser) e cole aqui; o sistema reconhece automaticamente a coluna <strong>M (codRubr)</strong> e a coluna <strong>P (dscRubr)</strong>, usando sempre os últimos 5 dígitos do código.<br>
+        Também aceita o formato simples <code>código;descrição</code> (um por linha), ex: <code>41950;PREVICOM - FACULTATIVA</code>.
+      </p>
+      <textarea id="admin-bulk-textarea" rows="6" style="width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ccc;border-radius:4px;" placeholder="Cole aqui direto do Excel (planilha do SIGRH) ou use o formato código;descrição"></textarea>
+      <div class="button-group" style="margin-top:10px;">
+        <button class="btn-primary" id="admin-bulk-import-btn" type="button">IMPORTAR LISTA</button>
+      </div>
+
+      <p style="margin-top:20px;"><strong>Códigos personalizados cadastrados neste navegador:</strong></p>
+      <div style="max-height:260px;overflow-y:auto;border:1px solid #ddd;border-radius:5px;">
+        <table class="table-base" style="margin:0;">
+          <thead>
+            <tr><th style="background:#0B5394;color:#fff;">CÓDIGO</th><th style="background:#0B5394;color:#fff;">DESCRIÇÃO</th><th style="background:#0B5394;color:#fff;width:80px;">AÇÃO</th></tr>
+          </thead>
+          <tbody id="admin-custom-body"></tbody>
+        </table>
+      </div>
+
+      <div class="button-group" style="margin-top:15px;">
+        <button class="btn-clear" id="admin-export-btn" type="button">EXPORTAR TABELA ATUAL (.json)</button>
+        <button class="btn-danger" id="admin-reset-btn" type="button">REMOVER TODOS OS PERSONALIZADOS</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="footer"><p>Acerto de Contas - Servidor com Vínculo (Cargo Efetivo)</p></div>
+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ========= DOM helpers ========= */
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  const el = {
+    nome: $("#nome"),
+    matricula: $("#matricula"),
+    cargo: $("#cargo"),
+    nascimento: $("#nascimento"),
+    processoSei: $("#processo-sei"),
+    admissao: $("#admissao"),
+    exoneracao: $("#exoneracao"),
+    diasMes: $("#dias-trabalhados-mes"),
+    adiantamento13: $("#adiantamento-13"),
+    adiantamento13NaoRecebeu: $("#adiantamento-13-nao-recebeu"),
+    avosV: $("#avos-ferias-vencidas"),
+    avosP: $("#avos-ferias-proporcionais"),
+    avos13: $("#avos-gratificacao"),
+
+    feriasBody: $("#ferias-body"),
+    errBox: $("#ferias-error-box"),
+    errText: $("#ferias-error-text"),
+
+    rubricasResultadoBody: $("#rubricas-resultado-body"),
+    res3Cod: $("#res3-codigo"),
+    res3Desc: $("#res3-descricao"),
+    res3Val: $("#res3-valor"),
+    resultadoSeguridadeTr: $("#resultado-seguridade-social"),
+    resRppsTr: $("#resultado-rpps-iprev"),
+    resRppsVal: $("#res-rpps-valor"),
+    resPrevicomTr: $("#resultado-previcom-complementar"),
+    resPrevicomVal: $("#res-previcom-valor"),
+    resIrCod: $("#res-ir-codigo"),
+    resIrVal: $("#res-ir-valor"),
+    resIr13Cod: $("#res-ir13-codigo"),
+    resIr13Val: $("#res-ir13-valor"),
+    resDif13Cod: $("#res-dif13-codigo"),
+    resDif13Val: $("#res-dif13-valor"),
+    res4Cod: $("#res4-codigo"),
+    res4Desc: $("#res4-descricao"),
+    res4Val: $("#res4-valor"),
+    resultadoInss13Tr: $("#resultado-inss-13"),
+    resRpps13Tr: $("#resultado-rpps-iprev-13"),
+    resRpps13Val: $("#res-rpps13-valor"),
+    resPrevicom13Tr: $("#resultado-previcom-complementar-13"),
+    resPrevicom13Val: $("#res-previcom13-valor"),
+
+    aaQtdRecebido: $("#aa-qtd-recebido"),
+    aaQtdUtilizado: $("#aa-qtd-utilizado"),
+    aaValorRecebido: $("#aa-valor-recebido"),
+    aaValorDevolverInput: $("#aa-valor-devolver"),
+    resAuxAlimCod: $("#res-auxalim-codigo"),
+    resAuxAlimDesc: $("#res-auxalim-descricao"),
+    resAuxAlimVal: $("#res-auxalim-valor"),
+    resAuxAlimTr: $("#resultado-aux-alimentacao"),
+    resAdiant13Cod: $("#res-adiantamento13-codigo"),
+    resAdiant13Desc: $("#res-adiantamento13-descricao"),
+    resAdiant13Val: $("#res-adiantamento13-valor"),
+
+    manualBody: $("#manual-body"),
+    totalFinalVal: $("#total-final-valor"),
+
+    resultsBody: $("#results-body"),
+    totalRemuneracaoVal: $("#total-remuneracao-valor"),
+    irDependentes: $("#ir-dependentes"),
+    adminTotalCodigos: $("#admin-total-codigos"),
+    adminTotalBase: $("#admin-total-base"),
+    adminTotalCustom: $("#admin-total-custom"),
+    adminCodInput: $("#admin-cod-input"),
+    adminDescInput: $("#admin-desc-input"),
+    adminAddBtn: $("#admin-add-btn"),
+    adminBulkTextarea: $("#admin-bulk-textarea"),
+    adminBulkImportBtn: $("#admin-bulk-import-btn"),
+    adminCustomBody: $("#admin-custom-body"),
+    adminExportBtn: $("#admin-export-btn"),
+    adminResetBtn: $("#admin-reset-btn"),
+    dfPrevicomCheck: $("#df-previcom-check"),
+    dfPrevicomPercentual: $("#df-previcom-percentual"),
+    detBox: $("#detalhes-calculo"),
+    detTxt: $("#detalhes-texto"),
+    detDiasBox: $("#detalhes-rubricas-dias"),
+    detDiasTxt: $("#detalhes-rubricas-texto"),
+
+    tabBtn1: $("#tab-btn-1"),
+    tabBtn2: $("#tab-btn-2"),
+    tabPanel1: $("#tab-panel-1"),
+    tabPanel2: $("#tab-panel-2"),
+    irParaAcerto: $("#ir-para-acerto"),
+    imprimirPdf: $("#imprimir-pdf"),
+    toggleDescricao: $("#toggle-descricao"),
+    tabelaResultadosCompleta: $("#tabela-resultados-completa"),
+    printHeaderDados: $("#print-header-dados"),
+  };
+
+  /* ========= Utils ========= */
+  const onlyDigits = (s) => (s ?? "").toString().replace(/\D/g,"");
+  const pad5 = (s) => {
+    const d = onlyDigits(s);
+    if(!d) return "";
+    return d.padStart(5,"0").slice(-5);
+  };
+
+  // 🔒 Evita bug de fuso: interpreta "YYYY-MM-DD" como data LOCAL (00:00 local)
+  const parseISODateLocal = (iso) => {
+    if (!iso) return null;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+
+  const toISOLocal = (dateObj) => {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const fmtBR = (iso) => {
+    if (!iso) return "";
+    const d = parseISODateLocal(iso);
+    if (!d) return "";
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  };
+
+  // ✅ Ponto 5: máscara monetária (formato brasileiro, sempre com centavos: 3.000,00)
+  // Trata os dígitos digitados como centavos, da direita para a esquerda.
+  const aplicarMascaraMoeda = (valorDigitado) => {
+    let digitos = onlyDigits(valorDigitado || "");
+    digitos = digitos.replace(/^0+(?=\d)/, ""); // remove zeros à esquerda supérfluos
+    while (digitos.length < 3) digitos = "0" + digitos;
+    const centavos = digitos.slice(-2);
+    const inteiro = digitos.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${inteiro},${centavos}`;
+  };
+
+  // "1.234,56" -> 1234.56 (number). Também aceita "1234.56" (ponto) por segurança.
+  const desmascarar = (valorTexto) => {
+    if (valorTexto == null || valorTexto === "") return 0;
+    const limpo = String(valorTexto).replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(limpo);
+    return isNaN(n) ? 0 : n;
+  };
+
+  // number -> "3.000,00" (para preencher campos mascarados via JS, ex.: auto-preenchimento)
+  const formatarParaMascara = (numero) => {
+    const centavosTotais = Math.round((Number(numero) || 0) * 100);
+    return aplicarMascaraMoeda(String(Math.abs(centavosTotais)));
+  };
+
+  // ✅ Igual a formatarParaMascara, mas preservando o sinal negativo — usado
+  // para exibir os valores na TABELA DE RESULTADOS (formato brasileiro, com
+  // separador de milhar e vírgula nos centavos).
+  const formatarValorTabela = (numero) => {
+    const n = Number(numero) || 0;
+    return (n < 0 ? "-" : "") + formatarParaMascara(n);
+  };
+
+  const ajustarCodigoComSinal = (codigoInformado, valor) => {
+    const c = pad5(codigoInformado);
+    if(!c || c.length !== 5) return "00000";
+    const ult4 = c.slice(1);
+    const p = (Number(valor) < 0) ? "6" : "2";
+    return p + ult4;
+  };
+
+  const prefixoDescricao = (valor) => (Number(valor) < 0) ? "DEV." : "DIF.";
+
+  // ✅ Lançamentos manuais: o sinal do valor é definido pelo 1º dígito do código,
+  // não digitado pelo usuário (a máscara monetária não aceita "-"). Códigos que
+  // começam com 4, 5 ou 6 são sempre devoluções (negativos); códigos que começam
+  // com 1, 2 ou 3 são sempre diferenças a receber (positivos). Sem código
+  // informado (ou 1º dígito fora dessas faixas), mantém o valor como positivo.
+  const sinalPorCodigoManual = (codigoInformado) => {
+    const c = pad5(codigoInformado);
+    const primeiro = c.charAt(0);
+    if (primeiro === "4" || primeiro === "5" || primeiro === "6") return -1;
+    return 1;
+  };
+
+  /* ========= Abas (dados pessoais x acerto de contas) ========= */
+  const dadosPessoaisPreenchidos = () =>
+    !!(el.nome.value.trim() && el.matricula.value.trim() && el.nascimento.value);
+
+  const irParaTab = (n) => {
+    const ativa1 = n === 1;
+    el.tabBtn1.classList.toggle("active", ativa1);
+    el.tabBtn2.classList.toggle("active", !ativa1);
+    el.tabPanel1.classList.toggle("active", ativa1);
+    el.tabPanel2.classList.toggle("active", !ativa1);
+  };
+
+  const tentarIrParaAcerto = () => {
+    if (!dadosPessoaisPreenchidos()) {
+      alert("Antes de calcular o acerto de contas, preencha o NOME, a MATRÍCULA e a DATA DE NASCIMENTO na aba \"1. DADOS PESSOAIS\".");
+      irParaTab(1);
+      return false;
+    }
+    irParaTab(2);
+    return true;
+  };
+
+  // ✅ Ponto 2 (correção): o botão deve ocultar/mostrar o bloco "Detalhes do
+  // Cálculo" (não apenas uma coluna da tabela) — é isso que fica logo abaixo
+  // dele na tela. O estado escolhido pelo usuário é lembrado entre recálculos.
+  let detalhesOcultosPeloUsuario = false;
+
+  const aplicarVisibilidadeDetalhes = () => {
+    el.detBox.style.display = detalhesOcultosPeloUsuario ? "none" : "block";
+    el.toggleDescricao.textContent = detalhesOcultosPeloUsuario ? "MOSTRAR DETALHES DO CÁLCULO" : "OCULTAR DETALHES DO CÁLCULO";
+  };
+
+  const toggleDescricaoResultados = () => {
+    detalhesOcultosPeloUsuario = !detalhesOcultosPeloUsuario;
+    aplicarVisibilidadeDetalhes();
+  };
+
+  const aplicarValorResultado = (td, valor) => {
+    const v = Number(valor || 0);
+    td.className = v >= 0 ? "valor-positivo" : "valor-negativo";
+    td.textContent = formatarValorTabela(v);
+  };
+
+  // ✅ Atualiza o TOTAL (rodapé da tabela de resultados) em tempo real, somando
+  // tudo o que já está sendo exibido na tabela — inclusive os lançamentos
+  // manuais, cujo sinal é definido pelo código (sinalPorCodigoManual). Não
+  // substitui o cálculo oficial feito por "Calcular Acerto"/"Gerar Relatório"
+  // (executarCalculoCompleto → obj.total): serve para refletir imediatamente,
+  // na tela, qualquer lançamento manual adicionado/alterado, sem precisar
+  // clicar novamente nos botões de cálculo. Ao clicar em "Calcular Acerto" ou
+  // "Gerar Relatório", o total oficial (mais preciso, sem arredondamentos
+  // intermediários) volta a prevalecer.
+  const recalcularTotalNaTela = () => {
+    let total = 0;
+    $$("#tabela-resultados-completa tbody tr").forEach(tr => {
+      if (tr.classList.contains("total-row")) return;
+
+      const inputValor = tr.querySelector(".manual-valor");
+      if (inputValor) {
+        const inputCodigo = tr.querySelector(".manual-codigo");
+        const valorAbs = Math.abs(desmascarar(inputValor.value));
+        const sinal = sinalPorCodigoManual(inputCodigo ? inputCodigo.value : "");
+
+        // ✅ feedback visual imediato: pinta o valor digitado de acordo com o
+        // sinal definido pelo código (vermelho = devolução/negativo)
+        inputValor.style.color = (valorAbs > 0 && sinal < 0) ? "#c0392b" : "";
+
+        total += valorAbs * sinal;
+        return;
+      }
+
+      const valCell = tr.cells[2];
+      if (!valCell) return;
+      const texto = (valCell.textContent || "").trim();
+      if (texto === "") return;
+      const num = desmascarar(texto);
+      if (!isNaN(num)) total += num;
+    });
+
+    if (el.totalFinalVal) {
+      el.totalFinalVal.className = total >= 0 ? "valor-positivo" : "valor-negativo";
+      el.totalFinalVal.textContent = formatarValorTabela(total);
+    }
+    return total;
+  };
+
+  const diffDiasIncl = (ini, fim) => {
+    const a = parseISODateLocal(ini);
+    const b = parseISODateLocal(fim);
+    if (!a || !b) return 0;
+    return Math.floor((b - a) / 86400000) + 1;
+  };
+
+  // Regra do seu cálculo: "mês a mês" (01/jan até 01/fev = 1 avo...).
+  // ✅ Correção: um mês incompleto só conta como 1 avo se tiver MAIS DE 14 dias
+  // (ou seja, 15 dias ou mais) trabalhados nele — regra usada tanto para férias
+  // quanto para 13º salário. O ponto chave é que a contagem de dias do bloco
+  // final precisa ser INCLUSIVA (o próprio dia de início do bloco conta como o
+  // 1º dia trabalhado nele): de 01/07 até 15/07 são 15 dias trabalhados (não 14),
+  // então é preciso somar +1 à diferença simples de dias antes de comparar com
+  // o limite de 14.
+  const avosMensal = (iniISO, fimISO) => {
+    const ini = parseISODateLocal(iniISO);
+    const fim = parseISODateLocal(fimISO);
+    if (!ini || !fim) return 0;
+
+    let anos = fim.getFullYear() - ini.getFullYear();
+    let meses = fim.getMonth() - ini.getMonth();
+    let dias = fim.getDate() - ini.getDate();
+
+    // Se o dia da exoneração for menor que o dia da admissão, "pega emprestado"
+    // um mês completo e recalcula os dias restantes com base no mês anterior ao
+    // da exoneração (mês a mês, data a data).
+    if (dias < 0) {
+      meses -= 1;
+      const diasNoMesAnterior = new Date(fim.getFullYear(), fim.getMonth(), 0).getDate();
+      dias += diasNoMesAnterior;
+    }
+
+    const mesesCompletos = anos * 12 + meses;
+
+    // ✅ Contagem inclusiva: dia de início do bloco também conta como dia
+    // trabalhado (de 01/07 até 15/07 = 15 dias, não 14).
+    const diasTrabalhadosNoMes = dias + 1;
+
+    // A fração do último mês (incompleta) só conta como avo se tiver MAIS DE 14
+    // dias (isto é, 15 dias ou mais) trabalhados nela.
+    let total = mesesCompletos;
+    if (diasTrabalhadosNoMes > 14) total += 1;
+
+    return Math.max(0, total);
+  };
+
+  const dataDentroPeriodo = (dataISO, admISO, exoISO) => {
+    const d = parseISODateLocal(dataISO);
+    const a = parseISODateLocal(admISO);
+    const e = parseISODateLocal(exoISO);
+    if (!d || !a || !e) return false;
+    return d >= a && d <= e;
+  };
+
+  /* ========= Render Férias ========= */
+  const blocoPeriodo = (linha, p) => `
+    <div class="ferias-periodo-completo">
+      <div class="periodo-ferias-container">
+        <div class="periodo-ferias">
+          <input type="date" data-role="ini" data-p="${p}" data-l="${linha}" title="Início">
+        </div>
+        <div class="periodo-ferias">
+          <input type="date" data-role="fim" data-p="${p}" data-l="${linha}" title="Fim">
+        </div>
+      </div>
+      <div class="terco-ferias-checkbox">
+        <input type="checkbox" class="recebeu-terco" id="recebeu-terco-${linha}-${p}">
+        <label for="recebeu-terco-${linha}-${p}">1/3?</label>
+      </div>
+    </div>
+  `;
+
+  const renderFerias = (qtd=36) => {
+    el.feriasBody.innerHTML = Array.from({length:qtd}, (_,i) => {
+      const linha = i+1;
+      return `
+        <tr data-linha="${linha}">
+          <td><input type="text" class="periodo-aquisitivo" placeholder="Ex: 2023-2024"></td>
+          <td>${blocoPeriodo(linha,1)}</td>
+          <td>${blocoPeriodo(linha,2)}</td>
+          <td>${blocoPeriodo(linha,3)}</td>
+          <td><input type="number" class="dias-usufruidos" placeholder="0" min="0" max="30" value="0"></td>
+        </tr>
+      `;
+    }).join("");
+  };
+
+  const recalcularDiasLinha = (tr) => {
+    const pares = [1,2,3].map(p => {
+      const ini = $(`input[data-role="ini"][data-p="${p}"]`, tr)?.value;
+      const fim = $(`input[data-role="fim"][data-p="${p}"]`, tr)?.value;
+      return {ini,fim};
+    });
+
+    let total = 0;
+    for(const {ini,fim} of pares){
+      if(ini && fim) total += diffDiasIncl(ini,fim);
+    }
+    const diasInput = $(".dias-usufruidos", tr);
+    diasInput.value = Math.min(30, total || 0);
+    aplicarAlertaDiasIncompletos(diasInput);
+  };
+
+  // ✅ Marca em vermelho o campo "Dias Usufr. (Total)" quando o período tiver
+  // usufruto lançado (>0 dias) mas o total não for exatamente 30 dias. É
+  // apenas um alerta visual para facilitar a conferência — não afeta nenhum
+  // cálculo.
+  const aplicarAlertaDiasIncompletos = (diasInput) => {
+    if (!diasInput) return;
+    const valor = parseInt(diasInput.value, 10) || 0;
+    const incompleto = valor > 0 && valor !== 30;
+    diasInput.classList.toggle("dias-incompletos", incompleto);
+    diasInput.title = incompleto ? "Este período não tem 30 dias completos de usufruto (apenas informativo)" : "";
+  };
+
+  /* ========= Validação férias ========= */
+  const esconderErro = () => (el.errBox.style.display="none", true);
+  const mostrarErro = (msg) => {
+    el.errText.textContent = msg;
+    el.errBox.style.display = "block";
+    el.errBox.scrollIntoView({behavior:"smooth", block:"center"});
+    return false;
+  };
+
+  const validarDatasFerias = () => {
+    const adm = el.admissao.value, exo = el.exoneracao.value;
+    if(!adm || !exo) return esconderErro();
+
+    const datas = $$('input[type="date"]', el.feriasBody);
+    const erros = [];
+
+    datas.forEach((inp, idx) => {
+      if(!inp.value) return;
+      if(!dataDentroPeriodo(inp.value, adm, exo)){
+        // linha: tr[data-linha], período: pelo data-p no input
+        const tr = inp.closest("tr");
+        const linha = tr?.dataset?.linha || "?";
+        const p = inp.dataset?.p || "?";
+        erros.push(`Linha ${linha}, ${p}º período: ${fmtBR(inp.value)}`);
+      }
+    });
+
+    if(erros.length){
+      return mostrarErro(
+        `As seguintes datas de férias estão fora do período de admissão (${fmtBR(adm)}) a exoneração (${fmtBR(exo)}):\n\n${erros.join("\n")}`
+      );
+    }
+    return esconderErro();
+  };
+
+  const contarRecebeuTerco = () => $$(".recebeu-terco:checked", el.feriasBody).length;
+  const recebeuTerco = () => contarRecebeuTerco() > 0;
+
+  const totalDiasUsufruidos = () =>
+    $$(".dias-usufruidos", el.feriasBody).reduce((s,i)=> s + (parseInt(i.value,10)||0), 0);
+
+  /* ========= Rubricas ========= */
+  const obterRubricas = () => {
+    const cod = $$(".rubrica-codigo");
+    const nom = $$(".rubrica-nome");
+    const val = $$(".rubrica-valor");
+    const chk = $$(".rubrica-naosegsocial");
+    const n = Math.min(cod.length, nom.length, val.length);
+    return Array.from({length:n}, (_,i) => ({
+      codigo: pad5(cod[i].value),
+      descricao: (nom[i].value || "").trim(),
+      valor: desmascarar(val[i].value),
+      naoIncideSeg: !!(chk[i] && chk[i].checked)
+    }));
+  };
+
+  const totalRubricas = (rubParam) => {
+    if (rubParam) return rubParam.reduce((s,r)=> s + (Number(r.valor)||0), 0);
+    return $$(".rubrica-valor").reduce((s,i)=> s + desmascarar(i.value), 0);
+  };
+
+  // ✅ Ponto 2: soma das verbas que INCIDEM Seguridade Social (exclui as
+  // marcadas com a caixinha "não incide Seguridade Social") — usada como base
+  // da Seguridade Social, da Seguridade Social sobre o 13º e do Imposto de
+  // Renda (que parte da mesma base).
+  const totalRubricasSeguridade = (rubParam) => {
+    const rub = rubParam || obterRubricas();
+    return rub.reduce((s,r)=> s + (r.naoIncideSeg ? 0 : (Number(r.valor)||0)), 0);
+  };
+
+  // ✅ Ponto (ordem no Resultado): gera a lista de linhas de resultado para
+  // TODAS as rubricas da Remuneração, na MESMA ORDEM em que foram lançadas —
+  // a 1ª rubrica usa a fórmula de dias pagos, a 2ª a fórmula de dias
+  // trabalhados, e as demais (3ª em diante) a fórmula proporcional padrão.
+  // A 1ª e a 2ª sempre aparecem (são o núcleo do acerto); as demais só
+  // aparecem se tiverem sido preenchidas (código, descrição ou valor).
+  const obterLinhasRubricas = (rubParam) => {
+    const rub = rubParam || obterRubricas();
+    const diasPagos = calcularDiasPagos();
+
+    return rub.map((r, i) => {
+      let valor;
+      if (i === 0) {
+        valor = Number((((Number(r.valor) || 0) / 30) * diasPagos).toFixed(2));
+      } else if (i === 1) {
+        valor = Number(valorDiasTrabalhados2aRubrica(rub).toFixed(2));
+      } else {
+        const valorBase = Number(r.valor) || 0;
+        valor = Number(((valorBase / 30) * diasPagos).toFixed(2));
+      }
+
+      const preenchida = i <= 1
+        ? true
+        : !!((r.codigo || "").trim() || (r.descricao || "").trim() || (Number(r.valor) || 0) !== 0);
+
+      return {
+        codigo: ajustarCodigoComSinal(r.codigo, valor),
+        descricao: r.descricao || "(sem descrição)",
+        valor,
+        preenchida
+      };
+    }).filter(it => it.preenchida);
+  };
+
+  // ✅ Ponto 1: mês comercial — para fins de pagamento, todo mês tem 30 dias.
+  // Se a exoneração cair no dia 31, para cálculo é tratado como dia 30 (não há
+  // "31º dia" a mais a pagar/receber).
+  const diaComercial = (dataObj) => dataObj ? Math.min(dataObj.getDate(), 30) : 0;
+
+  const calcularDiasPagos = () => {
+    const diasRecebidos = parseInt(el.diasMes.value, 10) || 0;
+
+    if (!el.exoneracao.value) return 0;
+
+    const dataExo = parseISODateLocal(el.exoneracao.value);
+    const diaExoneracao = diaComercial(dataExo);
+
+    // ✅ REGRA CORRETA:
+    const diasPagos = diaExoneracao - diasRecebidos;
+
+    return diasPagos; // pode ser positivo ou negativo
+  };
+
+  // ✅ Agora aceita um "rub" já obtido (evita chamar obterRubricas() de novo)
+  const valorDiasTrabalhados2aRubrica = (rubParam) => {
+    const diasPagos = calcularDiasPagos();
+    if (diasPagos === 0) return 0;
+
+    const rub = rubParam || obterRubricas();
+    const base = rub[1] ? (Number(rub[1].valor) || 0) : 0;
+    if (!base) return 0;
+
+    return (base / 30) * diasPagos;
+  };
+
+  const atualizarResultadosDinamicos = (rubParam) => {
+    const rub = rubParam || obterRubricas();
+    const r1 = rub[0] || {codigo:"",descricao:"",valor:0};
+    const r2 = rub[1] || {codigo:"",descricao:"",valor:0};
+
+    // ✅ Ponto 2: total da remuneração (soma das 8 rubricas), atualizado em tempo real
+    if (el.totalRemuneracaoVal) {
+      el.totalRemuneracaoVal.textContent = formatarParaMascara(totalRubricas(rub));
+    }
+
+    // ✅ Prévia ao vivo: TODAS as rubricas, na mesma ordem da Remuneração
+    const linhas = obterLinhasRubricas(rub);
+    el.rubricasResultadoBody.innerHTML = linhas.map(it => `
+      <tr>
+        <td>${pad5(it.codigo)}</td>
+        <td>${prefixoDescricao(it.valor)} ${it.descricao}</td>
+        <td class="${it.valor >= 0 ? "valor-positivo" : "valor-negativo"}">${formatarValorTabela(it.valor)}</td>
+      </tr>
+    `).join("");
+
+    const diasPagos = calcularDiasPagos();
+    const v1 = (Number(r1.valor || 0) / 30) * diasPagos;
+    const vDias = valorDiasTrabalhados2aRubrica(rub);
+
+    return {r1, r2, vDias, v1};
+  };
+
+  // ✅ SEGURIDADE SOCIAL (Servidor com Vínculo - Cargo Efetivo):
+  //    - Código 40920: quando o valor é NEGATIVO (desconto/devolução) — cenário
+  //      normal, 14% sobre a DIFERENÇA gerada pelos dias (dias a receber ou a
+  //      devolver) — não sobre a remuneração cheia. Se não houver diferença de
+  //      dias (diasPagos = 0), o valor fica ZERO.
+  //    - Código 30920: quando o valor é POSITIVO (o servidor tem a receber) —
+  //      cenário em que o servidor recebeu 30 dias (dias cheios) mas a data de
+  //      exoneração foi anterior (isto é, a soma de TODAS as verbas prorateada
+  //      pelos dias pagos é NEGATIVA — dias a devolver): a linha vira um
+  //      crédito de 14% sobre o total recebido a maior (não sobre a
+  //      remuneração cheia). Exemplo: recebeu 30 dias, trabalhou 20 dias ->
+  //      14% dos 10 dias recebidos a maior sobre TODAS as verbas.
+  //    - Se não houver nenhum valor a receber nem a devolver, o valor fica 0.
+  //    - Ponto 2: verbas marcadas com "não incide Seguridade Social" são
+  //      excluídas da base (remTotalSeguridade), tanto aqui quanto no cálculo
+  //      da Seguridade Social sobre o 13º.
+  //    - DF-PREVICOM: se marcado, muda a forma de cálculo — ver
+  //      calcularSeguridadeComOuSemPrevicom abaixo.
+  const TETO_RPPS_PREVICOM = 8475.55;
+
+  const obterPercentualDfPrevicom = () => {
+    const v = parseFloat((el.dfPrevicomPercentual.value || "0").replace(",", ".")) || 0;
+    return Math.min(8.5, Math.max(0, v));
+  };
+
+  // ✅ Aplica a regra do DF-PREVICOM sobre uma base já apurada (sempre um
+  // valor não-negativo) e um sinal (+1 = crédito/a receber, -1 = desconto/a
+  // devolver): se a base for até R$ 8.475,55, aplica 14% sobre ela inteira
+  // (RPPS IPREV). Se for maior, o RPPS IPREV continua aparecendo — mas
+  // limitado a 14% do teto (R$ 8.475,55) — e, ADICIONALMENTE, aplica-se o
+  // percentual informado (até 8,5%) sobre a diferença entre a base e o teto
+  // (PREVICOM - COMPLEMENTAR). Os dois valores coexistem nesse caso.
+  const calcularSeguridadeComPrevicom = (base, sinal) => {
+    const percentual = obterPercentualDfPrevicom();
+    if (base <= TETO_RPPS_PREVICOM) {
+      const valorRpps = Number((sinal * base * 0.14).toFixed(2));
+      return { valorRpps, valorPrevicom: 0 };
+    }
+    const valorRpps = Number((sinal * TETO_RPPS_PREVICOM * 0.14).toFixed(2));
+    const excedente = Number((base - TETO_RPPS_PREVICOM).toFixed(2));
+    const valorPrevicom = Number((sinal * excedente * (percentual / 100)).toFixed(2));
+    return { valorRpps, valorPrevicom };
+  };
+
+  const calcularBaseSeguridadeSocial = (rubParam) => {
+    const rub = rubParam || obterRubricas();
+    const remTotalSeguridade = totalRubricasSeguridade(rub);
+    const diasPagos = calcularDiasPagos();
+    const diffTotalGeral = Number(((remTotalSeguridade / 30) * diasPagos).toFixed(2));
+    const dfPrevicomAtivo = !!(el.dfPrevicomCheck && el.dfPrevicomCheck.checked);
+
+    let base, sinal, recebeuDiasAMais, valorRecebidoAMaior;
+    if (diffTotalGeral < 0) {
+      valorRecebidoAMaior = Number(Math.abs(diffTotalGeral).toFixed(2));
+      base = valorRecebidoAMaior;
+      sinal = 1;
+      recebeuDiasAMais = true;
+    } else {
+      valorRecebidoAMaior = 0;
+      base = Number(Math.max(0, diffTotalGeral).toFixed(2));
+      sinal = -1;
+      recebeuDiasAMais = false;
+    }
+
+    if (dfPrevicomAtivo) {
+      const { valorRpps, valorPrevicom } = calcularSeguridadeComPrevicom(base, sinal);
+      return {
+        remTotalSeguridade: Number(remTotalSeguridade.toFixed(2)),
+        diffTotalGeral, valorRecebidoAMaior, recebeuDiasAMais,
+        dfPrevicomAtivo: true,
+        codigoRpps: "40901", valorRpps,
+        codigoPrevicom: "41940", valorPrevicom,
+        valor: valorRpps + valorPrevicom
+      };
+    }
+
+    const valor = base > 0 ? Number((sinal * base * 0.14).toFixed(2)) : 0;
+    return {
+      remTotalSeguridade: Number(remTotalSeguridade.toFixed(2)),
+      diffTotalGeral, valorRecebidoAMaior, recebeuDiasAMais,
+      dfPrevicomAtivo: false,
+      codigo: valor > 0 ? "30920" : "40920",
+      valor
+    };
+  };
+
+  // ✅ Seguridade Social sobre o 13º = 14% do valor recebido de 13º (mesmo
+  // percentual usado na remuneração), calculado sobre o 13º "líquido" das
+  // verbas marcadas como não incidentes (ponto 2). Código 40923 quando o
+  // valor é negativo (devolução/desconto); código 30923 quando positivo
+  // (recebimento). DF-PREVICOM: mesma regra de teto/percentual do cálculo
+  // principal — mas a base usada é o valor CHEIO do 13º (DIF. DÉCIMO
+  // TERCEIRO, v13), não o "líquido" das verbas não incidentes.
+  const calcularInssSobre13 = (v13Seguridade, v13) => {
+    const dfPrevicomAtivo = !!(el.dfPrevicomCheck && el.dfPrevicomCheck.checked);
+
+    if (dfPrevicomAtivo) {
+      const baseCheia = Number(v13) || 0;
+      if (baseCheia <= 0) {
+        return { dfPrevicomAtivo: true, codigoRpps: "40924", valorRpps: 0, codigoPrevicom: "41943", valorPrevicom: 0, valor: 0 };
+      }
+      const { valorRpps, valorPrevicom } = calcularSeguridadeComPrevicom(baseCheia, -1);
+      return {
+        dfPrevicomAtivo: true,
+        codigoRpps: "40924", valorRpps,
+        codigoPrevicom: "41943", valorPrevicom,
+        valor: valorRpps + valorPrevicom
+      };
+    }
+
+    const valor13 = Number(v13Seguridade) || 0;
+    if (valor13 <= 0) {
+      return { dfPrevicomAtivo: false, codigo: "40923", valor: 0, detalhe: null };
+    }
+    const valor = Number((-(valor13 * 0.14)).toFixed(2));
+    return {
+      dfPrevicomAtivo: false,
+      codigo: valor < 0 ? "40923" : "30923",
+      valor,
+      detalhe: { baseCalculo: valor13 }
+    };
+  };
+
+  /* ========= Imposto de Renda (ponto 4) — tabela IRRF 2026 ========= */
+  // Tabela progressiva mensal 2026 (Lei 15.270/2025 mantém as alíquotas;
+  // valores oficiais da Receita Federal, vigentes desde jan/2026).
+  const TABELA_IRRF_2026 = [
+    { limite: 2428.80, aliquota: 0,     deducao: 0 },
+    { limite: 2826.65, aliquota: 0.075, deducao: 182.16 },
+    { limite: 3751.05, aliquota: 0.15,  deducao: 394.16 },
+    { limite: 4664.68, aliquota: 0.225, deducao: 675.49 },
+    { limite: Infinity, aliquota: 0.275, deducao: 908.73 }
+  ];
+  const DEDUCAO_POR_DEPENDENTE_2026 = 189.59;
+
+  /* ========= Preenchimento automático de descrição pelo código (SIGRH) ========= */
+  // ✅ Tabela de códigos de rubrica (5 dígitos, já sem o prefixo "29" da
+  // tabela SIGRH) -> descrição oficial. Fonte: exportação de rubricas do
+  // SIGRH (coluna codRubr sem o "29" inicial -> coluna dscRubr).
+  const CODIGOS_SIGRH = {"41950":"PREVICOM - FACULTATIVA","41127":"CREDSEF EMP.III","10591":"VPNI-REDUCAO REMUNERACAO","60281":"(DEV) INDENIZACAO DE TRANSPORTE EST.","60775":"(DEV) INDENIZ. DE ATIVIDADE EXTERNA","50453":"(DIF) GDF REPOSICAO/ERARIO","41207":"ODONT DEP I PL ODONTO","60413":"(DEV) GTIT-LEI 4426/2009","30001":"(DEV) FALTA(S) VENCIMENTO","30950":"(DEV) IMPOSTO DE RENDA","30952":"(DEV) I.R.R.F. FERIAS","41974":"IRRF UNIFICADO SOBRE FERIAS","40923":"SEGURIDADE.SOC.GRAT.NATALICIA","41975":"IRRF UNIFICADO 13 SALARIO","30498":"(DEV) ADTO. 13 SAL. PENSION. II","30497":"(DEV) ADTO. 13 SAL. PENSION. I","31144":"(DEV) GDF-SAUDE COP/DEPENDENTE","41099":"DESC. ATUALIZACAO MONETARIA","31940":"(DEV) PREVICOM - COMPLEMENTAR","10365":"VPNI LEI4426/2009 ART20 PAR.2","40912":"INSS 13 SALARIO","40850":"PENSAO ALIMENTICIA I","40852":"PENSAO ALIMENTICIA II","31136":"(DEV) GDF-SAUDE COP/TITULAR","20939":"(DIF) AB PERMANENCIA-DEC TERCEIRO","60844":"(DEV) VPNI L4584/11-DECIM.L1141/96-A","60120":"(DEV) VPNI L4584/11-DECIM.L1004/96-A","60890":"(DEV) ADIANT DEC TERCEIRO-ATIVO","30004":"(DEV) HORAS NAO TRABALHADAS","60073":"(DEV) AUX.NATALIDADE-LEI COMP 840/11","20712":"(DIF) IND SERV GESTANTE-DEC 34135/13","30455":"(DEV) REDUTOR TETO UNIFICADO","40453":"GDF REPOSICAO/ERARIO","41045":"CLUBE DA SAUDE-MENSALIDADE","60004":"(DEV) VENCIMENTO","61140":"(DEV) ADIANT. 13 FUNCAO C/VINCULO","60502":"(DEV) ADICIONAL TEMPO DE SERVICO","40498":"ADTO. 13 SAL. PENSION. II","60606":"(DEV) GHMA - LEI 5188/2013","40628":"SESI/GDF-CONVENIO/MENSALIDADE","20015":"(DIF) REPRESENT.FUNCAO S/ VINCULO","31134":"(DEV) GDF-SAUDE-DF","20584":"(DIF) GHPUI - LEI 6448/2019","20730":"(DIF) GIURB L 2706/01 ATIVOS","20582":"(DIF) GHPP-LEI 5190/2013","60866":"(DEV) 1/3 FERIAS ART. 7 VII CF - CLT","30949":"(DEV) INSS FERIAS","60593":"(DEV) DEC TERCEIRO FUNCAO-C/VINCULO","20017":"(DIF) VENCIMENTO FUNCAO S/ VINCULO","20502":"(DIF) ADICIONAL TEMPO DE SERVICO","20606":"(DIF) GHMA - LEI 5188/2013","20857":"(DIF) 1/3 FERIAS ART.7 VII VENCIDAS","20004":"(DIF) VENCIMENTO","20593":"(DIF) DEC TERCEIRO FUNCAO-C/VINCULO","60463":"(DEV) ADIC.QUALIFIC-AQ LEI 4426/2009","40455":"REDUTOR TETO UNIFICADO","50951":"(DIF) I.R.R.F. 13 SALARIO","61520":"(DEV) ACERTO DEC TERCEIRO-ATIVO","11140":"ADIANT. 13 FUNCAO C/VINCULO","40810":"BRB-EMPRESTIMO VII","41206":"ODONT TITULAR PL ODONTOLOGICO","40985":"IMPOSTO DE RENDA UNIFICADO","21593":"(DIF) ACERT DEC TERC FUNCAO C/VINCUL","20883":"(DIF) 1/3 FERIAS ART.7 VII-IND.PROP.","60408":"(DEV) 1/3 FERIAS ART.7 RESCISAO","10550":"AUXILIO CRECHE / PRE-ESCOLAR","10015":"REPRESENT.FUNCAO S/ VINCULO","40885":"SICOOB EXEC EMPRESTIMO","40497":"ADTO. 13 SAL. PENSION. I","10891":"13 SALARIO ADIANTAMENTO","60883":"(DEV) 1/3 FERIAS ART.7 VII-IND.PROP.","40681":"BRB-EMPRESTIMO V","10890":"ADIANT DEC TERCEIRO-ATIVO","41138":"DIAS NAO TRABALHADOS S/PREVID","20844":"(DIF) VPNI L4584/11-DECIM.L1141/96-A","60719":"(DEV) PARC. COMPL. AUX. ALIMENTACAO","20611":"(DIF) PCAUPORT","60584":"(DEV) GHPUI - LEI 6448/2019","50455":"(DIF) REDUTOR TETO UNIFICADO","60511":"(DEV) AB.PERMANENCIA EC41","10719":"PARC. COMPL. AUX. ALIMENTACAO","20120":"(DIF) VPNI L4584/11-DECIM.L1004/96-A","30920":"(DEV) SEGURIDADE SOCIAL","20088":"(DIF) JUROS DE MORA","20827":"(DIF) ATUALIZACAO MONETARIA","30850":"(DEV) PENSAO ALIMENTICIA I","41162":"REDUTOR TETO 13O SALARIO","10892":"13 SALARIO","20892":"(DIF) 13 SALARIO","20875":"(DIF) FERIAS VENCIDAS/INDENIZADAS","51136":"(DIF) GDF-SAUDE COP/TITULAR","21520":"(DIF) ACERTO DEC TERCEIRO-ATIVO","20073":"(DIF) AUX.NATALIDADE-LEI COMP 840/11","20866":"(DIF) 1/3 FERIAS ART. 7 VII CF - CLT","10001":"SALARIO CONTR.TEMPORARIO","50515":"(DIF) COTA PARTE AUX. CRECHE","20550":"(DIF) AUXILIO CRECHE / PRE-ESCOLAR","10809":"SAL. MATERNIDADE - CLT","40700":"REPOSICAO REMUNERACAO","60520":"(DEV) DEC TERCEIRO-ATIVO","50486":"(DIF) CUSTEIO AUX. TRANSPORTE","20912":"(DIF) AUXILIO TRANSPORTE PECUNIA","10704":"13.SALARIO MATERNIDADE","60891":"(DEV) 13 SALARIO ADIANTAMENTO","40137":"REPOS.13.SAL.MATERNIDADE","40490":"13 SALARIO PENSIONISTA II","41943":"PREVCOM-COMPLEMENTAR 13  SAL.","40489":"13 SALARIO PENSIONISTA I","10520":"DEC TERCEIRO-ATIVO","40924":"RPPS IPREV-GRAT.NATALICIA","40951":"I.R.R.F. 13 SALARIO","10607":"DEC TERCEIRO-SUBSTITUICAO","10593":"DEC TERCEIRO FUNCAO-C/VINCULO","10939":"AB PERMANENCIA-DEC TERCEIRO","60001":"(DEV) SALARIO CONTR.TEMPORARIO","60015":"(DEV) REPRESENT.FUNCAO S/ VINCULO","30910":"(DEV) INSS CONTRIBUICAO","10730":"GIURB L 2706/01 ATIVOS","50001":"(DIF) FALTA(S) VENCIMENTO","20926":"(DIF) AUX. ALIMENTACAO PECUNIA","30515":"(DEV) COTA PARTE AUX. CRECHE","60250":"(DEV) SUBSTITUICAO","20001":"(DIF) SALARIO CONTR.TEMPORARIO","40028":"DIAS NAO TRABALHADOS C/PREVID","21485":"(DIF) ACERTO 1/3 FERIAS SUBSTITUICAO","30486":"(DEV) CUSTEIO AUX. TRANSPORTE","40017":"DECISOES JUDICIAIS","20775":"(DIF) INDENIZ. DE ATIVIDADE EXTERNA","60017":"(DEV) VENCIMENTO FUNCAO S/ VINCULO","10872":"FERIAS INDENIZ.PROPORCIONAIS","60912":"(DEV) AUXILIO TRANSPORTE PECUNIA","60550":"(DEV) AUXILIO CRECHE / PRE-ESCOLAR","10408":"1/3 FERIAS ART.7 RESCISAO","21480":"(DIF) ACERTO DE FERIAS SUSBTITUICAO","20607":"(DIF) DEC TERCEIRO-SUBSTITUICAO","20520":"(DIF) DEC TERCEIRO-ATIVO","30951":"(DEV) I.R.R.F. 13 SALARIO","10047":"DECRETO 40208-ATUAL.MONETARIA","10034":"PECUNIA LICENCA PREMIO","51134":"(DIF) GDF-SAUDE-DF","40688":"BRB-EMPRESTIMO VI","20865":"(DIF) 1/3 FERIAS ART. 7 VII CF EST","20807":"(DIF) ADIC.NOTURNO ART75/8112 ATIVO","20511":"(DIF) AB.PERMANENCIA EC41","20463":"(DIF) ADIC.QUALIFIC-AQ LEI 4426/2009","10926":"AUX. ALIMENTACAO PECUNIA","10866":"1/3 FERIAS ART. 7 VII CF - CLT","10807":"ADIC.NOTURNO ART75/8112 ATIVO","10582":"GHPP-LEI 5190/2013","10502":"ADICIONAL TEMPO DE SERVICO","41092":"AAPPGG - MENSALIDADE","41134":"GDF-SAUDE-DF","41126":"CREDSEF EMP.II","40949":"INSS FERIAS","40888":"ASIBRAM-MENSALIDADE","40439":"BRB-EMPRESTIMO I","20014":"(DIF) REPRESENT.FUNCAO C/ VINCULO","10912":"AUXILIO TRANSPORTE PECUNIA","10865":"1/3 FERIAS ART. 7 VII CF EST","10611":"PCAUPORT","10584":"GHPUI - LEI 6448/2019","60872":"(DEV) FERIAS INDENIZ.PROPORCIONAIS","41144":"GDF-SAUDE COP/DEPENDENTE","40814":"CREDSEF - MENSALIDADE","40812":"BRB-EMPRESTIMO IX","40516":"INTERLIFE/MENSALIDADE","40450":"BRB-EMPRESTIMO II","40322":"ASPGDF-MENSALIDADE","10004":"VENCIMENTO","10281":"INDENIZACAO DE TRANSPORTE EST.","40871":"COOSERVCRED EMPRESTIMO","41940":"PREVICOM - COMPLEMENTAR","40920":"SEGURIDADE SOCIAL","40400":"SINDAFIS-MENSALIDADE","40391":"SINDIRETA-MENSALIDADE","40001":"FALTA(S) VENCIMENTO","10463":"ADIC.QUALIFIC-AQ LEI 4426/2009","10073":"AUX.NATALIDADE-LEI COMP 840/11","10014":"REPRESENT.FUNCAO C/ VINCULO","60926":"(DEV) AUX. ALIMENTACAO PECUNIA","41136":"GDF-SAUDE COP/TITULAR","40695":"ADESP/DF-MENSALIDADE","40624":"ASPGDF-SESC BENEFICIOS SOCIAIS","20413":"(DIF) GTIT-LEI 4426/2009","10511":"AB.PERMANENCIA EC41","40813":"CREDSEF EMPRESTIMO","40811":"BRB-EMPRESTIMO VIII","40670":"BRB-EMPRESTIMO III","40524":"ACATE/DF-MENSALIDADE","10844":"VPNI L4584/11-DECIM.L1141/96-A","10775":"INDENIZ. DE ATIVIDADE EXTERNA","10413":"GTIT-LEI 4426/2009","40680":"BRB-EMPRESTIMO IV","50004":"(DIF) HORAS NAO TRABALHADAS","40952":"I.R.R.F. FERIAS","40950":"IMPOSTO DE RENDA","40901":"RPPS IPREV","20250":"(DIF) SUBSTITUICAO","10606":"GHMA - LEI 5188/2013","10521":"DECIMO TERCEIRO SALARIO S/V","10250":"SUBSTITUICAO","10120":"VPNI L4584/11-DECIM.L1004/96-A","20281":"(DIF) INDENIZACAO DE TRANSPORTE EST.","60014":"(DEV) REPRESENT.FUNCAO C/ VINCULO","40910":"INSS CONTRIBUICAO","40870":"COOSERVCRED MENSALIDADE","40515":"COTA PARTE AUX. CRECHE","40486":"CUSTEIO AUX. TRANSPORTE","20872":"(DIF) FERIAS INDENIZ.PROPORCIONAIS","10017":"VENCIMENTO FUNCAO S/ VINCULO","30985":"(DEV) IMPOSTO DE RENDA UNIFICADO","20693":"(DIF) GDAT LEI 2775/2001 ATIVO","20269":"(DIF) INDEN.TRANSP.CARGO COM./RGPS","10269":"INDEN.TRANSP.CARGO COM./RGPS","41167":"SICOOB EXEC EMP 2","41168":"SICOOB EXEC EMP 3","61593":"(DEV) ACERT DEC TERC FUNCAO C/VINCUL","20070":"(DIF) GRAT INSTRUTORIA-DEC 33871/12","20377":"(DIF) VPNI LEI4413/2009 ART.6 PAR 1","20710":"(DIF) OPCAO 40 HORAS - VENCIMENTO","11187":"1/3 FERIAS FUNCAO ESTATUTARIA","21187":"(DIF) 1/3 FERIAS FUNCAO ESTATUTARIA","41952":"PREVICOM - OPCIONAL - 13O SAL.","51135":"(DIF) GDF-SAUDE-DEPENDENTE I","31135":"(DEV) GDF-SAUDE-DEPENDENTE I","40136":"ASSINFRA MENSALIDADE","41135":"GDF-SAUDE-DEPENDENTE I","31171":"(DEV) GDF-SAUDE-DEPENDENTE II","51175":"(DIF) GDF-SAUDE-DEPENDENTE III","41175":"GDF-SAUDE-DEPENDENTE III","51171":"(DIF) GDF-SAUDE-DEPENDENTE II","41171":"GDF-SAUDE-DEPENDENTE II","21119":"(DIF) ADIC. PERICULOSIDADE - BRIGADA","61119":"(DEV) ADIC. PERICULOSIDADE - BRIGADA","11119":"ADIC. PERICULOSIDADE - BRIGADA","61120":"(DEV) GEPA - LEI 7504/2024","41160":"REDUTOR TETO FERIAS","21120":"(DIF) GEPA - LEI 7504/2024","11120":"GEPA - LEI 7504/2024","51188":"(DIF) PICPAY ANTECIPACAO SALARIAL","41188":"PICPAY ANTECIPACAO SALARIAL","51192":"(DIF) GDF-SAUDE-DEPENDENTE V","51201":"(DIF) ODONTOGROUP DEP I PL ODONTO","21133":"(DIF) RESSARC.PLANO ODONTOLOGICO GDF","51200":"(DIF) ODONTOGROUP TITULAR PL ODONTO","41208":"ODONT DEP II PL ODONT","41201":"ODONTOGROUP DEP I PL ODONTO","51195":"(DIF) PREVIDENT DEP I   PL ODONTO","51191":"(DIF) GDF-SAUDE-DEPENDENTE IV","41197":"PREVIDENT DEP III PL ODONTO","31190":"(DEV) PREVIDENT TITULAR PL ODONTOLOG","41190":"PREVIDENT TITULAR PL ODONTOLOG","41198":"ODONTOGROUP DEP I PL ODONTO","41200":"ODONTOGROUP TITULAR PL ODONTO","41114":"GDF-SAUDE-DF","41196":"PREVIDENT DEP II PL ODONTO","41195":"PREVIDENT DEP I   PL ODONTO","11133":"RESSARC.PLANO ODONTOLOGICO GDF","41191":"GDF-SAUDE-DEPENDENTE IV","41202":"ODONTOGROUP DEP II PL ODONTO","41192":"GDF-SAUDE-DEPENDENTE V","41193":"GDF-SAUDE-DEPENDENTE VI","41232":"MAIS DENTAL DEP I  PL ODONT","41231":"MAIS DENTAL TITULAR PL ODONT","51222":"(DIF) GDF-SAUDE-DEPENDENTE VIII","51221":"(DIF) GDF-SAUDE-DEPENDENTE VII","41223":"GDF-SAUDE-DEPENDENTE IX","41224":"GDF-SAUDE-DEPENDENTE X","41222":"GDF-SAUDE-DEPENDENTE VIII","41221":"GDF-SAUDE-DEPENDENTE VII","41239":"ACERTO DE CONTAS RESSARCIMENTO","51261":"(DIF) DESCONTO REPOUSO REMUNERADO","41261":"DESCONTO REPOUSO REMUNERADO","11197":"COMP. SALARIO MINIMO SEM VINC.","41265":"ASIBRAM SESC BENEFICIO SOCIAL","41266":"ASIBRAM SESI BENEFICIO SOCIAL"};
+
+  // ✅ Códigos personalizados: cadastrados pelo usuário no painel "Gerenciar
+  // tabela de códigos", salvos no localStorage deste navegador. Têm
+  // prioridade sobre a tabela padrão (CODIGOS_SIGRH) quando houver conflito.
+  const CHAVE_LOCALSTORAGE_CODIGOS = "acertoServidorEfetivo_codigosCustom";
+
+  const carregarCodigosCustom = () => {
+    try {
+      const raw = localStorage.getItem(CHAVE_LOCALSTORAGE_CODIGOS);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return (obj && typeof obj === "object") ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  const salvarCodigosCustom = (obj) => {
+    try {
+      localStorage.setItem(CHAVE_LOCALSTORAGE_CODIGOS, JSON.stringify(obj));
+    } catch (e) {
+      alert("Não foi possível salvar no navegador (armazenamento local indisponível ou cheio).");
+    }
+  };
+
+  // ✅ Retorna a tabela combinada: padrão + personalizados (personalizados
+  // sobrescrevem a descrição padrão quando o código coincide).
+  const obterCodigosCombinados = () => {
+    const custom = carregarCodigosCustom();
+    return { ...CODIGOS_SIGRH, ...custom };
+  };
+
+  // ✅ Quando o código digitado (5 dígitos) bater com um código conhecido, a
+  // descrição é preenchida automaticamente. Se o campo de descrição já tiver
+  // sido preenchido AUTOMATICAMENTE antes (e o usuário não editou o texto na
+  // mão), ao trocar o código a descrição é ATUALIZADA para a do novo código —
+  // ou limpa, se o novo código não for encontrado. Uma descrição digitada
+  // manualmente pelo usuário nunca é sobrescrita.
+  const aplicarDescricaoAutomaticaPorCodigo = (inputCodigo) => {
+    const codigo = onlyDigits(inputCodigo.value);
+    const tr = inputCodigo.closest("tr");
+    if (!tr) return;
+    const campoDescricao = tr.querySelector(".rubrica-nome, .manual-descricao");
+    if (!campoDescricao) return;
+
+    const eraAutoPreenchida = campoDescricao.dataset.autoDesc === "1";
+    const podeAlterar = !campoDescricao.value.trim() || eraAutoPreenchida;
+    if (!podeAlterar) return;
+
+    if (codigo.length !== 5) {
+      if (eraAutoPreenchida) {
+        campoDescricao.value = "";
+        campoDescricao.dataset.autoDesc = "0";
+      }
+      return;
+    }
+
+    const descricao = obterCodigosCombinados()[codigo];
+    if (!descricao) {
+      if (eraAutoPreenchida) {
+        campoDescricao.value = "";
+        campoDescricao.dataset.autoDesc = "0";
+      }
+      return;
+    }
+
+    campoDescricao.value = descricao;
+    campoDescricao.dataset.autoDesc = "1";
+  };
+
+  /* ========= Painel "Gerenciar tabela de códigos" ========= */
+  const renderizarPainelCodigos = () => {
+    const custom = carregarCodigosCustom();
+    const codigosOrdenados = Object.keys(custom).sort();
+
+    el.adminTotalBase.textContent = Object.keys(CODIGOS_SIGRH).length;
+    el.adminTotalCustom.textContent = codigosOrdenados.length;
+    el.adminTotalCodigos.textContent = Object.keys(obterCodigosCombinados()).length;
+
+    if (codigosOrdenados.length === 0) {
+      el.adminCustomBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#888;">Nenhum código personalizado cadastrado ainda</td></tr>`;
+      return;
+    }
+
+    el.adminCustomBody.innerHTML = codigosOrdenados.map(cod => `
+      <tr>
+        <td>${cod}</td>
+        <td>${custom[cod]}</td>
+        <td style="text-align:center;"><button type="button" class="btn-danger admin-remove-btn" data-cod="${cod}" style="padding:4px 10px;font-size:12px;">Remover</button></td>
+      </tr>
+    `).join("");
+  };
+
+  const adicionarOuAtualizarCodigo = (codigo, descricao) => {
+    const cod = onlyDigits(codigo);
+    const desc = (descricao || "").trim();
+    if (cod.length !== 5) { alert("O código precisa ter exatamente 5 dígitos."); return false; }
+    if (!desc) { alert("Preencha a descrição."); return false; }
+    const custom = carregarCodigosCustom();
+    custom[cod] = desc.toUpperCase();
+    salvarCodigosCustom(custom);
+    return true;
+  };
+
+  // ✅ Aceita dois formatos de colagem:
+  //    1) Colado diretamente do Excel/planilha SIGRH (tabulado, com a linha de
+  //       cabeçalho e todas as colunas) — usa a coluna M (codRubr, índice 12)
+  //       e a coluna P (dscRubr, índice 15). O código usado é sempre os
+  //       ÚLTIMOS 5 DÍGITOS de codRubr (não apenas removendo um prefixo "29"
+  //       fixo, já que também aparecem códigos com outros prefixos, como
+  //       "74...", em que o código real de 5 dígitos também é o final).
+  //    2) Formato simples "código;descrição", um por linha.
+  //    A linha de cabeçalho (com "codRubr"/"dscRubr"/"SIGLA") é ignorada.
+  const importarCodigosEmLote = (texto) => {
+    const linhas = (texto || "").split(/\r?\n/).map(l => l.replace(/\r$/, "")).filter(l => l.trim() !== "");
+    const custom = carregarCodigosCustom();
+    let importados = 0, ignorados = 0;
+
+    linhas.forEach(linha => {
+      if (/codRubr|dscRubr|^SIGLA\t/i.test(linha)) return; // cabeçalho: ignora silenciosamente
+
+      // Formato 1: colado do Excel (tabulado, muitas colunas)
+      const colunasTab = linha.split("\t");
+      if (colunasTab.length >= 16) {
+        const codBruto = onlyDigits(colunasTab[12] || "");
+        const desc = (colunasTab[15] || "").trim();
+        if (codBruto.length >= 5 && desc) {
+          custom[codBruto.slice(-5)] = desc.toUpperCase();
+          importados++;
+        } else {
+          ignorados++;
+        }
+        return;
+      }
+
+      // Formato 2: código;descrição
+      const partes = linha.split(";");
+      if (partes.length >= 2) {
+        const codBruto = onlyDigits(partes[0]);
+        const desc = partes.slice(1).join(";").trim();
+        if (codBruto.length >= 5 && desc) {
+          custom[codBruto.slice(-5)] = desc.toUpperCase();
+          importados++;
+          return;
+        }
+      }
+      ignorados++;
+    });
+
+    salvarCodigosCustom(custom);
+    return { importados, ignorados };
+  };
+
+  const removerCodigoCustom = (codigo) => {
+    const custom = carregarCodigosCustom();
+    delete custom[codigo];
+    salvarCodigosCustom(custom);
+  };
+
+
+  // ✅ Cálculo do IRRF 2026, incluindo o redutor da Lei 15.270/2025: isenção
+  // total até R$5.000,00 de rendimento bruto mensal, redução gradual entre
+  // R$5.000,01 e R$7.350,00 [Redutor = R$978,62 − (0,133145 × rendimento
+  // bruto mensal)], sem redução adicional acima de R$7.350,00.
+  // - baseCalculo: já líquida de INSS/Seguridade Social e da dedução por
+  //   dependentes — usada na tabela progressiva.
+  // - rendimentoBruto: valor bruto (antes de INSS/dependentes) — usado só
+  //   para aferir a faixa do redutor, conforme a fórmula oficial.
+  const calcularIRRF2026 = (baseCalculo, rendimentoBruto) => {
+    const base = Math.max(0, Number(baseCalculo) || 0);
+    const bruto = Math.max(0, Number(rendimentoBruto) || 0);
+
+    const faixa = TABELA_IRRF_2026.find(f => base <= f.limite);
+    const irTabela = Math.max(0, Number((base * faixa.aliquota - faixa.deducao).toFixed(2)));
+
+    let redutor = 0;
+    if (bruto <= 5000) {
+      redutor = irTabela; // isenção total
+    } else if (bruto <= 7350) {
+      redutor = Math.max(0, Number((978.62 - 0.133145 * bruto).toFixed(2)));
+    }
+    redutor = Math.min(redutor, irTabela);
+
+    return Number((irTabela - redutor).toFixed(2));
+  };
+
+  // ✅ Imposto de Renda sobre a Remuneração — código 40950 (desconto) / 30950
+  // (a receber). Usa a mesma regra de dias da Seguridade Social: calcula o IR
+  // sobre a remuneração correspondente aos dias JÁ RECEBIDOS (campo "dias
+  // trabalhados no mês do desligamento") e sobre a remuneração correspondente
+  // aos dias a que o servidor tinha direito (dia da exoneração no mês); a
+  // diferença (maior − menor) é lançada no resultado — se positiva (dias
+  // recebidos a maior), código 30950; se negativa (dias ainda a receber),
+  // código 40950.
+  // ⚠️ A caixinha "não incide Seguridade Social": o rendimento BRUTO usado no
+  // IR (para fins de faixa/tabela e do redutor) continua sendo a remuneração
+  // TOTAL (todas as verbas, sem exclusão). Porém, o valor de Seguridade
+  // Social ABATIDO da base do IR reflete a exclusão (menos verbas sujeitas a
+  // Seguridade Social => menos INSS retido => base do IR maior => IR maior).
+  // ⚠️ DF-PREVICOM ativo: o valor abatido da base do IR passa a ser a SOMA de
+  // RPPS IPREV + PREVICOM - COMPLEMENTAR (aplicado a cada uma das duas bases
+  // de dias), em vez dos 14% padrão.
+  const calcularImpostoDeRenda = (rubParam, dependentes) => {
+    const rub = rubParam || obterRubricas();
+    const remTotal = totalRubricas(rub);
+    const remTotalSeguridade = totalRubricasSeguridade(rub);
+    const dep = Math.max(0, parseInt(dependentes, 10) || 0);
+    const deducaoDependentes = dep * DEDUCAO_POR_DEPENDENTE_2026;
+    const dfPrevicomAtivo = !!(el.dfPrevicomCheck && el.dfPrevicomCheck.checked);
+
+    const dataExo = parseISODateLocal(el.exoneracao.value);
+    const diasDevidos = diaComercial(dataExo);
+    const diasRecebidos = parseInt(el.diasMes.value, 10) || 0;
+
+    // Rendimento bruto (para a tabela/redutor do IR) — sempre a remuneração
+    // TOTAL, sem exclusão
+    const remDiasDevidos = (remTotal / 30) * diasDevidos;
+    const remDiasRecebidos = (remTotal / 30) * diasRecebidos;
+
+    // Seguridade Social (ou RPPS+PREVICOM, se DF-PREVICOM ativo) a abater da
+    // base do IR — reflete a exclusão de verbas não incidentes (mesma
+    // proporção de dias, aplicada sobre a remuneração SUJEITA à Seguridade Social)
+    const remSegDiasDevidos = (remTotalSeguridade / 30) * diasDevidos;
+    const remSegDiasRecebidos = (remTotalSeguridade / 30) * diasRecebidos;
+
+    let inssDiasDevidos, inssDiasRecebidos;
+    if (dfPrevicomAtivo) {
+      const pDevidos = calcularSeguridadeComPrevicom(Math.max(0, remSegDiasDevidos), 1);
+      const pRecebidos = calcularSeguridadeComPrevicom(Math.max(0, remSegDiasRecebidos), 1);
+      inssDiasDevidos = pDevidos.valorRpps + pDevidos.valorPrevicom;
+      inssDiasRecebidos = pRecebidos.valorRpps + pRecebidos.valorPrevicom;
+    } else {
+      inssDiasDevidos = remSegDiasDevidos * 0.14;
+      inssDiasRecebidos = remSegDiasRecebidos * 0.14;
+    }
+
+    const baseDiasDevidos = Math.max(0, remDiasDevidos - inssDiasDevidos - deducaoDependentes);
+    const baseDiasRecebidos = Math.max(0, remDiasRecebidos - inssDiasRecebidos - deducaoDependentes);
+
+    const irDiasDevidos = calcularIRRF2026(baseDiasDevidos, remDiasDevidos);
+    const irDiasRecebidos = calcularIRRF2026(baseDiasRecebidos, remDiasRecebidos);
+
+    const diferenca = Number((irDiasRecebidos - irDiasDevidos).toFixed(2));
+
+    return {
+      codigo: diferenca > 0 ? "30950" : "40950",
+      valor: diferenca,
+      detalhe: { diasDevidos, diasRecebidos, irDiasDevidos, irDiasRecebidos, dependentes: dep }
+    };
+  };
+
+  // ✅ Imposto de Renda sobre o 13º — código 40951 (desconto) / 30951 (a
+  // receber). O 13º não tem a mesma noção de "dias trabalhados no mês", então
+  // aqui o IR é calculado uma única vez. O rendimento bruto (para a tabela e
+  // o redutor) é sempre o valor CHEIO do 13º (v13, sem exclusão); a
+  // Seguridade Social abatida da base reflete a exclusão (usa v13Seguridade,
+  // o 13º "líquido" das verbas não incidentes).
+  // ⚠️ DF-PREVICOM ativo: o valor abatido passa a ser a SOMA de RPPS IPREV -
+  // GRAT. NATALÍCIA + PREVICOM - COMPLEMENTAR GRAT. NATALÍCIA, calculada
+  // sobre o valor CHEIO do 13º (v13), em vez dos 14% padrão.
+  const calcularImpostoDeRenda13 = (v13, v13Seguridade, dependentes) => {
+    const valor13 = Number(v13) || 0;
+    if (valor13 <= 0) return { codigo: "40951", valor: 0 };
+
+    const dep = Math.max(0, parseInt(dependentes, 10) || 0);
+    const deducaoDependentes = dep * DEDUCAO_POR_DEPENDENTE_2026;
+    const dfPrevicomAtivo = !!(el.dfPrevicomCheck && el.dfPrevicomCheck.checked);
+
+    let inss13;
+    if (dfPrevicomAtivo) {
+      const p = calcularSeguridadeComPrevicom(valor13, 1);
+      inss13 = p.valorRpps + p.valorPrevicom;
+    } else {
+      inss13 = (Number(v13Seguridade) || 0) * 0.14;
+    }
+
+    const base13 = Math.max(0, valor13 - inss13 - deducaoDependentes);
+    const ir13 = calcularIRRF2026(base13, valor13);
+    const valor = ir13 > 0 ? Number((-ir13).toFixed(2)) : 0;
+
+    return { codigo: valor < 0 ? "40951" : "30951", valor };
+  };
+
+  /* ========= Auxílio Alimentação (ponto 6) ========= */
+  // Valor de cada unidade = valor recebido (R$) ÷ 22
+  // Quantidade a devolver = quantidade recebida − quantidade utilizada
+  // Valor a devolver = quantidade a devolver × valor de cada unidade
+  const calcularAuxAlimentacao = () => {
+    const qtdRecebido = parseFloat(el.aaQtdRecebido.value) || 0;
+    const qtdUtilizado = parseFloat(el.aaQtdUtilizado.value) || 0;
+    const valorRecebido = desmascarar(el.aaValorRecebido.value);
+    const codigo = "60926";
+
+    const valorUnidade = valorRecebido > 0 ? valorRecebido / 22 : 0;
+    const qtdADevolver = Math.max(0, qtdRecebido - qtdUtilizado);
+    const valorADevolver = Number((qtdADevolver * valorUnidade).toFixed(2));
+    const valor = valorADevolver > 0 ? Number((-valorADevolver).toFixed(2)) : 0;
+
+    return {
+      qtdRecebido, qtdUtilizado, valorRecebido, valorUnidade,
+      qtdADevolver, valorADevolver, valor, codigo
+    };
+  };
+
+  const atualizarAuxAlimentacaoNaTela = () => {
+    const aa = calcularAuxAlimentacao();
+    el.aaValorDevolverInput.value = formatarParaMascara(aa.valorADevolver);
+  };
+
+  // ✅ Adiantamento de 13º salário — só é calculado (auto-preenchido) quando a
+  // exoneração ocorrer NO MÊS SEGUINTE ao mês de aniversário do servidor (data
+  // de nascimento) OU DEPOIS dele, DENTRO DO MESMO ANO da exoneração — ou
+  // seja, quando o adiantamento já teria sido pago automaticamente pela folha
+  // antes da exoneração, NESSE ano civil. O valor é 60% do total lançado na
+  // Remuneração (Base do Cálculo). No acerto, entra como devolução (código
+  // 61140), sem incidência de Seguridade Social.
+  // ✅ Ponto 2: se a caixinha "Não recebeu o adiantamento?" estiver marcada,
+  // não há devolução alguma no Resultado do Acerto, independentemente do
+  // valor preenchido no campo.
+  const calcularAdiantamento13 = (remTotal) => {
+    const dataExo = parseISODateLocal(el.exoneracao.value);
+    const dataNasc = parseISODateLocal(el.nascimento.value);
+    const mesExoneracao = dataExo ? dataExo.getMonth() + 1 : 0; // 1=jan ... 12=dez
+    const mesAniversario = dataNasc ? dataNasc.getMonth() + 1 : 0;
+    const mesSeguinteAoAniversario = mesAniversario ? (mesAniversario % 12) + 1 : 0;
+    const exoneracaoNoMesSeguinteAniversario = mesAniversario > 0 && mesExoneracao >= mesSeguinteAoAniversario;
+
+    const valorAtual = desmascarar(el.adiantamento13.value);
+    const eraAutoPreenchido = el.adiantamento13.dataset.auto === "1";
+
+    if (exoneracaoNoMesSeguinteAniversario) {
+      // ✅ Só auto-preenche se o campo estiver zerado (não sobrescreve um
+      // valor que o usuário já digitou manualmente).
+      if (valorAtual === 0) {
+        const sugerido = (Number(remTotal) || 0) * 0.60;
+        el.adiantamento13.value = formatarParaMascara(sugerido);
+        el.adiantamento13.dataset.auto = "1";
+      }
+    } else if (eraAutoPreenchido) {
+      // Se o valor atual foi preenchido automaticamente por nós e a
+      // exoneração deixou de cair no mês seguinte ao aniversário (ou depois),
+      // dentro do mesmo ano, o valor não faz mais sentido — limpa para zero.
+      el.adiantamento13.value = "0,00";
+      el.adiantamento13.dataset.auto = "0";
+    }
+
+    const naoRecebeu = !!(el.adiantamento13NaoRecebeu && el.adiantamento13NaoRecebeu.checked);
+    const valorInformado = desmascarar(el.adiantamento13.value);
+    const valorDevolucao = (!naoRecebeu && valorInformado > 0) ? Number((-valorInformado).toFixed(2)) : 0;
+
+    return {
+      mesExoneracao,
+      mesAniversario,
+      exoneracaoNoMesSeguinteAniversario,
+      naoRecebeu,
+      valorInformado: Number(valorInformado.toFixed(2)),
+      valor: valorDevolucao,
+      codigo: "61140"
+    };
+  };
+
+  /* ========= Lançamentos manuais (ponto 3) ========= */
+  const obterLancamentosManuais = () => {
+    const cod = $$(".manual-codigo");
+    const desc = $$(".manual-descricao");
+    const val = $$(".manual-valor");
+    const n = Math.min(cod.length, desc.length, val.length);
+    return Array.from({ length: n }, (_, i) => {
+      const codigo = pad5(cod[i].value);
+      // ✅ valor digitado é sempre tratado como módulo; o sinal vem do código
+      const valorAbs = Math.abs(desmascarar(val[i].value));
+      const valor = valorAbs * sinalPorCodigoManual(codigo);
+      return {
+        codigo,
+        descricao: (desc[i].value || "").trim(),
+        valor
+      };
+    }).filter(it => it.codigo || it.descricao || it.valor !== 0);
+  };
+
+  const totalLancamentosManuais = (itens) => itens.reduce((s, it) => s + (Number(it.valor) || 0), 0);
+
+
+  /* ========= Avos ========= */
+  const calcularAvosFerias = () => {
+    const adm = el.admissao.value, exo = el.exoneracao.value;
+    if(!adm || !exo) return {avosVencidos:0, avosProporcionais:0, totalAvos:0, totalAvosBruto:0, avosExcluidos:0};
+    const totalAvosBruto = avosMensal(adm, exo);
+    const totalAvos = totalAvosBruto;
+    const periodosCompletos = Math.floor((totalAvos - 1)/12);
+    const avosVencidos = periodosCompletos*12;
+    const avosProporcionais = totalAvos - avosVencidos;
+    return {avosVencidos, avosProporcionais, totalAvos, totalAvosBruto, avosExcluidos:0};
+  };
+
+  const avos13AnoDesligamento = () => {
+    const admISO = el.admissao.value, exoISO = el.exoneracao.value;
+    if(!admISO || !exoISO) return {avos:0, avosBruto:0, avosExcluidos:0};
+    const adm = parseISODateLocal(admISO);
+    const exo = parseISODateLocal(exoISO);
+    const ano = exo.getFullYear();
+    const jan1 = new Date(ano,0,1);
+    const ini = (adm > jan1) ? adm : jan1;
+    if(ini > exo) return {avos:0, avosBruto:0, avosExcluidos:0};
+
+    let avosBruto;
+    if(ini.getTime() === exo.getTime()) avosBruto = 1;
+    else avosBruto = avosMensal(toISOLocal(ini), exoISO);
+
+    return {avos: avosBruto, avosBruto, avosExcluidos:0};
+  };
+
+  // ✅ Versão SILENCIOSA: apenas calcula, não mostra alerta nem escreve na tela.
+  //    É a que deve ser usada internamente por calcularAcerto/gerarRelatorio.
+  const calcularAvosDados = () => {
+    const adm = el.admissao.value, exo = el.exoneracao.value;
+    if(!adm || !exo) return null;
+    if(!validarDatasFerias()) return null;
+
+    const fer = calcularAvosFerias();
+    const a13 = avos13AnoDesligamento();
+
+    return {
+      avosFeriasVencidas: fer.avosVencidos,
+      avosFeriasProporcionais: fer.avosProporcionais,
+      totalAvosFerias: fer.totalAvos,
+      totalAvosFeriasBruto: fer.totalAvosBruto,
+      avosFeriasExcluidos: fer.avosExcluidos,
+      avosGratificacao: a13.avos,
+      avosGratificacaoBruto: a13.avosBruto,
+      avosGratificacaoExcluidos: a13.avosExcluidos
+    };
+  };
+
+  const atualizarAvosNaTela = (avos) => {
+    el.avosV.textContent = avos.avosFeriasVencidas;
+    el.avosP.textContent = avos.avosFeriasProporcionais;
+    el.avos13.textContent = avos.avosGratificacao;
+  };
+
+  // ✅ Handler do botão "CALCULAR AVOS": único lugar que mostra o alerta de avos.
+  const calcularAvosBotao = () => {
+    const adm = el.admissao.value, exo = el.exoneracao.value;
+    if(!adm || !exo) return alert("Por favor, preencha as datas de admissão e exoneração para calcular os avos.");
+
+    const avos = calcularAvosDados();
+    if(!avos) return;
+
+    atualizarAvosNaTela(avos);
+  };
+
+  /* ========= Férias proporcionais (mesma lógica do seu código) ========= */
+  const feriasProporcionaisComplexo = (remTotal, avos, diasUsuf) => {
+    // segurança (evita undefined / NaN)
+    const rem = Number(remTotal) || 0;
+    const diasUsufruidos = Number(diasUsuf) || 0;
+
+    // no seu código, isso existe vindo do calcularAvosDados()
+    // (avosFeriasProporcionais = avos do último período no cargo)
+    const avosNoCargo = Math.max(0, Math.min(12, Number(avos?.avosFeriasProporcionais) || 0));
+    const faltamAvos = 12 - avosNoCargo;
+
+    const valorPorDia = rem / 30;
+    const valorUmAvo  = rem / 12;
+
+    // =========================
+    // 20872 - FÉRIAS PROPORCIONAIS (direito x usufruto)
+    // =========================
+    const diasDireito = (avosNoCargo / 12) * 30;            // ex.: 2 avos = 5 dias
+    const saldoDias   = diasDireito - diasUsufruidos;       // negativo => devolve
+    const valorFeriasProp = saldoDias * valorPorDia;        // pode ser negativo
+
+    return {
+      // 20872
+      valorFeriasProporcionais: valorFeriasProp.toFixed(2),
+
+      detalhes: {
+        avosNoCargo,
+        faltamAvos,
+        diasDireito: Number(diasDireito.toFixed(2)),
+        diasUsufruidos: diasUsufruidos,
+        saldoDias: Number(saldoDias.toFixed(2)),
+        valorFeriasFinal: Number(valorFeriasProp.toFixed(2))
+      }
+    };
+  };
+
+  // ✅ Correção: cada marcação de "Recebeu 1/3?" representa UM lump sum completo
+  // (calculado sobre 12 avos, valor fixo) recebido no gozo das férias. Se o
+  // servidor marcar a caixa em duas linhas diferentes, ele recebeu DOIS lump
+  // sums — um cobre integralmente as vencidas e o outro cobre integralmente as
+  // proporcionais (modelo "cascata"): primeiro abate o que for devido nas
+  // vencidas, o que sobrar do(s) lump sum(s) abate o que for devido nas
+  // proporcionais.
+  //
+  //   1/3 devido pelas vencidas (sem abatimento)      = valor de 1 avo × avos vencidos ÷ 3
+  //   1/3 devido pelas proporcionais (sem abatimento) = valor de 1 avo × avos de direito (máx. 12) ÷ 3
+  //   1/3 por lump sum recebido                       = valor de 1 avo × 12 ÷ 3 (fixo)
+  //   total recebido                                  = nº de vezes marcado × 1/3 por lump sum
+  //
+  //   -> abate primeiro das vencidas (até o limite do que é devido lá)
+  //   -> o que sobrar do total recebido abate das proporcionais (até o limite do que é devido lá)
+  //
+  //   1 marcação  + 12 avos vencidos completos  => vencidas quitada (20857=0), proporcional integral
+  //   2 marcações + 12+12 avos completos        => vencidas E proporcional quitadas (20857=0, 20883=0)
+  //   nenhuma marcação                          => nada abatido, cálculo tradicional (proporcional aos dias em aberto)
+  // ✅ Correção: o 1/3 de férias (vencidas e proporcionais) é sempre 1/3 do
+  // valor NET já calculado das férias (vFeriasVenc e vFerProp) — e não de uma
+  // ✅ Para cada período aquisitivo (linha da tabela de férias), verifica se a
+  // caixinha "Recebeu 1/3?" foi marcada em algum dos 3 blocos de usufruto
+  // daquela linha. Se sim, os dias usufruídos DAQUELA LINHA (campo "Dias
+  // Usufr. Total") são tratados como "1/3 já recebido" para esses dias — e
+  // alocados entre vencidas/proporcional seguindo a MESMA ordem cronológica
+  // (FIFO) já usada para consumir a capacidade de vencidas no cálculo
+  // principal das férias. Isso garante que o "já recebido" corresponda
+  // exatamente aos dias daquele bloco específico, em vez de assumir sempre um
+  // ciclo completo de 12 avos por marcação (o que zerava indevidamente saldos
+  // positivos de períodos parciais).
+  const calcularDiasTercoRecebido = (diasDevidosVencidas) => {
+    let cumulativo = 0;
+    let diasTercoVencidas = 0;
+    let diasTercoProporcional = 0;
+
+    $$("#ferias-body tr").forEach(tr => {
+      const dias = parseInt(tr.querySelector(".dias-usufruidos")?.value, 10) || 0;
+      if (dias <= 0) return;
+
+      const capacidadeRestante = Math.max(0, diasDevidosVencidas - cumulativo);
+      const diasNestaLinhaVencidas = Math.min(dias, capacidadeRestante);
+      const diasNestaLinhaProporcional = dias - diasNestaLinhaVencidas;
+
+      const recebeuNestaLinha = tr.querySelectorAll(".recebeu-terco:checked").length > 0;
+      if (recebeuNestaLinha) {
+        diasTercoVencidas += diasNestaLinhaVencidas;
+        diasTercoProporcional += diasNestaLinhaProporcional;
+      }
+
+      cumulativo += dias;
+    });
+
+    return { diasTercoVencidas, diasTercoProporcional };
+  };
+
+  // ✅ O 1/3 devido é calculado sobre os avos "brutos" (vencidas: todos os
+  // avos completos; proporcionais: avos do período em curso, limitado a 12) —
+  // o mesmo valor que seria devido independentemente de o servidor já ter
+  // usufruído os dias ou não. Desse valor bruto, abate-se o 1/3 já recebido
+  // (calculado linha a linha, acima) — e o resultado PODE ficar negativo
+  // (devolução), quando o servidor recebeu o 1/3 de um bloco de férias sem
+  // ter completado os avos correspondentes até a exoneração.
+  const calcularTercoCombinado = (valorUmAvo, valorPorDia, avosVencidas, avosProporcionalCapped, diasDevidosVencidas) => {
+    const qtdRecebeu = contarRecebeuTerco();
+    const { diasTercoVencidas, diasTercoProporcional } = calcularDiasTercoRecebido(diasDevidosVencidas);
+
+    const tercoDevidoVencidas = (Number(valorUmAvo) || 0) * (Number(avosVencidas) || 0) / 3;
+    const tercoDevidoProporcional = (Number(valorUmAvo) || 0) * (Number(avosProporcionalCapped) || 0) / 3;
+
+    const tercoJaRecebidoVencidas = diasTercoVencidas * (Number(valorPorDia) || 0) / 3;
+    const tercoJaRecebidoProporcional = diasTercoProporcional * (Number(valorPorDia) || 0) / 3;
+
+    const vTercoVenc = Number((tercoDevidoVencidas - tercoJaRecebidoVencidas).toFixed(2));
+    const vTercoProp = Number((tercoDevidoProporcional - tercoJaRecebidoProporcional).toFixed(2));
+
+    return {
+      vTercoVenc,
+      vTercoProp,
+      detalhes: {
+        recebeuTerco: qtdRecebeu > 0, qtdRecebeu,
+        tercoDevidoVencidas: Number(tercoDevidoVencidas.toFixed(2)),
+        tercoDevidoProporcional: Number(tercoDevidoProporcional.toFixed(2)),
+        diasTercoVencidas, diasTercoProporcional,
+        tercoJaRecebidoVencidas: Number(tercoJaRecebidoVencidas.toFixed(2)),
+        tercoJaRecebidoProporcional: Number(tercoJaRecebidoProporcional.toFixed(2))
+      }
+    };
+  };
+
+  /* ========= Limpar ========= */
+  const limparResultados = () => {
+    el.rubricasResultadoBody.innerHTML = "";
+    el.res3Cod.textContent="40920"; el.res3Desc.textContent="SEGURIDADE SOCIAL"; el.res3Val.textContent="0,00"; el.res3Val.className="valor-negativo";
+    el.resultadoSeguridadeTr.style.display = "";
+    el.resRppsTr.style.display = "none"; el.resRppsVal.textContent = "0,00"; el.resRppsVal.className = "valor-negativo";
+    el.resPrevicomTr.style.display = "none"; el.resPrevicomVal.textContent = "0,00"; el.resPrevicomVal.className = "valor-negativo";
+    el.resIrCod.textContent="40950"; el.resIrVal.textContent="0,00"; el.resIrVal.className="valor-negativo";
+    el.resDif13Cod.textContent="20520"; el.resDif13Val.textContent="0,00"; el.resDif13Val.className="valor-positivo";
+    el.res4Cod.textContent="40923"; el.res4Desc.textContent="SEGURIDADE SOCIAL SOBRE 13º SALÁRIO"; el.res4Val.textContent="0,00"; el.res4Val.className="valor-negativo";
+    el.resultadoInss13Tr.style.display = "";
+    el.resRpps13Tr.style.display = "none"; el.resRpps13Val.textContent = "0,00"; el.resRpps13Val.className = "valor-negativo";
+    el.resPrevicom13Tr.style.display = "none"; el.resPrevicom13Val.textContent = "0,00"; el.resPrevicom13Val.className = "valor-negativo";
+    el.resIr13Cod.textContent="40951"; el.resIr13Val.textContent="0,00"; el.resIr13Val.className="valor-negativo";
+    el.resAuxAlimVal.textContent="0,00"; el.resAuxAlimVal.className="valor-positivo"; el.resAuxAlimTr.style.display="none";
+    el.resAdiant13Val.textContent="0,00"; el.resAdiant13Val.className="valor-positivo";
+
+    $$("#results-body tr").forEach(tr => {
+      if(
+        tr.id==="resultado-seguridade-social" || tr.id==="resultado-rpps-iprev" || tr.id==="resultado-previcom-complementar" ||
+        tr.id==="resultado-ir" || tr.id==="resultado-dif-13" ||
+        tr.id==="resultado-inss-13" || tr.id==="resultado-rpps-iprev-13" || tr.id==="resultado-previcom-complementar-13" ||
+        tr.id==="resultado-ir13" ||
+        tr.id==="resultado-aux-alimentacao" ||
+        tr.id==="resultado-adiantamento-13"
+      ) return;
+      if(tr.classList.contains("total-row")) return;
+      const v = tr.querySelector("td:nth-child(3)");
+      if(v){ v.textContent="0,00"; v.className="valor-positivo"; }
+    });
+
+    el.totalFinalVal.textContent="0,00"; el.totalFinalVal.className="valor-positivo";
+  };
+
+  const limparTudo = () => {
+    ["nome","matricula","cargo","nascimento","admissao","exoneracao","processo-sei"].forEach(id => $("#"+id).value="");
+    el.diasMes.value="0";
+    el.irDependentes.value="0";
+    el.dfPrevicomCheck.checked = false;
+    el.dfPrevicomPercentual.value = "";
+    el.aaQtdRecebido.value="0"; el.aaQtdUtilizado.value="0"; el.aaValorRecebido.value="0,00";
+    el.adiantamento13.value="0,00";
+    el.adiantamento13.dataset.auto = "0";
+    el.adiantamento13NaoRecebeu.checked = false;
+
+    $$(".rubrica-codigo").forEach(i=>i.value="");
+    $$(".rubrica-nome").forEach(i=>i.value="");
+    $$(".rubrica-valor").forEach(i=>i.value="0,00");
+    $$(".rubrica-naosegsocial").forEach(i=>i.checked=false);
+
+    $$(".manual-codigo").forEach(i=>i.value="");
+    $$(".manual-descricao").forEach(i=>i.value="");
+    $$(".manual-valor").forEach(i=>{ i.value="0,00"; i.style.color=""; });
+
+    $$(".ferias-table input", document).forEach(inp => {
+      if(inp.type==="number") inp.value="0";
+      else if(inp.type==="checkbox") inp.checked=false;
+      else inp.value="";
+    });
+
+    el.avosV.textContent="0"; el.avosP.textContent="0"; el.avos13.textContent="0";
+    limparResultados();
+    atualizarResultadosDinamicos();
+    atualizarAuxAlimentacaoNaTela();
+
+    el.detBox.style.display="none";
+    el.detDiasBox.style.display="none";
+    el.errBox.style.display="none";
+
+    alert("Todos os dados foram limpos!");
+  };
+
+  /* ========= Cálculo acerto (pipeline único) ========= */
+
+  // Guarda o último cálculo completo (evita reprocessar/reler o DOM no relatório)
+  let ultimoCalculo = null;
+
+  const formatarMoeda = (v) => (v < 0 ? "-" : "") + Math.abs(Number(v) || 0).toFixed(2);
+
+  // ✅ Faz TODO o cálculo uma única vez (rubricas lidas 1x) e devolve um objeto puro,
+  //    sem tocar na tela. Usado tanto por calcularAcerto() quanto por gerarRelatorio().
+  const executarCalculoCompleto = () => {
+    const nome = el.nome.value.trim();
+    const mat = el.matricula.value.trim();
+    if (!nome || !mat || !el.nascimento.value) {
+      alert("Antes de calcular o acerto de contas, preencha nome, matrícula e data de nascimento na aba \"1. DADOS PESSOAIS\".");
+      irParaTab(1);
+      return null;
+    }
+    if (!validarDatasFerias()) return null;
+
+    const avos = calcularAvosDados();
+    if (!avos) {
+      alert("Por favor, preencha as datas de admissão e exoneração para calcular os avos.");
+      return null;
+    }
+
+    // ✅ rubricas lidas apenas UMA vez e repassadas para todas as funções seguintes
+    const rub = obterRubricas();
+    const remTotal = totalRubricas(rub);
+    if (remTotal === 0) {
+      alert("Por favor, informe valores na Remuneração para calcular o acerto.");
+      return null;
+    }
+
+    const valorUmAvo = remTotal / 12;
+    const remTotalSeguridade = totalRubricasSeguridade(rub);
+    const valorUmAvoSeguridade = remTotalSeguridade / 12;
+    const diasUsuf = totalDiasUsufruidos();
+    const diasMes = parseInt(el.diasMes.value, 10) || 0;
+
+    const r1 = rub[0] || { codigo: "", descricao: "", valor: 0 };
+    const r2 = rub[1] || { codigo: "", descricao: "", valor: 0 };
+    const diasPagos = calcularDiasPagos();
+    const v1 = (Number(r1.valor || 0) / 30) * diasPagos;
+    const v2 = valorDiasTrabalhados2aRubrica(rub);
+
+    // ✅ Seguridade Social (14% sobre a diferença de dias; vira crédito positivo
+    // quando o servidor recebeu dias a mais que a data de exoneração; ponto 2:
+    // exclui verbas marcadas como "não incide Seguridade Social")
+    const baseSeg = calcularBaseSeguridadeSocial(rub);
+    const codigoSegSocial = baseSeg.codigo;
+    const vSegSocial = baseSeg.valor;
+
+    const v13 = Number((valorUmAvo * avos.avosGratificacao).toFixed(2));
+    // ✅ Ponto 2: 13º "líquido" das verbas não incidentes, usado só para a
+    // Seguridade Social sobre o 13º (o v13 pago ao servidor continua cheio)
+    const v13Seguridade = Number((valorUmAvoSeguridade * avos.avosGratificacao).toFixed(2));
+
+    // ✅ Seguridade Social sobre o 13º salário do acerto
+    const inss13 = calcularInssSobre13(v13Seguridade, v13);
+    const codigoSegSocial13 = inss13.codigo;
+    const vSegSocial13 = inss13.valor;
+
+    // ✅ Ponto 4: Imposto de Renda (tabela IRRF 2026), sobre a remuneração e
+    // sobre o 13º, usando o número de dependentes informado
+    const dependentes = Math.max(0, parseInt(el.irDependentes.value, 10) || 0);
+    const impostoRenda = calcularImpostoDeRenda(rub, dependentes);
+    const codigoIR = impostoRenda.codigo;
+    const vIR = impostoRenda.valor;
+    const impostoRenda13 = calcularImpostoDeRenda13(v13, v13Seguridade, dependentes);
+    const codigoIR13 = impostoRenda13.codigo;
+    const vIR13 = impostoRenda13.valor;
+
+    // ✅ Correção: a base de cálculo das férias e do 1/3 de férias é a
+    // REMUNERAÇÃO TOTAL (soma de todas as verbas lançadas), sem exclusão de
+    // nenhuma rubrica específica — já que neste acerto (Servidor com Vínculo -
+    // Cargo Efetivo) os códigos/descrições das rubricas são de livre
+    // preenchimento, não havendo mais uma verba fixa (como "Adicional
+    // Periculosidade") que deva ficar de fora dessa base.
+    const remSemPericulosidade = remTotal;
+    const valorUmAvoFerias = remSemPericulosidade / 12;
+
+    // ✅ Ponto 1: alocação FIFO dos dias de férias usufruídos.
+    // O total de dias usufruídos (de todos os períodos lançados) é consumido
+    // PRIMEIRO pelo débito de férias VENCIDAS (o período mais antigo). Só o que
+    // sobrar depois de quitar as vencidas é aplicado ao saldo das PROPORCIONAIS.
+    // Isso é necessário porque o servidor pode gozar férias já vencidas mesmo
+    // depois de iniciado o novo período aquisitivo (proporcional).
+    const diasDevidosVencidas = avos.avosFeriasVencidas * 2.5;
+    const diasUsufruidosVencidas = Math.min(diasUsuf, diasDevidosVencidas);
+    const diasUsufruidosRestantes = Math.max(0, diasUsuf - diasDevidosVencidas);
+
+    const diasFeriasVencidasDevidos = diasDevidosVencidas - diasUsufruidosVencidas;
+    let vFeriasVenc = 0;
+    if (diasFeriasVencidasDevidos > 0) {
+      vFeriasVenc = Number(((remSemPericulosidade / 30) * diasFeriasVencidasDevidos).toFixed(2));
+    }
+
+    // ✅ Ponto 1: apenas os dias RESTANTES (após quitar as vencidas) entram no
+    // cálculo do saldo das férias proporcionais
+    const ferProp = feriasProporcionaisComplexo(remSemPericulosidade, avos, diasUsufruidosRestantes);
+    const vFerProp = Number(ferProp.valorFeriasProporcionais);
+
+    // ✅ 1/3 calculado sobre os avos brutos (vencidas + proporcional em curso,
+    // limitado a 12), abatendo o 1/3 já recebido linha a linha (dias
+    // usufruídos em blocos marcados "Recebeu 1/3?"), seguindo a mesma ordem
+    // FIFO usada para consumir a capacidade de vencidas.
+    const avosProporcionalCapped = Math.max(0, Math.min(12, Number(avos.avosFeriasProporcionais) || 0));
+    const valorPorDiaFerias = remSemPericulosidade / 30;
+    const terco = calcularTercoCombinado(valorUmAvoFerias, valorPorDiaFerias, avos.avosFeriasVencidas, avosProporcionalCapped, diasDevidosVencidas);
+    const vTercoVenc = terco.vTercoVenc;
+    const vTercoProp = terco.vTercoProp;
+
+    // ✅ Ponto 6: Auxílio Alimentação
+    const auxAlim = calcularAuxAlimentacao();
+
+    // ✅ Ponto 2: adiantamento de 13º salário (6/12 avos da remuneração, sem INSS)
+    const adiantamento13 = calcularAdiantamento13(remTotal);
+
+    // ✅ Ordem no Resultado: TODAS as rubricas da Remuneração, na mesma ordem
+    // em que foram lançadas (1ª usa fórmula de dias pagos, 2ª de dias
+    // trabalhados, demais a fórmula proporcional padrão — só aparecem se
+    // preenchidas).
+    const linhasRubricas = obterLinhasRubricas(rub);
+    const totalLinhasRubricas = linhasRubricas.reduce((s, it) => s + (Number(it.valor) || 0), 0);
+
+    // ✅ Ponto 3: lançamentos manuais (preenchidos livremente pelo usuário)
+    const manuais = obterLancamentosManuais();
+    const totalManuais = totalLancamentosManuais(manuais);
+
+    const total = totalLinhasRubricas + vSegSocial + vSegSocial13 + v13 + vFeriasVenc + vTercoVenc + vFerProp + vTercoProp
+      + vIR + vIR13
+      + auxAlim.valor
+      + adiantamento13.valor
+      + totalManuais;
+
+    return {
+      nome, mat, cargo: el.cargo.value || "", nascimento: el.nascimento.value,
+      processoSei: (el.processoSei.value || "").trim(),
+      admissao: el.admissao.value, exoneracao: el.exoneracao.value,
+      rub, r1, r2, remTotal, remTotalSeguridade, remSemPericulosidade, diasMes, diasPagos, v1, v2,
+      baseSeg, codigoSegSocial, vSegSocial,
+      inss13, codigoSegSocial13, vSegSocial13, v13Seguridade,
+      impostoRenda, codigoIR, vIR, impostoRenda13, codigoIR13, vIR13, dependentes,
+      avos, diasUsuf, valorUmAvo, valorUmAvoFerias, v13,
+      diasFeriasVencidasDevidos, vFeriasVenc, vTercoVenc,
+      diasDevidosVencidas, diasUsufruidosVencidas, diasUsufruidosRestantes,
+      ferProp, vFerProp, vTercoProp, terco,
+      auxAlim, adiantamento13, linhasRubricas, totalLinhasRubricas, manuais, totalManuais,
+      total
+    };
+  };
+
+  // ✅ Escreve o objeto de resultado na tela (tabela de resultados, avos, detalhes)
+  const aplicarResultadosNaTela = (obj) => {
+    atualizarResultadosDinamicos(obj.rub);
+    atualizarAvosNaTela(obj.avos);
+
+    if (obj.baseSeg.dfPrevicomAtivo) {
+      el.resultadoSeguridadeTr.style.display = "none";
+      el.resRppsTr.style.display = obj.baseSeg.valorRpps !== 0 ? "" : "none";
+      el.resPrevicomTr.style.display = obj.baseSeg.valorPrevicom !== 0 ? "" : "none";
+      aplicarValorResultado(el.resRppsVal, obj.baseSeg.valorRpps);
+      aplicarValorResultado(el.resPrevicomVal, obj.baseSeg.valorPrevicom);
+    } else {
+      el.resultadoSeguridadeTr.style.display = "";
+      el.resRppsTr.style.display = "none";
+      el.resPrevicomTr.style.display = "none";
+      el.res3Cod.textContent = obj.codigoSegSocial;
+      el.res3Desc.textContent = "SEGURIDADE SOCIAL";
+      aplicarValorResultado(el.res3Val, obj.vSegSocial);
+    }
+
+    // ✅ Ponto 4: Imposto de Renda sobre a Remuneração
+    el.resIrCod.textContent = obj.codigoIR;
+    aplicarValorResultado(el.resIrVal, obj.vIR);
+
+    // ✅ "Dif. Décimo Terceiro" — código 20520 (a receber) / 60520 (a devolver)
+    el.resDif13Cod.textContent = obj.v13 < 0 ? "60520" : "20520";
+    aplicarValorResultado(el.resDif13Val, obj.v13);
+
+    if (obj.inss13.dfPrevicomAtivo) {
+      el.resultadoInss13Tr.style.display = "none";
+      el.resRpps13Tr.style.display = obj.inss13.valorRpps !== 0 ? "" : "none";
+      el.resPrevicom13Tr.style.display = obj.inss13.valorPrevicom !== 0 ? "" : "none";
+      aplicarValorResultado(el.resRpps13Val, obj.inss13.valorRpps);
+      aplicarValorResultado(el.resPrevicom13Val, obj.inss13.valorPrevicom);
+    } else {
+      el.resultadoInss13Tr.style.display = "";
+      el.resRpps13Tr.style.display = "none";
+      el.resPrevicom13Tr.style.display = "none";
+      el.res4Cod.textContent = obj.codigoSegSocial13;
+      el.res4Desc.textContent = "SEGURIDADE SOCIAL SOBRE 13º SALÁRIO";
+      aplicarValorResultado(el.res4Val, obj.vSegSocial13);
+    }
+
+    // ✅ Ponto 4: Imposto de Renda sobre o 13º
+    el.resIr13Cod.textContent = obj.codigoIR13;
+    aplicarValorResultado(el.resIr13Val, obj.vIR13);
+
+    // ✅ Ponto 6: Auxílio Alimentação — linha só aparece se houver valor a devolver
+    if (obj.auxAlim.valor !== 0) {
+      el.resAuxAlimTr.style.display = "";
+      el.resAuxAlimCod.textContent = obj.auxAlim.codigo;
+      aplicarValorResultado(el.resAuxAlimVal, obj.auxAlim.valor);
+    } else {
+      el.resAuxAlimTr.style.display = "none";
+    }
+
+    // ✅ Todas as rubricas da Remuneração, na mesma ordem em que foram lançadas
+    el.rubricasResultadoBody.innerHTML = obj.linhasRubricas.map(it => `
+      <tr>
+        <td>${pad5(it.codigo)}</td>
+        <td>${prefixoDescricao(it.valor)} ${it.descricao}</td>
+        <td class="${it.valor >= 0 ? "valor-positivo" : "valor-negativo"}">${formatarValorTabela(it.valor)}</td>
+      </tr>
+    `).join("");
+
+    // ✅ Ponto 2: adiantamento de 13º salário
+    aplicarValorResultado(el.resAdiant13Val, obj.adiantamento13.valor);
+
+    $$("#results-body tr").forEach(tr => {
+      if (
+        tr.id === "resultado-rubrica-1" || tr.id === "resultado-rubrica-2" ||
+        tr.id === "resultado-seguridade-social" || tr.id === "resultado-inss-13" ||
+        tr.id === "resultado-aux-alimentacao" ||
+        tr.id === "resultado-adiantamento-13"
+      ) return;
+      if (tr.classList.contains("total-row")) return;
+
+      const codCell = tr.cells[0];
+      const valCell = tr.cells[2];
+      if (!codCell || !valCell) return;
+
+      const codigoBase = codCell.textContent.trim();
+      let valor = null;
+      if (codigoBase.endsWith("0875")) valor = obj.vFeriasVenc;
+      if (codigoBase.endsWith("0857")) valor = obj.vTercoVenc;
+      if (codigoBase.endsWith("0872")) valor = obj.vFerProp;
+      if (codigoBase.endsWith("0883")) valor = obj.vTercoProp;
+      if (valor === null) return;
+
+      valCell.textContent = formatarValorTabela(valor);
+      valCell.className = valor >= 0 ? "valor-positivo" : "valor-negativo";
+      const ultimos4 = codigoBase.slice(-4);
+      codCell.textContent = (valor >= 0 ? "2" : "6") + ultimos4;
+    });
+
+    // ✅ Ponto 3: total já soma os lançamentos manuais (calculado em executarCalculoCompleto)
+    el.totalFinalVal.className = obj.total >= 0 ? "valor-positivo" : "valor-negativo";
+    el.totalFinalVal.textContent = formatarValorTabela(obj.total);
+
+    el.detTxt.innerHTML = `
+      <strong>Cálculo — ACERTO DE CONTAS - SERVIDOR COM VÍNCULO (CARGO EFETIVO):</strong><br><br>
+      <strong>Período de cálculo (DATA A DATA):</strong><br>
+      - Admissão: ${fmtBR(obj.admissao)}<br>
+      - Desligamento: ${fmtBR(obj.exoneracao)}<br>
+      - Total de avos (mês a mês): ${obj.avos.totalAvosFerias} avos<br><br>
+
+      <strong>Itens dinâmicos (Remuneração):</strong><br>
+      - 1ª rubrica: ${obj.r1.descricao || "(sem descrição)"} | Código base: ${pad5(obj.r1.codigo) || "00000"} | Valor: R$ ${obj.v1.toFixed(2)}<br>
+      - 2ª rubrica (dias): ${obj.r2.descricao || "(sem descrição)"} | Código base: ${pad5(obj.r2.codigo) || "00000"} | Valor dias: R$ ${obj.v2.toFixed(2)}<br><br>
+
+      <strong>Seguridade Social${obj.baseSeg.dfPrevicomAtivo ? "" : ` (código ${obj.codigoSegSocial})`}:</strong><br>
+      - Soma das verbas sujeitas à Seguridade Social (exclui as marcadas como "não incide"): R$ ${obj.baseSeg.remTotalSeguridade.toFixed(2)}<br>
+      ${obj.baseSeg.recebeuDiasAMais ? `
+        - Servidor recebeu 30 dias, mas a exoneração foi anterior — total recebido a maior: R$ ${obj.baseSeg.valorRecebidoAMaior.toFixed(2)}<br>
+      ` : `
+        - Diferença de dias (a receber): R$ ${Math.max(0, obj.baseSeg.diffTotalGeral).toFixed(2)}<br>
+      `}
+      ${obj.baseSeg.dfPrevicomAtivo ? `
+        - DF-PREVICOM ativo (teto R$ ${TETO_RPPS_PREVICOM.toFixed(2)}): ${[
+            obj.baseSeg.valorRpps !== 0 ? `RPPS IPREV (código 40901): R$ ${obj.baseSeg.valorRpps.toFixed(2)}` : null,
+            obj.baseSeg.valorPrevicom !== 0 ? `PREVICOM - COMPLEMENTAR (código 41940): R$ ${obj.baseSeg.valorPrevicom.toFixed(2)}` : null
+          ].filter(Boolean).join(" | ")}<br>
+      ` : `
+        - Valor (14% × diferença): R$ ${obj.vSegSocial.toFixed(2)}<br>
+      `}
+      <br>
+
+      <strong>Imposto de Renda (tabela IRRF 2026, código ${obj.codigoIR}):</strong><br>
+      - Nº de dependentes informado: ${obj.dependentes}<br>
+      - Dias devidos (até a exoneração): ${obj.impostoRenda.detalhe.diasDevidos} | IR sobre esses dias: R$ ${obj.impostoRenda.detalhe.irDiasDevidos.toFixed(2)}<br>
+      - Dias já recebidos (mês do desligamento): ${obj.impostoRenda.detalhe.diasRecebidos} | IR sobre esses dias: R$ ${obj.impostoRenda.detalhe.irDiasRecebidos.toFixed(2)}<br>
+      - Diferença lançada no resultado: R$ ${formatarMoeda(obj.vIR)}<br><br>
+
+      <strong>Cálculo da Gratificação Natalícia (13º):</strong><br>
+      - Remuneração total (soma das rubricas): R$ ${obj.remTotal.toFixed(2)}<br>
+      - Valor de 1 avo: R$ ${obj.remTotal.toFixed(2)} ÷ 12 = R$ ${obj.valorUmAvo.toFixed(2)}<br>
+      - Avos devidos (ANO CORRENTE): ${obj.avos.avosGratificacao} avos<br>
+      - Cálculo 13º: R$ ${obj.valorUmAvo.toFixed(2)} × ${obj.avos.avosGratificacao} = R$ ${obj.v13.toFixed(2)}<br>
+      ${obj.inss13.dfPrevicomAtivo
+        ? `- Seguridade Social sobre o 13º (DF-PREVICOM ativo): ${[
+            obj.inss13.valorRpps !== 0 ? `RPPS IPREV - GRAT. NATALÍCIA (código 40924): R$ ${obj.inss13.valorRpps.toFixed(2)}` : null,
+            obj.inss13.valorPrevicom !== 0 ? `PREVICOM - COMPLEMENTAR GRAT. NATALÍCIA (código 41943): R$ ${obj.inss13.valorPrevicom.toFixed(2)}` : null
+          ].filter(Boolean).join(" | ")}<br>`
+        : `- Seguridade Social sobre o 13º (14% × valor do 13º sujeito à Seguridade Social, código ${obj.codigoSegSocial13}): R$ ${obj.vSegSocial13.toFixed(2)}<br>`}
+      - Imposto de Renda sobre o 13º (tabela IRRF 2026, código ${obj.codigoIR13}): R$ ${formatarMoeda(obj.vIR13)}<br><br>
+
+      <strong>Cálculo das Férias Vencidas:</strong><br>
+      - Remuneração para fins de férias (total das verbas da Remuneração): R$ ${obj.remSemPericulosidade.toFixed(2)}<br>
+      - Avos vencidos: ${obj.avos.avosFeriasVencidas} avos<br>
+      - Dias de férias vencidas devidos: ${obj.avos.avosFeriasVencidas} × 2,5 = ${obj.diasDevidosVencidas.toFixed(1)} dias<br>
+      - Total de dias usufruídos (todos os períodos lançados): ${obj.diasUsuf} dias<br>
+      - Dias usufruídos alocados às vencidas (FIFO, período mais antigo primeiro): ${obj.diasUsufruidosVencidas.toFixed(1)} dias<br>
+      ${obj.diasFeriasVencidasDevidos > 0 ? `
+        - Dias a indenizar: ${obj.diasFeriasVencidasDevidos.toFixed(1)} dias<br>
+        - Valor por dia: R$ ${obj.remSemPericulosidade.toFixed(2)} ÷ 30 = R$ ${(obj.remSemPericulosidade/30).toFixed(2)}<br>
+        - Cálculo férias vencidas: ${obj.diasFeriasVencidasDevidos.toFixed(1)} × R$ ${(obj.remSemPericulosidade/30).toFixed(2)} = R$ ${obj.vFeriasVenc.toFixed(2)}<br>
+        - 1/3 sobre férias vencidas: R$ ${obj.vFeriasVenc.toFixed(2)} ÷ 3 = R$ ${obj.vTercoVenc.toFixed(2)}<br>
+      ` : `- Não há férias vencidas a receber (dias usufruídos ≥ dias devidos)<br>`}
+      ${obj.diasUsufruidosRestantes > 0 ? `- Dias usufruídos restantes (aplicados ao saldo das proporcionais): ${obj.diasUsufruidosRestantes.toFixed(1)} dias<br>` : ``}
+
+      <br><strong>Cálculo das Férias Proporcionais (direito x usufruto):</strong><br>
+      - Avos acumulados no período em aberto: ${obj.ferProp.detalhes.avosNoCargo} avos<br>
+      - Avos que faltam para completar 12: ${obj.ferProp.detalhes.faltamAvos} avos<br>
+      - Dias de direito (avos ÷ 12 × 30): ${obj.ferProp.detalhes.diasDireito} dias<br>
+      - Dias usufruídos (restantes após FIFO com as vencidas): ${obj.ferProp.detalhes.diasUsufruidos} dias<br>
+      - Saldo de dias (direito - usufruídos): ${obj.ferProp.detalhes.saldoDias} dias<br>
+      - Férias proporcionais (saldo × valor/dia): R$ ${obj.vFerProp.toFixed(2)}<br><br>
+
+      <strong>Cálculo do 1/3:</strong><br>
+      - Avos vencidos: ${obj.avos.avosFeriasVencidas} avos | Avos proporcionais de direito: ${Math.min(12, obj.avos.avosFeriasProporcionais)} avos<br>
+      - 1/3 devido (bruto, sobre os avos): vencidas R$ ${obj.terco.detalhes.tercoDevidoVencidas.toFixed(2)} | proporcionais R$ ${obj.terco.detalhes.tercoDevidoProporcional.toFixed(2)}<br>
+      - Dias com "Recebeu 1/3?" marcado: ${obj.terco.detalhes.diasTercoVencidas} dia(s) nas vencidas | ${obj.terco.detalhes.diasTercoProporcional} dia(s) nas proporcionais<br>
+      - 1/3 já recebido (abatido do devido bruto): vencidas R$ ${obj.terco.detalhes.tercoJaRecebidoVencidas.toFixed(2)} | proporcionais R$ ${obj.terco.detalhes.tercoJaRecebidoProporcional.toFixed(2)}<br>
+      - 1/3 sobre férias vencidas (20857): R$ ${obj.vTercoVenc.toFixed(2)}<br>
+      - 1/3 sobre férias proporcionais (20883): R$ ${obj.vTercoProp.toFixed(2)}
+    `;
+    aplicarVisibilidadeDetalhes();
+
+    const baseDias = obj.r2.valor ? Number(obj.r2.valor) : 0;
+    if (obj.diasMes !== 0 && baseDias !== 0) {
+      el.detDiasTxt.innerHTML = `
+        <strong>Detalhes do cálculo dos dias trabalhados (2ª rubrica):</strong><br><br>
+        Dias informados no mês do desligamento: ${obj.diasMes} dias ${obj.diasMes < 0 ? "(DEVOLUÇÃO)" : ""}<br>
+        Rubrica usada: ${obj.r2.descricao || "(sem descrição)"}<br>
+        Fórmula: (Valor ÷ 30) × ${obj.diasMes}<br>
+        Cálculo: (R$ ${baseDias.toFixed(2)} ÷ 30) × ${obj.diasMes} = R$ ${obj.v2.toFixed(2)}<br><br>
+        <strong>Total no 2º item (dias trabalhados):</strong><br>
+        <strong>R$ ${obj.v2.toFixed(2)}</strong>
+      `;
+      el.detDiasBox.style.display = "block";
+    } else {
+      el.detDiasBox.style.display = "none";
+    }
+  };
+
+  const buildMsgFinal = (obj) => {
+    return `ACERTO DE CONTAS - SERVIDOR COM VÍNCULO (CARGO EFETIVO)
+========================================
+
+Servidor: ${obj.nome} (Matrícula: ${obj.mat})
+Cargo/Função: ${obj.cargo}
+Data de nascimento: ${fmtBR(obj.nascimento)}
+${obj.processoSei ? `Processo SEI: ${obj.processoSei}\n` : ``}
+Período: ${fmtBR(obj.admissao)} a ${fmtBR(obj.exoneracao)} (DATA A DATA)
+Total de avos (mês a mês): ${obj.avos.totalAvosFerias} avos${obj.avos.avosFeriasExcluidos > 0 ? ` (${obj.avos.totalAvosFeriasBruto} avos pela data a data - ${obj.avos.avosFeriasExcluidos} avo(s) por mês(es) com menos de 15 dias trabalhados)` : ``}
+Remuneração (soma das rubricas): R$ ${obj.remTotal.toFixed(2)}
+Férias vencidas: ${obj.avos.avosFeriasVencidas} avos
+Férias proporcionais: ${obj.avos.avosFeriasProporcionais} avos
+Gratificação natalícia: ${obj.avos.avosGratificacao} avos${obj.avos.avosGratificacaoExcluidos > 0 ? ` (${obj.avos.avosGratificacaoBruto} avos no ano - ${obj.avos.avosGratificacaoExcluidos} avo(s) por mês(es) com menos de 15 dias trabalhados)` : ``}
+${obj.diasUsuf > 0 ? `Dias de férias usufruídos: ${obj.diasUsuf} dias\n` : ""}${obj.diasMes > 0 ? `Dias trabalhados no mês: ${obj.diasMes} dias\nValor por dias trabalhados (2ª rubrica): R$ ${obj.v2.toFixed(2)}\n` : ""}
+Total líquido: R$ ${obj.total.toFixed(2)}`;
+  };
+
+  const calcularAcerto = () => {
+    const obj = executarCalculoCompleto();
+    if (!obj) return;
+    ultimoCalculo = obj;
+    aplicarResultadosNaTela(obj);
+  };
+
+  /* ========= Relatório / Export ========= */
+  const buildRelatorioTexto = (obj) => {
+    const cod13 = (obj.v13 >= 0 ? "2" : "6") + "0520";
+
+    const itensFixos = [
+      { codigoBase: "0875", desc: "FÉRIAS INDENIZADAS (VENCIDAS)", valor: obj.vFeriasVenc },
+      { codigoBase: "0857", desc: "1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)", valor: obj.vTercoVenc },
+      { codigoBase: "0872", desc: "FÉRIAS PROPORCIONAIS", valor: obj.vFerProp },
+      { codigoBase: "0883", desc: "1/3 DE FÉRIAS PROPORCIONAIS", valor: obj.vTercoProp },
+    ];
+
+    let linhasResultado = "";
+    obj.linhasRubricas.forEach(it => {
+      linhasResultado += `${pad5(it.codigo)} - ${prefixoDescricao(it.valor)} ${it.descricao}: R$ ${formatarMoeda(it.valor)}\n`;
+    });
+    if (obj.baseSeg.dfPrevicomAtivo) {
+      if (obj.baseSeg.valorRpps !== 0) linhasResultado += `40901 - RPPS IPREV: R$ ${formatarMoeda(obj.baseSeg.valorRpps)}\n`;
+      if (obj.baseSeg.valorPrevicom !== 0) linhasResultado += `41940 - PREVICOM - COMPLEMENTAR: R$ ${formatarMoeda(obj.baseSeg.valorPrevicom)}\n`;
+    } else {
+      linhasResultado += `${obj.codigoSegSocial} - SEGURIDADE SOCIAL: R$ ${formatarMoeda(obj.vSegSocial)}\n`;
+    }
+    if (obj.vIR !== 0) {
+      linhasResultado += `${obj.codigoIR} - IMPOSTO DE RENDA: R$ ${formatarMoeda(obj.vIR)}\n`;
+    }
+    linhasResultado += `${cod13} - DIF. DÉCIMO TERCEIRO: R$ ${formatarMoeda(obj.v13)}\n`;
+    if (obj.inss13.dfPrevicomAtivo) {
+      if (obj.inss13.valorRpps !== 0) linhasResultado += `40924 - RPPS IPREV - GRAT. NATALÍCIA: R$ ${formatarMoeda(obj.inss13.valorRpps)}\n`;
+      if (obj.inss13.valorPrevicom !== 0) linhasResultado += `41943 - PREVICOM - COMPLEMENTAR GRAT. NATALÍCIA: R$ ${formatarMoeda(obj.inss13.valorPrevicom)}\n`;
+    } else {
+      linhasResultado += `${obj.codigoSegSocial13} - SEGURIDADE SOCIAL SOBRE 13º SALÁRIO: R$ ${formatarMoeda(obj.vSegSocial13)}\n`;
+    }
+    if (obj.vIR13 !== 0) {
+      linhasResultado += `${obj.codigoIR13} - IMPOSTO DE RENDA SOBRE 13º: R$ ${formatarMoeda(obj.vIR13)}\n`;
+    }
+    itensFixos.forEach(it => {
+      const cod = (it.valor >= 0 ? "2" : "6") + it.codigoBase;
+      linhasResultado += `${cod} - ${it.desc}: R$ ${formatarMoeda(it.valor)}\n`;
+    });
+    if (obj.auxAlim.valor !== 0) {
+      linhasResultado += `${pad5(obj.auxAlim.codigo)} - DEV. AUXÍLIO ALIMENTAÇÃO: R$ ${formatarMoeda(obj.auxAlim.valor)}\n`;
+    }
+    if (obj.adiantamento13.valor !== 0) {
+      linhasResultado += `${obj.adiantamento13.codigo} - ADIANTAMENTO DE 13º SALÁRIO: R$ ${formatarMoeda(obj.adiantamento13.valor)}\n`;
+    }
+    obj.manuais.forEach(it => {
+      const cod = it.codigo || "00000";
+      const desc = it.descricao || "(lançamento manual)";
+      linhasResultado += `${cod} - ${desc}: R$ ${formatarMoeda(it.valor)}\n`;
+    });
+
+    const textoSegSocial = obj.baseSeg.dfPrevicomAtivo
+      ? `DF-PREVICOM ativo — ${[
+          obj.baseSeg.valorRpps !== 0 ? `RPPS IPREV: R$ ${obj.baseSeg.valorRpps.toFixed(2)}` : null,
+          obj.baseSeg.valorPrevicom !== 0 ? `PREVICOM - COMPLEMENTAR: R$ ${obj.baseSeg.valorPrevicom.toFixed(2)}` : null
+        ].filter(Boolean).join(" | ")}`
+      : (obj.baseSeg.recebeuDiasAMais
+        ? `Servidor recebeu dias a mais do que a data de exoneração — total recebido a maior (verbas sujeitas à Seguridade Social): R$ ${obj.baseSeg.valorRecebidoAMaior.toFixed(2)} | Valor a receber (14% sobre o recebido a maior): R$ ${obj.vSegSocial.toFixed(2)}`
+        : `Base para os 14% (verbas sujeitas à Seguridade Social, diferença de dias): R$ ${obj.baseSeg.diffTotalGeral.toFixed(2)} | Valor: R$ ${obj.vSegSocial.toFixed(2)}`);
+
+    return `RELATÓRIO DE ACERTO - SERVIDOR COM VÍNCULO (CARGO EFETIVO)
+========================================================
+
+DATA: ${new Date().toLocaleDateString("pt-BR")}
+
+DADOS DO SERVIDOR:
+Nome: ${obj.nome}
+Matrícula: ${obj.mat}
+Cargo/Função: ${obj.cargo}
+Data de nascimento: ${fmtBR(obj.nascimento)}
+${obj.processoSei ? `Processo SEI: ${obj.processoSei}\n` : ``}
+PERÍODO (DATA A DATA):
+Admissão: ${fmtBR(obj.admissao)}
+Desligamento: ${fmtBR(obj.exoneracao)}
+Total de avos (mês a mês): ${obj.avos.totalAvosFerias} avos
+Dias trabalhados no mês do desligamento: ${obj.diasMes} dias
+Dias de férias usufruídos: ${obj.diasUsuf} dias
+
+REMUNERAÇÃO:
+Total (soma das rubricas): R$ ${obj.remTotal.toFixed(2)}
+Remuneração para fins de férias e 1/3 (total das verbas da Remuneração): R$ ${obj.remSemPericulosidade.toFixed(2)}
+Diferença 1ª rubrica: R$ ${obj.v1.toFixed(2)}
+Diferença 2ª rubrica (dias trabalhados): R$ ${obj.v2.toFixed(2)}
+Seguridade Social${obj.baseSeg.dfPrevicomAtivo ? "" : ` (14% - código ${obj.codigoSegSocial})`}: ${textoSegSocial}
+Valor da Seguridade Social (remuneração): R$ ${obj.vSegSocial.toFixed(2)}
+Imposto de Renda (tabela IRRF 2026, código ${obj.codigoIR}, ${obj.dependentes} dependente(s)): R$ ${formatarMoeda(obj.vIR)}
+Seguridade Social sobre o 13º salário${obj.inss13.dfPrevicomAtivo ? " (DF-PREVICOM)" : ` (código ${obj.codigoSegSocial13})`}: R$ ${obj.vSegSocial13.toFixed(2)}
+Imposto de Renda sobre o 13º (código ${obj.codigoIR13}): R$ ${formatarMoeda(obj.vIR13)}
+
+CÁLCULO DE AVOS:
+Férias vencidas: ${obj.avos.avosFeriasVencidas} avos
+Férias proporcionais: ${obj.avos.avosFeriasProporcionais} avos
+13º salário proporcional: ${obj.avos.avosGratificacao} avos
+
+AUXÍLIO ALIMENTAÇÃO:
+Quantidade recebida: ${obj.auxAlim.qtdRecebido} | Quantidade utilizada: ${obj.auxAlim.qtdUtilizado} | Valor recebido: R$ ${obj.auxAlim.valorRecebido.toFixed(2)}
+Valor de cada unidade: R$ ${obj.auxAlim.valorUnidade.toFixed(2)} | Quantidade a devolver: ${obj.auxAlim.qtdADevolver} | Valor a devolver (código ${pad5(obj.auxAlim.codigo)}): R$ ${formatarMoeda(obj.auxAlim.valor)}
+
+ADIANTAMENTO DE 13º SALÁRIO:
+Mês da exoneração: ${obj.adiantamento13.mesExoneracao || "-"} | Valor recebido: R$ ${obj.adiantamento13.valorInformado.toFixed(2)} | Devolução (código ${obj.adiantamento13.codigo}, sem INSS): R$ ${formatarMoeda(obj.adiantamento13.valor)}
+
+RESULTADO DO ACERTO:
+================================
+${linhasResultado}
+TOTAL LÍQUIDO: R$ ${obj.total.toFixed(2)}
+
+OBSERVAÇÕES:
+- Este cálculo considera o período do vínculo efetivo
+- Período calculado DATA A DATA (da admissão até o desligamento)
+- Cálculo de avos: mês a mês (01/jan até 01/fev = 1 avo)
+- Férias vencidas: todos os avos antes do último período completo
+- Férias proporcionais: cálculo considerando avos completos, dias usufruídos e 1/3
+- Itens dinâmicos: 1ª rubrica (valor direto) e 2ª rubrica (valor/30*dias)
+- Seguridade Social: 14% sobre a soma das verbas da Remuneração (ou sobre o valor líquido, se houver dias recebidos a mais que a exoneração)
+`;
+  };
+
+  const gerarRelatorio = () => {
+    const obj = executarCalculoCompleto();
+    if (!obj) return;
+    ultimoCalculo = obj;
+    aplicarResultadosNaTela(obj);
+
+    const rel = buildRelatorioTexto(obj);
+
+    const w = window.open("", "_blank");
+    w.document.write("<html><head><title>Relatório de Acerto</title>");
+    w.document.write('<style>body{font-family:Arial,sans-serif;margin:20px}pre{white-space:pre-wrap}</style>');
+    w.document.write("</head><body>");
+    w.document.write("<h2>RELATÓRIO DE ACERTO - SERVIDOR COM VÍNCULO (CARGO EFETIVO)</h2>");
+    w.document.write("<pre>" + rel + "</pre>");
+    w.document.write("</body></html>");
+    w.document.close();
+
+    alert("Relatório gerado com sucesso! Uma nova janela foi aberta com o relatório completo.");
+  };
+
+  // ✅ Ponto 4: imprime EXATAMENTE a aba "ACERTO DE CONTAS" como está na tela
+  // (mesma tabela de resultados, com ou sem descrição conforme o toggle),
+  // acrescentando um cabeçalho impresso com a identificação do servidor.
+  const imprimirAcerto = () => {
+    const obj = executarCalculoCompleto();
+    if (!obj) return;
+    ultimoCalculo = obj;
+    aplicarResultadosNaTela(obj);
+
+    el.printHeaderDados.innerHTML = `
+      <strong>Nome:</strong> ${obj.nome} &nbsp;|&nbsp; <strong>Matrícula:</strong> ${obj.mat}<br>
+      <strong>Cargo/Função:</strong> ${obj.cargo || "-"} &nbsp;|&nbsp; <strong>Data de nascimento:</strong> ${fmtBR(obj.nascimento)}<br>
+      <strong>Admissão:</strong> ${fmtBR(obj.admissao)} &nbsp;|&nbsp; <strong>Desligamento/Exoneração:</strong> ${fmtBR(obj.exoneracao)}
+      ${obj.processoSei ? `<br><strong>Processo SEI:</strong> ${obj.processoSei}` : ``}
+    `;
+
+    window.print();
+  };
+
+
+  const exportar = () => {
+    const dados = {
+      nome: el.nome.value,
+      matricula: el.matricula.value,
+      cargo: el.cargo.value,
+      nascimento: el.nascimento.value,
+      processoSei: el.processoSei.value,
+      admissao: el.admissao.value,
+      exoneracao: el.exoneracao.value,
+      diasTrabalhadosMes: el.diasMes.value,
+      rubricas: obterRubricas(),
+      auxAlimentacao: {
+        qtdRecebido: el.aaQtdRecebido.value,
+        qtdUtilizado: el.aaQtdUtilizado.value,
+        valorRecebido: el.aaValorRecebido.value,
+        valorADevolver: el.aaValorDevolverInput.value
+      },
+      avosFeriasVencidas: el.avosV.textContent,
+      avosFeriasProporcionais: el.avosP.textContent,
+      avosGratificacao: el.avos13.textContent,
+      dataExportacao: new Date().toISOString(),
+    };
+
+    const blob = new Blob([JSON.stringify(dados,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `acerto_servidor_efetivo_${dados.matricula || "dados"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    alert("Dados exportados com sucesso!");
+  };
+
+  /* ========= Eventos (delegação -> mais leve) ========= */
+  const bind = () => {
+    // Férias: recalcula dias + valida ao mudar qualquer date
+    el.feriasBody.addEventListener("change", (ev) => {
+      const t = ev.target;
+      if(t && t.matches('input[type="date"]')){
+        const tr = t.closest("tr");
+        if(tr) recalcularDiasLinha(tr);
+        validarDatasFerias();
+      }
+    });
+
+    el.feriasBody.addEventListener("input", (ev) => {
+      const t = ev.target;
+      if(t && t.classList?.contains("dias-usufruidos")){
+        aplicarAlertaDiasIncompletos(t);
+      }
+    });
+
+    // Rubricas: mantém só dígitos no código e atualiza dinâmicos (com debounce leve)
+    let inputDebounceTimer = null;
+    let manualDebounceTimer = null;
+    let auxAlimDebounceTimer = null;
+    document.addEventListener("input", (ev) => {
+      const t = ev.target;
+      if(!t) return;
+
+      if(t.classList?.contains("rubrica-codigo")){
+        t.value = onlyDigits(t.value).slice(0,5);
+        aplicarDescricaoAutomaticaPorCodigo(t);
+      }
+
+      if(t.classList?.contains("manual-codigo")){
+        aplicarDescricaoAutomaticaPorCodigo(t);
+      }
+
+      // ✅ Se o usuário digitar diretamente na descrição, ela deixa de ser
+      // considerada "automática" — não será mais sobrescrita ao trocar o código.
+      if(t.classList?.contains("rubrica-nome") || t.classList?.contains("manual-descricao")){
+        t.dataset.autoDesc = "0";
+      }
+
+      if (t === el.adminCodInput) {
+        t.value = onlyDigits(t.value).slice(0,5);
+      }
+
+      // ✅ Limita o percentual do DF-PREVICOM a no máximo 8,5%
+      if (t === el.dfPrevicomPercentual) {
+        const v = parseFloat(t.value);
+        if (!isNaN(v) && v > 8.5) t.value = "8.5";
+      }
+
+      // ✅ Ponto 4: força caixa alta em todos os campos de texto livre
+      if(
+        t.tagName === "INPUT" && t.type === "text" &&
+        !t.classList?.contains("moeda-mask") && t.getAttribute("inputmode") !== "numeric"
+      ){
+        const pos = t.selectionStart, posEnd = t.selectionEnd;
+        t.value = t.value.toUpperCase();
+        if (pos != null) t.setSelectionRange(pos, posEnd);
+      }
+
+      // ✅ Ponto 5: máscara monetária (formato 0,00) nos campos de valor
+      if (t.classList?.contains("moeda-mask")) {
+        t.value = aplicarMascaraMoeda(t.value);
+        // ✅ Ponto 1/2: se o usuário editar manualmente o adiantamento de 13º,
+        // deixa de ser considerado "auto-preenchido" — não será mais sobrescrito
+        // nem limpo automaticamente.
+        if (t === el.adiantamento13) {
+          t.dataset.auto = "0";
+        }
+      }
+
+      if(
+        t.classList?.contains("rubrica-codigo") ||
+        t.classList?.contains("rubrica-nome") ||
+        t.classList?.contains("rubrica-valor") ||
+        t.classList?.contains("rubrica-naosegsocial") ||
+        t === el.diasMes || t === el.irDependentes
+      ){
+        // ✅ Evita recalcular a cada caractere digitado (mais leve em máquinas modestas)
+        clearTimeout(inputDebounceTimer);
+        inputDebounceTimer = setTimeout(() => atualizarResultadosDinamicos(), 120);
+      }
+
+      // ✅ Ponto 6: prévia ao vivo do valor a devolver de Auxílio Alimentação
+      if(
+        t === el.aaQtdRecebido || t === el.aaQtdUtilizado ||
+        t === el.aaValorRecebido
+      ){
+        clearTimeout(auxAlimDebounceTimer);
+        auxAlimDebounceTimer = setTimeout(() => atualizarAuxAlimentacaoNaTela(), 120);
+      }
+
+      // ✅ Lançamentos manuais: sinal automático pelo código (4/5/6 = negativo,
+      // 1/2/3 = positivo) e atualização IMEDIATA do Total (com pequeno debounce
+      // apenas para não recalcular a cada tecla).
+      if(
+        t.classList?.contains("manual-codigo") ||
+        t.classList?.contains("manual-descricao") ||
+        t.classList?.contains("manual-valor")
+      ){
+        clearTimeout(manualDebounceTimer);
+        manualDebounceTimer = setTimeout(() => recalcularTotalNaTela(), 120);
+      }
+    });
+
+    // valida período ao mudar datas base
+    el.admissao.addEventListener("change", validarDatasFerias);
+    el.exoneracao.addEventListener("change", validarDatasFerias);
+
+    // botões
+    $("#limpar-dados").addEventListener("click", limparTudo);
+    $("#limpar-dados-tab1").addEventListener("click", limparTudo);
+    $("#calcular-acerto").addEventListener("click", () => { if (tentarIrParaAcerto()) calcularAcerto(); });
+    $("#calcular-avos").addEventListener("click", () => { if (tentarIrParaAcerto()) calcularAvosBotao(); });
+    $("#gerar-relatorio").addEventListener("click", () => { if (tentarIrParaAcerto()) gerarRelatorio(); });
+    $("#exportar-dados").addEventListener("click", exportar);
+    $("#imprimir-pdf").addEventListener("click", () => { if (tentarIrParaAcerto()) imprimirAcerto(); });
+    el.toggleDescricao.addEventListener("click", toggleDescricaoResultados);
+
+    // abas
+    el.irParaAcerto.addEventListener("click", tentarIrParaAcerto);
+    el.tabBtn1.addEventListener("click", () => irParaTab(1));
+    el.tabBtn2.addEventListener("click", tentarIrParaAcerto);
+
+    // ✅ Painel "Gerenciar tabela de códigos"
+    el.adminAddBtn.addEventListener("click", () => {
+      if (adicionarOuAtualizarCodigo(el.adminCodInput.value, el.adminDescInput.value)) {
+        el.adminCodInput.value = "";
+        el.adminDescInput.value = "";
+        renderizarPainelCodigos();
+        alert("Código salvo com sucesso!");
+      }
+    });
+
+    el.adminBulkImportBtn.addEventListener("click", () => {
+      const { importados, ignorados } = importarCodigosEmLote(el.adminBulkTextarea.value);
+      renderizarPainelCodigos();
+      if (importados > 0) el.adminBulkTextarea.value = "";
+      alert(`Importação concluída: ${importados} código(s) importado(s)${ignorados > 0 ? `, ${ignorados} linha(s) ignorada(s) por formato inválido` : ""}.`);
+    });
+
+    el.adminCustomBody.addEventListener("click", (ev) => {
+      const btn = ev.target.closest(".admin-remove-btn");
+      if (!btn) return;
+      const cod = btn.dataset.cod;
+      if (confirm(`Remover o código personalizado ${cod}?`)) {
+        removerCodigoCustom(cod);
+        renderizarPainelCodigos();
+      }
+    });
+
+    el.adminExportBtn.addEventListener("click", () => {
+      const dados = obterCodigosCombinados();
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "codigos_sigrh_atual.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    el.adminResetBtn.addEventListener("click", () => {
+      if (confirm("Isso vai remover TODOS os códigos personalizados salvos neste navegador (a tabela padrão não é afetada). Continuar?")) {
+        salvarCodigosCustom({});
+        renderizarPainelCodigos();
+      }
+    });
+  };
+
+  /* ========= Init ========= */
+  const init = () => {
+    renderFerias(36);
+    $("#caracteristicas-box").open = false;
+    atualizarResultadosDinamicos();
+    atualizarAuxAlimentacaoNaTela();
+    renderizarPainelCodigos();
+    bind();
+  };
+
+  window.addEventListener("load", init);
+})();
+</script>
+
+<script type="module">
+  import { exigirLogin, salvarAcerto, checkConnection, observarLogin, logout, buscarAcerto, atualizarAcerto } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+
+  // Junta todas as linhas visíveis da tabela de resultados (código, descrição, valor)
+  function coletarLinhasResultado() {
+    const linhas = [];
+    const lerCelula = (td) => {
+      const input = td.querySelector('input');
+      return input ? input.value.trim() : td.textContent.trim();
+    };
+    document.querySelectorAll('#tabela-resultados-completa tbody tr').forEach((tr) => {
+      if (tr.style.display === 'none') return;
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 3) {
+        const codigo = lerCelula(tds[0]);
+        const descricao = lerCelula(tds[1]);
+        const valor = lerCelula(tds[2]);
+        if (!codigo && !descricao && !valor) return;
+        linhas.push({ codigo, descricao, valor });
+      }
+    });
+    return linhas;
+  }
+
+  // ---- Edição de acerto já salvo ----
+  function chaveElemento(el) {
+    if (el.id) return 'id:' + el.id;
+    const container = el.closest('[id]') || document.body;
+    const cls = Array.from(el.classList).join('.');
+    const seletor = el.tagName.toLowerCase() + (cls ? '.' + cls : '');
+    const lista = Array.from(container.querySelectorAll(seletor));
+    const idx = lista.indexOf(el);
+    return 'pos:' + (container.id || '') + '::' + seletor + '::' + idx;
+  }
+
+  function elementoPelaChave(chave) {
+    if (chave.indexOf('id:') === 0) {
+      return document.getElementById(chave.slice(3));
+    }
+    if (chave.indexOf('pos:') === 0) {
+      const partes = chave.slice(4).split('::');
+      const containerId = partes[0];
+      const seletor = partes[1];
+      const idx = parseInt(partes[2], 10);
+      const container = containerId ? document.getElementById(containerId) : document.body;
+      if (!container) return null;
+      const lista = container.querySelectorAll(seletor);
+      return lista[idx] || null;
+    }
+    return null;
+  }
+
+  function coletarEntradas() {
+    const entradas = {};
+    document.querySelectorAll('input, select, textarea').forEach((el) => {
+      const chave = chaveElemento(el);
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        entradas[chave] = el.checked;
+      } else {
+        entradas[chave] = el.value;
+      }
+    });
+    return entradas;
+  }
+
+  function restaurarEntradas(entradas) {
+    if (!entradas) return;
+    Object.keys(entradas).forEach((chave) => {
+      const el = elementoPelaChave(chave);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = entradas[chave];
+      } else {
+        el.value = entradas[chave];
+      }
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const idEdicao = params.get('editar');
+
+  if (idEdicao) {
+    buscarAcerto(idEdicao).then((registro) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      if (registro && registro.dados && registro.dados.entradas) {
+        restaurarEntradas(registro.dados.entradas);
+        banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule e clique em "Salvar no Portal" para atualizar este mesmo registro.';
+      } else {
+        banner.textContent = 'Este acerto foi salvo antes da função de edição existir — não é possível recarregar os campos automaticamente. Ao salvar de novo, será criado um registro novo.';
+        banner.style.background = '#FBEAEA';
+        banner.style.borderColor = '#E9B4B4';
+        banner.style.color = '#7A2E2E';
+      }
+    }).catch((err) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      banner.textContent = 'Erro ao carregar o acerto para edição: ' + err.message;
+      banner.style.background = '#FBEAEA';
+      banner.style.borderColor = '#E9B4B4';
+      banner.style.color = '#7A2E2E';
+    });
+  }
+
+  document.getElementById('salvar-portal').addEventListener('click', async () => {
+    const status = document.getElementById('salvar-portal-status');
+    const dados = {
+      nome: document.getElementById('nome').value,
+      matricula: document.getElementById('matricula').value,
+      cargo: document.getElementById('cargo').value,
+      nascimento: document.getElementById('nascimento').value,
+      admissao: document.getElementById('admissao').value,
+      exoneracao: document.getElementById('exoneracao').value,
+      totalFinal: document.getElementById('total-final-valor').textContent.trim(),
+      rubricas: coletarLinhasResultado(),
+      entradas: coletarEntradas()
+    };
+
+    if (!dados.matricula) {
+      status.textContent = 'Preencha ao menos a matrícula antes de salvar.';
+      status.style.color = '#B23B3B';
+      return;
+    }
+
+    status.textContent = 'Salvando...';
+    status.style.color = '';
+    try {
+      if (idEdicao) {
+        await atualizarAcerto(idEdicao, 'efetivo', dados);
+        status.textContent = 'Acerto atualizado no portal com sucesso.';
+      } else {
+        await salvarAcerto('efetivo', dados);
+        status.textContent = 'Acerto salvo no portal com sucesso.';
+      }
+      status.style.color = '#3E7A4C';
+    } catch (err) {
+      status.textContent = 'Erro ao salvar: ' + err.message;
+      status.style.color = '#B23B3B';
+    }
+  });
+</script>
+</body>
+</html>

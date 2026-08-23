@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Correção de Folha (Versão 09)</title>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif}
+    body{background:#f5f7fa;color:#333;line-height:1.6;padding:20px}
+    .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 10px 28px -18px rgba(15,42,61,.25);padding:30px;border:1px solid #EDEAE0}
+    header{text-align:center;margin-bottom:30px;border-bottom:2px solid #C1560C;padding-bottom:15px}
+    h1{color:#C1560C;margin-bottom:10px;font-size:28px}
+    .subtitle{color:#666;font-size:16px}
+    .section{margin-bottom:30px;padding:20px;background:#f9fafc;border-radius:8px;border-left:4px solid #C1560C}
+    h2{color:#C1560C;margin-bottom:15px;font-size:20px}
+    .row{display:flex;flex-wrap:wrap;margin:0 -10px}
+    .col{flex:1;padding:0 10px;min-width:200px}
+    .form-group{margin-bottom:15px}
+    label{display:block;margin-bottom:5px;font-weight:600;color:#444}
+
+    input[type="text"],input[type="date"],input[type="number"],input[type="month"],select{
+      width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:16px;transition:border .3s
+    }
+    input:focus,select:focus{border-color:#C1560C;outline:none}
+    input[type="text"]:not(.moeda-mask):not([inputmode="numeric"]){text-transform:uppercase}
+
+    .table-base{width:100%;border-collapse:collapse;margin-top:10px}
+    .table-base th,.table-base td{padding:10px 12px;text-align:left;border-bottom:1px solid #ddd;vertical-align:middle}
+    .rub-codigo-input{width:100%;text-align:center;font-variant-numeric:tabular-nums}
+    .rub-valor-input{width:100%;text-align:right;font-variant-numeric:tabular-nums}
+    .rub-descricao-input{width:100%}
+
+    .button-group{display:flex;flex-wrap:wrap;gap:15px;margin-top:20px}
+    button{padding:12px 25px;border:none;border-radius:5px;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s ease}
+    .btn-primary{background:#C1560C;color:#fff}.btn-primary:hover{background:#9A4409}
+    .btn-secondary{background:#0056b3;color:#fff}.btn-secondary:hover{background:#004494}
+    .btn-danger{background:#dc3545;color:#fff}.btn-danger:hover{background:#bd2130}
+    .btn-clear{background:#6c757d;color:#fff}.btn-clear:hover{background:#545b62}
+    .btn-remover-linha{background:#f1f1f1;color:#b23b3b;border:1px solid #e2b7b7;border-radius:5px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-remover-linha:hover{background:#fbeaea}
+
+    .footer{text-align:center;margin-top:30px;color:#666;font-size:14px}
+
+    .info-box{background:#fff4e9;border:1px solid #f0c48f;border-radius:5px;padding:15px;margin:15px 0;font-size:14px;color:#6b3d10}
+
+    /* ✅ Bloco exclusivo de impressão (tema laranja) */
+    .print-only{display:none}
+    .print-only h1{color:#C1560C;font-size:20px;margin:0 0 4px}
+    .print-only .print-subtitulo{font-size:12.5px;color:#555;margin:0 0 14px;border-bottom:2px solid #C1560C;padding-bottom:12px}
+    .print-only .print-secao-titulo{font-size:15px;color:#C1560C;margin:0 0 10px;border-bottom:1px solid #ddd;padding-bottom:6px}
+    .print-only .print-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 28px;margin-bottom:20px}
+    .print-only .print-info-item .print-label{font-family:'IBM Plex Mono',monospace,monospace;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#8a8a8a;margin-bottom:3px}
+    .print-only .print-info-item .print-valor{font-size:14px;font-weight:700;color:#222}
+    .print-tabela{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px}
+    .print-tabela thead th{background:#C1560C;color:#fff;text-align:left;padding:8px 10px}
+    .print-tabela thead th:not(:first-child){text-align:right}
+    .print-tabela tbody td{padding:6px 10px;border-bottom:1px solid #e2e2e2}
+    .print-tabela tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+    .print-tabela tfoot .print-total-row td{font-weight:700;padding:10px;border-top:2px solid #333}
+    .print-tabela tfoot .print-total-row td:not(:first-child){text-align:right;font-size:13px}
+    .print-only .print-rodape{font-size:11px;color:#777;text-align:center;margin-top:24px}
+
+    @media print{
+      .sidebar, .topbar, #banner-edicao{display:none !important}
+      .shell{display:block !important}
+      .main-area{margin:0 !important;padding:0 !important;width:100% !important}
+      .conteudo-modulo{padding:0 !important}
+      .container > *{display:none !important}
+      #print-only-container{display:block !important}
+      body{padding:0;background:#fff}
+      .container{box-shadow:none;padding:0}
+    }
+
+    @media (max-width:768px){
+      .row{flex-direction:column}
+      .col{width:100%;margin-bottom:15px}
+      .button-group{flex-direction:column}
+      button{width:100%}
+    }
+  </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+  }
+  html, body{ background:var(--paper) !important; padding:0 !important; margin:0 !important; }
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif !important; font-size:1.1rem; font-weight:600; color:#fff !important; margin:0.3rem 0 0 !important; text-align:left !important; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; font-family:'IBM Plex Sans',sans-serif; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.6rem 1.8rem 3rem; max-width:1200px; margin:0 auto; }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+  }
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html" class="ativo"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div class="conteudo-modulo">
+<div id="banner-edicao" style="display:none;background:#FBF3E3;border:1px solid #E9CE9C;color:#5B4A28;padding:0.7rem 1rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.2rem;font-family:'IBM Plex Sans',sans-serif;"></div>
+<div class="container">
+
+  <!-- ✅ Bloco exclusivo de impressão -->
+  <div class="print-only" id="print-only-container">
+    <h1>CORREÇÃO DE FOLHA — LANÇAMENTO SIGRH v09</h1>
+    <p class="print-subtitulo">Correção de faltas/repouso por competência • Emitido em <span id="print-data-emissao"></span></p>
+
+    <h2 class="print-secao-titulo">DADOS PESSOAIS</h2>
+    <div class="print-info-grid" id="print-dados-pessoais"></div>
+
+    <table class="print-tabela" id="print-tabela-competencias">
+      <thead>
+        <tr>
+          <th>Competência</th>
+          <th>Dias de Falta</th>
+          <th>Dias de Repouso</th>
+          <th>Valor da Falta (R$)</th>
+          <th>Valor do Repouso (R$)</th>
+          <th>INSS a devolver (R$)</th>
+        </tr>
+      </thead>
+      <tbody id="print-competencias-body"></tbody>
+      <tfoot>
+        <tr class="print-total-row">
+          <td>TOTAL</td>
+          <td id="print-total-dias-falta"></td>
+          <td id="print-total-dias-repouso"></td>
+          <td id="print-total-valor-falta"></td>
+          <td id="print-total-valor-repouso"></td>
+          <td id="print-total-inss"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p class="print-rodape" id="print-rodape"></p>
+  </div>
+
+  <header>
+    <h1>CORREÇÃO DE FOLHA (VERSÃO 09)</h1>
+    <p class="subtitle">Apuração de faltas e repouso remunerado por competência para lançamento na folha</p>
+  </header>
+
+  <section class="section">
+    <h2>DADOS PESSOAIS</h2>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="nome">NOME:</label>
+          <input type="text" id="nome" placeholder="Digite o nome do servidor" />
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="matricula">MATRÍCULA:</label>
+          <input type="text" id="matricula" placeholder="Número da matrícula" />
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="cargo">CARGO/FUNÇÃO:</label>
+          <input type="text" id="cargo" placeholder="Nome do cargo/função" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>RUBRICAS DA REMUNERAÇÃO</h2>
+    <div class="info-box">
+      <strong>Atenção:</strong> informe as rubricas que compõem a remuneração bruta mensal do servidor. O
+      total é usado para calcular proporcionalmente o valor de cada dia de falta/repouso (base ÷ 30) e a
+      diferença de INSS a devolver em cada competência.
+    </div>
+
+    <div style="overflow-x:auto;margin-top:6px;">
+      <table class="table-base" id="rub-table" style="width:100%;min-width:620px;margin-top:0;">
+        <thead>
+          <tr>
+            <th style="font-size:12px;width:110px;">Código</th>
+            <th style="font-size:12px;">Descrição</th>
+            <th style="font-size:12px;width:160px;">Valor (R$)</th>
+          </tr>
+        </thead>
+        <tbody id="rub-body">
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+          <tr><td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td><td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td><td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td></tr>
+        </tbody>
+        <tfoot>
+          <tr style="font-weight:bold;background:#f8f9fa;">
+            <td style="font-size:12px;" colspan="2">TOTAL DA REMUNERAÇÃO</td>
+            <td id="rub-total-valor" style="font-size:13px;text-align:right;">0,00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>LANÇAMENTO POR COMPETÊNCIA</h2>
+
+    <div style="overflow-x:auto;margin-top:6px;">
+      <table class="table-base" style="width:100%;min-width:820px;margin-top:0;">
+        <thead>
+          <tr>
+            <th style="font-size:12px;">Competência</th>
+            <th style="font-size:12px;">Dias de Falta</th>
+            <th style="font-size:12px;">Dias de Repouso Remunerado</th>
+            <th style="font-size:12px;">Valor da Falta (R$)</th>
+            <th style="font-size:12px;">Valor do Repouso (R$)</th>
+            <th style="font-size:12px;">INSS a devolver (R$)</th>
+            <th style="font-size:12px;"></th>
+          </tr>
+        </thead>
+        <tbody id="cf-body">
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+        </tbody>
+        <tfoot>
+          <tr style="font-weight:bold;background:#f8f9fa;">
+            <td style="font-size:12px;">TOTAL</td>
+            <td id="cf-total-dias-falta" style="font-size:12px;"></td>
+            <td id="cf-total-dias-repouso" style="font-size:12px;"></td>
+            <td id="cf-total-valor-falta" style="font-size:12px;text-align:right;"></td>
+            <td id="cf-total-valor-repouso" style="font-size:12px;text-align:right;"></td>
+            <td id="cf-total-inss" style="font-size:12px;text-align:right;"></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="button-group" style="margin-top:10px;">
+      <button type="button" class="btn-clear" id="cf-adicionar-linha" style="font-size:12px;padding:6px 12px;">+ ADICIONAR MÊS</button>
+      <button type="button" class="btn-danger" id="cf-limpar" style="font-size:12px;padding:6px 12px;">LIMPAR TUDO</button>
+    </div>
+  </section>
+
+  <div class="button-group">
+    <button class="btn-primary" id="cf-imprimir">IMPRIMIR / SALVAR PDF</button>
+    <button class="btn-secondary" id="salvar-portal" type="button">SALVAR NO PORTAL</button>
+  </div>
+  <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
+
+  <div class="footer"><p>Correção de Folha (Versão 09) — Portal de Acertos IBRAM-DF</p></div>
+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  const el = {
+    nome: $("#nome"),
+    matricula: $("#matricula"),
+    cargo: $("#cargo"),
+    rubBody: $("#rub-body"),
+    rubTotalValor: $("#rub-total-valor"),
+    cfBody: $("#cf-body"),
+    cfTotalDiasFalta: $("#cf-total-dias-falta"),
+    cfTotalDiasRepouso: $("#cf-total-dias-repouso"),
+    cfTotalValorFalta: $("#cf-total-valor-falta"),
+    cfTotalValorRepouso: $("#cf-total-valor-repouso"),
+    cfTotalInss: $("#cf-total-inss"),
+    printDataEmissao: $("#print-data-emissao"),
+    printDadosPessoais: $("#print-dados-pessoais"),
+    printCompetenciasBody: $("#print-competencias-body"),
+    printTotalDiasFalta: $("#print-total-dias-falta"),
+    printTotalDiasRepouso: $("#print-total-dias-repouso"),
+    printTotalValorFalta: $("#print-total-valor-falta"),
+    printTotalValorRepouso: $("#print-total-valor-repouso"),
+    printTotalInss: $("#print-total-inss"),
+    printRodape: $("#print-rodape")
+  };
+
+  /* ========= Utils (reaproveitados da suíte de acerto) ========= */
+  const onlyDigits = (s) => (s ?? "").toString().replace(/\D/g,"");
+
+  const parseISODateLocal = (iso) => {
+    if (!iso) return null;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+  const toISOLocal = (dateObj) => {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const fmtBR = (iso) => {
+    if (!iso) return "";
+    const d = parseISODateLocal(iso);
+    if (!d) return "";
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  };
+
+  const aplicarMascaraMoeda = (valorDigitado) => {
+    let digitos = onlyDigits(valorDigitado || "");
+    digitos = digitos.replace(/^0+(?=\d)/, "");
+    while (digitos.length < 3) digitos = "0" + digitos;
+    const centavos = digitos.slice(-2);
+    const inteiro = digitos.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${inteiro},${centavos}`;
+  };
+  const desmascarar = (valorTexto) => {
+    if (valorTexto == null || valorTexto === "") return 0;
+    const limpo = String(valorTexto).replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(limpo);
+    return isNaN(n) ? 0 : n;
+  };
+  const formatarParaMascara = (numero) => {
+    const centavosTotais = Math.round((Number(numero) || 0) * 100);
+    return aplicarMascaraMoeda(String(Math.abs(centavosTotais)));
+  };
+  const formatarValorTabela = (numero) => {
+    const n = Number(numero) || 0;
+    return (n < 0 ? "-" : "") + formatarParaMascara(n);
+  };
+
+  // ✅ INSS/RGPS — tabela progressiva 2026 (mesmas faixas/alíquotas validadas
+  // nas demais ferramentas da suíte).
+  const calcularSeguridadeSocialRGPSDetalhado = (baseRemuneracao) => {
+    const baseOriginal = Number(baseRemuneracao) || 0;
+    if (baseOriginal <= 0) {
+      return { total: 0, totalNegativo: 0, baseConsiderada: 0, faixa1: 0, faixa2: 0, faixa3: 0, faixa4: 0 };
+    }
+    const teto = 8475.55;
+    const base = Math.min(baseOriginal, teto);
+    const faixa1Base = Math.min(base, 1621.00);
+    const faixa2Base = base > 1621.00 ? Math.min(base, 2902.84) - 1621.00 : 0;
+    const faixa3Base = base > 2902.84 ? Math.min(base, 4354.27) - 2902.84 : 0;
+    const faixa4Base = base > 4354.27 ? Math.min(base, 8475.55) - 4354.27 : 0;
+    const faixa1 = Number((faixa1Base * 0.075).toFixed(2));
+    const faixa2 = Number((faixa2Base * 0.09).toFixed(2));
+    const faixa3 = Number((faixa3Base * 0.12).toFixed(2));
+    const faixa4 = Number((faixa4Base * 0.14).toFixed(2));
+    const total = Number((faixa1 + faixa2 + faixa3 + faixa4).toFixed(2));
+    return { total, totalNegativo: -total, baseConsiderada: base, faixa1, faixa2, faixa3, faixa4 };
+  };
+
+  const dadosPessoaisPreenchidos = () =>
+    !!(el.nome.value.trim() && el.matricula.value.trim());
+
+  /* ========= Rubricas da remuneração (6 linhas fixas) ========= */
+  const criarLinhaRubHTML = () => `
+    <td><input type="text" inputmode="numeric" class="rub-codigo rub-codigo-input" placeholder="00000" maxlength="5" style="font-size:13px;padding:8px;"></td>
+    <td><input type="text" class="rub-descricao rub-descricao-input" placeholder="Descrição da rubrica" style="font-size:13px;padding:8px;"></td>
+    <td><input type="text" inputmode="decimal" class="rub-valor rub-valor-input moeda-mask" placeholder="0,00" value="0,00" style="font-size:13px;padding:8px;"></td>
+  `;
+
+  const limparRubricas = () => {
+    if (!el.rubBody) return;
+    el.rubBody.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = criarLinhaRubHTML();
+      el.rubBody.appendChild(tr);
+    }
+  };
+
+  const totalRubricas = () => {
+    return $$(".rub-valor").reduce((s, i) => s + desmascarar(i.value), 0);
+  };
+
+  const atualizarTotalRubricas = () => {
+    const total = totalRubricas();
+    if (el.rubTotalValor) el.rubTotalValor.textContent = formatarValorTabela(total);
+    return total;
+  };
+
+  /* ========= Tabela de competências ========= */
+  const criarLinhaHTML = () => `
+    <td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+    <td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+    <td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+    <td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+    <td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+    <td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+    <td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td>
+  `;
+
+  const vincularRemoverLinha = (tr) => {
+    tr.querySelector(".btn-remover-linha")?.addEventListener("click", () => {
+      tr.remove();
+      atualizarPreview();
+    });
+  };
+
+  const cfAdicionarLinha = () => {
+    const tr = document.createElement("tr");
+    tr.className = "cf-linha";
+    tr.innerHTML = criarLinhaHTML();
+    el.cfBody.appendChild(tr);
+    tr.querySelector(".cf-mes")?.focus();
+    vincularRemoverLinha(tr);
+    return tr;
+  };
+
+  const cfLimpar = () => {
+    if (!confirm("Isso vai apagar todos os lançamentos desta tela. Deseja continuar?")) return;
+    el.cfBody.innerHTML = "";
+    limparRubricas();
+    for (let i = 0; i < 3; i++) cfAdicionarLinha();
+    atualizarPreview();
+  };
+
+  const atualizarPreview = () => {
+    const rem = atualizarTotalRubricas();
+    let totalDiasFalta = 0, totalDiasRepouso = 0, totalValorFalta = 0, totalValorRepouso = 0, totalInss = 0;
+
+    $$(".cf-linha").forEach(tr => {
+      const previewFalta = tr.querySelector(".cf-preview-falta");
+      const previewRepouso = tr.querySelector(".cf-preview-repouso");
+      const previewInss = tr.querySelector(".cf-preview-inss");
+      if (!previewFalta || !previewRepouso || !previewInss) return;
+
+      const diasFalta = parseFloat(tr.querySelector(".cf-dias-falta")?.value) || 0;
+      const diasRepouso = parseFloat(tr.querySelector(".cf-dias-repouso")?.value) || 0;
+      const diasTotal = diasFalta + diasRepouso;
+
+      if (rem <= 0) {
+        previewFalta.value = "0,00";
+        previewRepouso.value = "0,00";
+        previewInss.value = "0,00";
+        return;
+      }
+
+      const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
+      const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
+      previewFalta.value = formatarValorTabela(valorFalta);
+      previewRepouso.value = formatarValorTabela(valorRepouso);
+
+      totalDiasFalta += diasFalta;
+      totalDiasRepouso += diasRepouso;
+      totalValorFalta += valorFalta;
+      totalValorRepouso += valorRepouso;
+
+      if (diasTotal <= 0) {
+        previewInss.value = "0,00";
+        return;
+      }
+
+      const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
+      const baseReduzidaMes = Math.max(0, Number((rem - valorDevolucaoMes).toFixed(2)));
+      const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(rem);
+      const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
+      const diferencaMes = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
+      previewInss.value = formatarValorTabela(diferencaMes);
+      totalInss += diferencaMes;
+    });
+
+    el.cfTotalDiasFalta.textContent = totalDiasFalta;
+    el.cfTotalDiasRepouso.textContent = totalDiasRepouso;
+    el.cfTotalValorFalta.textContent = formatarValorTabela(totalValorFalta);
+    el.cfTotalValorRepouso.textContent = formatarValorTabela(totalValorRepouso);
+    el.cfTotalInss.textContent = formatarValorTabela(totalInss);
+  };
+
+  /* ========= Impressão ========= */
+  const imprimir = () => {
+    if (!dadosPessoaisPreenchidos()) {
+      alert("Preencha nome e matrícula antes de imprimir.");
+      return;
+    }
+
+    const rem = totalRubricas();
+    const linhas = $$(".cf-linha").map(tr => {
+      const mes = tr.querySelector(".cf-mes")?.value || "";
+      const diasFalta = parseFloat(tr.querySelector(".cf-dias-falta")?.value) || 0;
+      const diasRepouso = parseFloat(tr.querySelector(".cf-dias-repouso")?.value) || 0;
+      if (!mes || (diasFalta <= 0 && diasRepouso <= 0)) return null;
+
+      const [ano, mesNum] = mes.split("-");
+      const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : mes;
+      const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
+      const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
+      const diasTotal = diasFalta + diasRepouso;
+
+      let inss = 0;
+      if (rem > 0 && diasTotal > 0) {
+        const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
+        const baseReduzidaMes = Math.max(0, Number((rem - valorDevolucaoMes).toFixed(2)));
+        const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(rem);
+        const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
+        inss = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
+      }
+
+      return { mes: mesFormatado, diasFalta, diasRepouso, valorFalta, valorRepouso, inss };
+    }).filter(Boolean);
+
+    if (linhas.length === 0) {
+      alert("Não há nenhuma competência preenchida para imprimir.");
+      return;
+    }
+
+    const hojeBR = fmtBR(toISOLocal(new Date()));
+    el.printDataEmissao.textContent = hojeBR;
+
+    const itemInfo = (label, valor) => `
+      <div class="print-info-item">
+        <div class="print-label">${label}</div>
+        <div class="print-valor">${valor || "-"}</div>
+      </div>
+    `;
+    el.printDadosPessoais.innerHTML =
+      itemInfo("Nome", el.nome.value.trim()) +
+      itemInfo("Matrícula", el.matricula.value.trim()) +
+      itemInfo("Cargo/Função", el.cargo.value.trim()) +
+      itemInfo("Total da remuneração", "R$ " + formatarValorTabela(rem));
+
+    el.printCompetenciasBody.innerHTML = linhas.map(l => `
+      <tr>
+        <td>${l.mes}</td>
+        <td>${l.diasFalta}</td>
+        <td>${l.diasRepouso}</td>
+        <td>${formatarValorTabela(l.valorFalta)}</td>
+        <td>${formatarValorTabela(l.valorRepouso)}</td>
+        <td>${formatarValorTabela(l.inss)}</td>
+      </tr>
+    `).join("");
+
+    const totais = linhas.reduce((acc, l) => ({
+      diasFalta: acc.diasFalta + l.diasFalta,
+      diasRepouso: acc.diasRepouso + l.diasRepouso,
+      valorFalta: acc.valorFalta + l.valorFalta,
+      valorRepouso: acc.valorRepouso + l.valorRepouso,
+      inss: acc.inss + l.inss
+    }), { diasFalta: 0, diasRepouso: 0, valorFalta: 0, valorRepouso: 0, inss: 0 });
+
+    el.printTotalDiasFalta.textContent = totais.diasFalta;
+    el.printTotalDiasRepouso.textContent = totais.diasRepouso;
+    el.printTotalValorFalta.textContent = formatarValorTabela(totais.valorFalta);
+    el.printTotalValorRepouso.textContent = formatarValorTabela(totais.valorRepouso);
+    el.printTotalInss.textContent = formatarValorTabela(totais.inss);
+
+    el.printRodape.textContent = `${hojeBR} — Correção de Folha (Versão 09) — Portal de Acertos IBRAM-DF`;
+
+    window.print();
+  };
+
+  /* ========= Eventos ========= */
+  let debounceTimer = null;
+  document.addEventListener("input", (ev) => {
+    const t = ev.target;
+    if (!t) return;
+
+    if (t.classList?.contains("rub-codigo")) {
+      t.value = onlyDigits(t.value).slice(0, 5);
+    }
+
+    if (
+      t.tagName === "INPUT" && t.type === "text" &&
+      !t.classList?.contains("moeda-mask") && t.getAttribute("inputmode") !== "numeric"
+    ) {
+      const pos = t.selectionStart, posEnd = t.selectionEnd;
+      t.value = t.value.toUpperCase();
+      if (pos != null) t.setSelectionRange(pos, posEnd);
+    }
+
+    if (t.classList?.contains("moeda-mask")) {
+      t.value = aplicarMascaraMoeda(t.value);
+    }
+
+    if (
+      t.classList?.contains("rub-valor") ||
+      t.classList?.contains("cf-dias-falta") ||
+      t.classList?.contains("cf-dias-repouso") ||
+      t.classList?.contains("cf-mes")
+    ) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(atualizarPreview, 120);
+    }
+  });
+
+  document.addEventListener("change", (ev) => {
+    if (ev.target?.classList?.contains("cf-mes")) atualizarPreview();
+  });
+
+  $("#cf-adicionar-linha").addEventListener("click", cfAdicionarLinha);
+  $("#cf-limpar").addEventListener("click", cfLimpar);
+  $("#cf-imprimir").addEventListener("click", imprimir);
+
+  /* ========= Init ========= */
+  const init = () => {
+    $$(".cf-linha").forEach(vincularRemoverLinha);
+    atualizarPreview();
+  };
+  window.addEventListener("load", init);
+
+  // Expostas para o módulo de integração com o portal (abaixo)
+  window.__cf = {
+    dadosPessoaisPreenchidos,
+    formatarValorTabela,
+    desmascarar
+  };
+})();
+</script>
+
+<script type="module">
+import { exigirLogin, salvarAcerto, checkConnection, observarLogin, logout, buscarAcerto, atualizarAcerto } from '../assets/firebase-init.js';
+
+// Exige login para usar esta página. Se não estiver logado, manda para ../login.html
+exigirLogin((usuario) => {
+  console.log('Logado como', usuario.email);
+});
+
+checkConnection().then((ok) => {
+  const dot = document.getElementById('conn-dot');
+  const text = document.getElementById('conn-text');
+  if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+  else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+});
+
+observarLogin((usuario) => {
+  if (usuario) {
+    document.getElementById('login-info').style.display = 'flex';
+    document.getElementById('login-text').textContent = usuario.email;
+  }
+});
+
+document.getElementById('btn-sair').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await logout();
+  window.location.reload();
+});
+
+// Junta as 6 rubricas da remuneração (só as preenchidas)
+function coletarRubricas() {
+  const linhas = [];
+  document.querySelectorAll('#rub-body tr').forEach((tr) => {
+    const codigo = tr.querySelector('.rub-codigo')?.value || '';
+    const descricao = tr.querySelector('.rub-descricao')?.value || '';
+    const valor = tr.querySelector('.rub-valor')?.value || '0,00';
+    if (!codigo && !descricao && valor === '0,00') return;
+    linhas.push({ codigo, descricao, valor });
+  });
+  return linhas;
+}
+
+// Junta todas as linhas preenchidas da tabela de competências
+function coletarLinhasResultado() {
+  const linhas = [];
+  document.querySelectorAll('#cf-body tr.cf-linha').forEach((tr) => {
+    const mes = tr.querySelector('.cf-mes')?.value || '';
+    const diasFalta = tr.querySelector('.cf-dias-falta')?.value || '';
+    const diasRepouso = tr.querySelector('.cf-dias-repouso')?.value || '';
+    if (!mes && !diasFalta && !diasRepouso) return;
+    linhas.push({
+      mes,
+      diasFalta,
+      diasRepouso,
+      valorFalta: tr.querySelector('.cf-preview-falta')?.value || '0,00',
+      valorRepouso: tr.querySelector('.cf-preview-repouso')?.value || '0,00',
+      inss: tr.querySelector('.cf-preview-inss')?.value || '0,00'
+    });
+  });
+  return linhas;
+}
+
+// ---- Edição de acerto já salvo (mesmo padrão das demais ferramentas) ----
+function chaveElemento(el) {
+  if (el.id) return 'id:' + el.id;
+  const container = el.closest('[id]') || document.body;
+  const cls = Array.from(el.classList).join('.');
+  const seletor = el.tagName.toLowerCase() + (cls ? '.' + cls : '');
+  const lista = Array.from(container.querySelectorAll(seletor));
+  const idx = lista.indexOf(el);
+  return 'pos:' + (container.id || '') + '::' + seletor + '::' + idx;
+}
+
+function elementoPelaChave(chave) {
+  if (chave.indexOf('id:') === 0) {
+    return document.getElementById(chave.slice(3));
+  }
+  if (chave.indexOf('pos:') === 0) {
+    const partes = chave.slice(4).split('::');
+    const containerId = partes[0];
+    const seletor = partes[1];
+    const idx = parseInt(partes[2], 10);
+    const container = containerId ? document.getElementById(containerId) : document.body;
+    if (!container) return null;
+    const lista = container.querySelectorAll(seletor);
+    return lista[idx] || null;
+  }
+  return null;
+}
+
+function coletarEntradas() {
+  const entradas = {};
+  document.querySelectorAll('input, select, textarea').forEach((el) => {
+    const chave = chaveElemento(el);
+    if (el.type === 'checkbox' || el.type === 'radio') {
+      entradas[chave] = el.checked;
+    } else {
+      entradas[chave] = el.value;
+    }
+  });
+  return entradas;
+}
+
+function restaurarEntradas(entradas) {
+  if (!entradas) return;
+  Object.keys(entradas).forEach((chave) => {
+    const el = elementoPelaChave(chave);
+    if (!el) return;
+    if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = entradas[chave];
+    } else {
+      el.value = entradas[chave];
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+const params = new URLSearchParams(window.location.search);
+const idEdicao = params.get('editar');
+
+// Garante que existam linhas suficientes na tabela antes de restaurar
+// entradas salvas por posição (a tabela começa com 3 linhas por padrão).
+function garantirLinhasMinimas(qtd) {
+  const body = document.getElementById('cf-body');
+  while (body.querySelectorAll('tr.cf-linha').length < qtd) {
+    document.getElementById('cf-adicionar-linha').click();
+  }
+}
+
+if (idEdicao) {
+  buscarAcerto(idEdicao).then((registro) => {
+    const banner = document.getElementById('banner-edicao');
+    banner.style.display = 'block';
+    if (registro && registro.dados && registro.dados.entradas) {
+      const qtdLinhasSalvas = (registro.dados.competencias || []).length;
+      if (qtdLinhasSalvas > 3) garantirLinhasMinimas(qtdLinhasSalvas);
+      restaurarEntradas(registro.dados.entradas);
+      banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Clique em "Salvar no Portal" para atualizar este mesmo registro.';
+    } else {
+      banner.textContent = 'Este acerto foi salvo antes da função de edição existir — não é possível recarregar os campos automaticamente. Ao salvar de novo, será criado um registro novo.';
+      banner.style.background = '#FBEAEA';
+      banner.style.borderColor = '#E9B4B4';
+      banner.style.color = '#7A2E2E';
+    }
+  }).catch((err) => {
+    const banner = document.getElementById('banner-edicao');
+    banner.style.display = 'block';
+    banner.textContent = 'Erro ao carregar o acerto para edição: ' + err.message;
+    banner.style.background = '#FBEAEA';
+    banner.style.borderColor = '#E9B4B4';
+    banner.style.color = '#7A2E2E';
+  });
+}
+
+document.getElementById('salvar-portal').addEventListener('click', async () => {
+  const status = document.getElementById('salvar-portal-status');
+  const dados = {
+    nome: document.getElementById('nome').value,
+    matricula: document.getElementById('matricula').value,
+    cargo: document.getElementById('cargo').value,
+    rubricas: coletarRubricas(),
+    totalRemuneracao: document.getElementById('rub-total-valor').textContent.trim(),
+    totalFinal: document.getElementById('cf-total-inss').textContent.trim(),
+    competencias: coletarLinhasResultado(),
+    entradas: coletarEntradas()
+  };
+
+  if (!dados.matricula) {
+    status.textContent = 'Preencha ao menos a matrícula antes de salvar.';
+    status.style.color = '#B23B3B';
+    return;
+  }
+
+  status.textContent = 'Salvando...';
+  status.style.color = '';
+  try {
+    if (idEdicao) {
+      await atualizarAcerto(idEdicao, 'correcao-folha', dados);
+      status.textContent = 'Acerto atualizado no portal com sucesso.';
+    } else {
+      await salvarAcerto('correcao-folha', dados);
+      status.textContent = 'Acerto salvo no portal com sucesso.';
+    }
+    status.style.color = '#3E7A4C';
+  } catch (err) {
+    status.textContent = 'Erro ao salvar: ' + err.message;
+    status.style.color = '#B23B3B';
+  }
+});
+</script>
+</body>
+</html>

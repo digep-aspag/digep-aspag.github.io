@@ -1,0 +1,2188 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema de Acerto — Cargos Comissionados</title>
+<style>
+/* ============================================================
+   RESET / BASE
+============================================================ */
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:1rem;line-height:1.5;color:#212529;background:#f5f7fa}
+strong{font-weight:700}
+small{font-size:.875em}
+em{font-style:italic}
+
+/* ============================================================
+   LAYOUT / GRID (substitui o grid do Bootstrap, só o necessário)
+============================================================ */
+.container{width:100%;margin:0 auto;padding:0 1rem}
+.app-container{max-width:1400px}
+.my-4{margin-top:1.5rem;margin-bottom:1.5rem}
+.row{display:flex;flex-wrap:wrap;margin-left:-.5rem;margin-right:-.5rem}
+.row>*{padding-left:.5rem;padding-right:.5rem;width:100%}
+.row.g-3{row-gap:1rem}
+.align-items-end{align-items:flex-end}
+.d-flex{display:flex!important}
+.d-none{display:none!important}
+.flex-wrap{flex-wrap:wrap}
+.gap-2{gap:.5rem}
+.ms-auto{margin-left:auto}
+@media(min-width:768px){
+  .col-md-3{width:25%}
+  .col-md-4{width:33.3333%}
+}
+@media(min-width:992px){
+  .col-lg-3{width:25%}
+  .col-lg-4{width:33.3333%}
+  .col-lg-5{width:41.6667%}
+  .col-lg-6{width:50%}
+  .d-lg-block{display:block!important}
+}
+
+/* ============================================================
+   UTILIDADES DE ESPAÇAMENTO / TEXTO
+============================================================ */
+.mb-0{margin-bottom:0}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:1rem}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:1rem}
+.pt-3{padding-top:1rem}
+.py-2{padding-top:.5rem;padding-bottom:.5rem}
+.px-3{padding-left:1rem;padding-right:1rem}
+.me-1{margin-right:.25rem}
+.fw-bold{font-weight:700}.fw-semibold{font-weight:600}.fw-normal{font-weight:400}
+.fs-5{font-size:1.25rem}.fs-6{font-size:1rem}
+.text-muted{color:#6c757d}
+.text-danger{color:#dc3545}
+.text-success{color:#198754}
+.text-end{text-align:right}
+
+/* ============================================================
+   CABEÇALHO / IDENTIDADE DO APP
+============================================================ */
+.app-title{color:#556B2F;font-weight:700;margin:0}
+.app-subtitle{color:#6c757d;font-size:.95rem}
+.rule{border-top:2px solid #556B2F;margin-top:.4rem}
+
+/* ============================================================
+   ABAS (substitui nav-tabs + tab-content do Bootstrap)
+============================================================ */
+.nav{display:flex;list-style:none;margin:.25rem 0 0;padding:0;flex-wrap:wrap}
+.nav-tabs{border-bottom:1px solid #dee2e6}
+.nav-item{margin-bottom:-1px}
+.nav-link{display:block;padding:.5rem 1rem;border:1px solid transparent;
+  border-top-left-radius:.375rem;border-top-right-radius:.375rem;
+  cursor:pointer;background:#f8f9fa;color:#0d6efd;font:inherit}
+.nav-link.active{color:#212529;background:#fff;border-color:#dee2e6 #dee2e6 #fff}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ============================================================
+   CARD
+============================================================ */
+.card{background:#fff;border:1px solid rgba(0,0,0,.125);border-radius:.5rem}
+.card.shadow-sm{box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
+.card-body{padding:1rem 1.25rem}
+.card-title{margin:0 0 .5rem;font-size:1.25rem;font-weight:500}
+
+/* ============================================================
+   ALERTAS
+============================================================ */
+.alert{padding:.75rem 1rem;border:1px solid transparent;border-radius:.375rem}
+.alert-info{color:#055160;background:#cff4fc;border-color:#b6effb}
+.alert-warning{color:#664d03;background:#fff3cd;border-color:#ffecb5}
+.alert-primary{color:#084298;background:#cfe2ff;border-color:#b6d4fe}
+.alert-danger{color:#842029;background:#f8d7da;border-color:#f5c2c7}
+
+/* ============================================================
+   FORMULÁRIOS
+============================================================ */
+.form-label{font-weight:600;display:block;margin-bottom:.25rem}
+.form-control{display:block;width:100%;padding:.375rem .75rem;font-size:1rem;
+  border:1px solid #ced4da;border-radius:.375rem;background:#fff;color:#212529;
+  transition:border-color .1s,box-shadow .1s}
+.form-control:focus{outline:0;border-color:#86b7fe;box-shadow:0 0 0 .2rem rgba(13,110,253,.15)}
+.form-control-sm{padding:.25rem .5rem;font-size:.875rem;border-radius:.25rem}
+.form-control.is-invalid{border-color:#dc3545}
+.form-control.is-valid{border-color:#198754}
+.form-check-input{width:1rem;height:1rem;margin:0;vertical-align:middle}
+.form-check-label{font-size:.9rem;vertical-align:middle}
+
+/* ============================================================
+   BOTÕES
+============================================================ */
+.btn{display:inline-block;padding:.375rem .75rem;font-size:1rem;border-radius:.375rem;
+  border:1px solid transparent;cursor:pointer;text-align:center;user-select:none;
+  transition:background-color .1s,border-color .1s,opacity .1s}
+.btn:disabled{opacity:.65;cursor:not-allowed}
+.btn-sm{padding:.25rem .5rem;font-size:.875rem;border-radius:.25rem}
+.btn-lg{padding:.65rem 1.25rem;font-size:1.15rem;border-radius:.5rem;font-weight:600}
+.btn-primary{background:#0d6efd;border-color:#0d6efd;color:#fff}
+.btn-primary:hover:not(:disabled){background:#0b5ed7;border-color:#0a58ca}
+.btn-secondary{background:#6c757d;border-color:#6c757d;color:#fff}
+.btn-secondary:hover:not(:disabled){background:#5c636a}
+.btn-success{background:#198754;border-color:#198754;color:#fff}
+.btn-success:hover:not(:disabled){background:#157347}
+.btn-dark{background:#212529;border-color:#212529;color:#fff}
+.btn-dark:hover:not(:disabled){background:#1c1f23}
+.btn-outline-primary{background:transparent;border-color:#0d6efd;color:#0d6efd}
+.btn-outline-primary:hover:not(:disabled){background:#0d6efd;color:#fff}
+.btn-outline-secondary{background:transparent;border-color:#6c757d;color:#6c757d}
+.btn-outline-secondary:hover:not(:disabled){background:#6c757d;color:#fff}
+.btn-outline-danger{background:transparent;border-color:#dc3545;color:#dc3545}
+.btn-outline-danger:hover:not(:disabled){background:#dc3545;color:#fff}
+.spinner-border{display:inline-block;width:1rem;height:1rem;border:.2em solid currentColor;
+  border-right-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:-.125em}
+.spinner-border-sm{width:.875rem;height:.875rem;border-width:.15em}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============================================================
+   TABELAS
+============================================================ */
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.5rem;vertical-align:top;border-bottom:1px solid #dee2e6}
+.results-table td:last-child,.results-table th:last-child,
+#resumo-table td:last-child,#resumo-table th:last-child{text-align:right}
+.table-bordered th,.table-bordered td{border:1px solid #dee2e6}
+.table-success th{background:#d1e7dd}
+.table-responsive{overflow-x:auto}
+.align-middle td,.align-middle th{vertical-align:middle}
+
+/* ============================================================
+   ESTILOS ORIGINAIS ESPECÍFICOS DO SISTEMA
+============================================================ */
+.uppercase{text-transform:uppercase}
+.ferias-table{table-layout:fixed;width:100%;border-collapse:separate;border-spacing:0}
+.ferias-table th,.ferias-table td{padding:6px 8px;font-size:13px;vertical-align:middle;text-align:center;border:1px solid #dee2e6}
+.ferias-table th{background:#556B2F;color:#fff;white-space:nowrap}
+.col-aquisitivo{width:16%}.col-usufruto-1{width:24%}.col-usufruto-2{width:24%}.col-usufruto-3{width:24%}.col-total-dias{width:12%}
+.periodo-ferias-container{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end}
+.periodo-ferias label{display:block;font-size:11px;color:#6c757d;margin-bottom:3px}
+.periodo-ferias input[type="date"]{padding:4px 6px;font-size:13px}
+.periodo-aquisitivo{padding:6px 8px;font-size:13px}
+.terco-ferias-checkbox{display:flex;align-items:center;gap:6px;margin-top:6px}
+.ferias-table .dias-usufruidos{width:80px;text-align:right;padding:4px 6px;font-size:13px;margin:0 auto}
+.th-wrap{display:inline-block;line-height:1.2}
+.valor-positivo{color:#198754!important;font-weight:700}
+.valor-negativo{color:#ff0000!important;font-weight:700}
+.calculation-details,.rubricas-dias-trabalhados{border:1px solid #dee2e6;border-radius:.5rem;padding:12px;background:#f8f9fa;font-size:.9rem}
+.simbolo-feedback{min-height:18px}
+.manual-row td{background:#fffdf5}
+.manual-row td[contenteditable]{cursor:text;outline:none}
+.manual-row td[contenteditable]:focus{background:#fff3cd;box-shadow:inset 0 0 0 1px #ffc107}
+.manual-row .manual-codigo:empty::before{content:'código';color:#adb5bd;font-style:italic}
+.manual-row .manual-descricao:empty::before{content:'descrição (opcional)';color:#adb5bd;font-style:italic}
+
+/* ============================================================
+   IMPRESSÃO / GERAÇÃO DE PDF (via Ctrl+P do navegador)
+   Modelo de relatório dedicado — não reaproveita as abas em tela,
+   gera páginas limpas (1 por cargo + 1 de resumo) a partir dos
+   dados já calculados.
+============================================================ */
+.print-container{display:none}
+@media print{
+  @page{margin:14mm}
+  body *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+  body > *:not(.print-container){display:none !important}
+  .print-container{display:block !important}
+  .print-page{font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#212529;
+    break-after:page;page-break-after:always}
+  .print-page:last-child{break-after:auto;page-break-after:auto}
+  .print-page h2{font-size:17pt;color:#556B2F;margin:0 0 4px;font-weight:700}
+  .print-page .print-sub{font-size:9.5pt;color:#6c757d;margin:0 0 8px}
+  .print-page .print-meta{font-size:10pt;margin:2px 0}
+  .print-page hr{border:none;border-top:2px solid #556B2F;margin:8px 0 12px}
+  .print-page .print-cargo-head{display:flex;justify-content:space-between;align-items:baseline;
+    flex-wrap:wrap;gap:8px;margin-top:16px}
+  .print-page h3{font-size:13pt;margin:0;color:#212529}
+  .print-page h4{font-size:11.5pt;margin:12px 0 4px;color:#212529}
+  .print-page table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:6px}
+  .print-page table th{background:#556B2F;color:#fff;padding:4px 6px;text-align:left;font-size:9.5pt}
+  .print-page table td{padding:4px 6px;border-bottom:1px solid #dee2e6;vertical-align:top}
+  .print-page table td:last-child,.print-page table th:last-child{text-align:right}
+  .print-page .print-total{font-weight:700;font-size:12pt;margin-top:8px;text-align:right}
+  .print-page .print-empty{font-size:10pt;color:#6c757d;font-style:italic}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+  }
+  html, body{ background:var(--paper) !important; padding:0 !important; margin:0 !important; }
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif !important; font-size:1.1rem; font-weight:600; color:#fff !important; margin:0.3rem 0 0 !important; text-align:left !important; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; font-family:'IBM Plex Sans',sans-serif; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.6rem 1.8rem 3rem; }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+  }
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html" class="ativo"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div class="conteudo-modulo">
+<div id="banner-edicao" style="display:none;background:#FBF3E3;border:1px solid #E9CE9C;color:#5B4A28;padding:0.7rem 1rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.2rem;font-family:'IBM Plex Sans',sans-serif;"></div>
+<div class="container app-container my-4">
+  <header class="mb-3">
+    <h1 class="app-title">Sistema de Acerto — Cargos Comissionados</h1>
+    <div class="app-subtitle">Cálculos conforme LC 840/2011 • Avos com quinzena (≥15 dias) • Cada cargo calculado de forma independente</div>
+    <div class="rule"></div>
+  </header>
+
+  <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-target="#pane-pessoais" type="button">Dados Pessoais</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c1"  type="button">Cargo 1</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c2"  type="button">Cargo 2</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c3"  type="button">Cargo 3</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c4"  type="button">Cargo 4</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c5"  type="button">Cargo 5</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c6"  type="button">Cargo 6</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c7"  type="button">Cargo 7</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c8"  type="button">Cargo 8</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c9"  type="button">Cargo 9</button></li>
+    <li class="nav-item"><button class="nav-link" data-target="#pane-c10" type="button">Cargo 10</button></li>
+    <li class="nav-item ms-auto"><button class="nav-link" data-target="#pane-resumo" type="button">Resumo</button></li>
+  </ul>
+
+  <div class="tab-content pt-3">
+    <div class="tab-pane active" id="pane-pessoais">
+      <div class="card shadow-sm"><div class="card-body">
+        <h4 class="card-title mb-3">Dados Pessoais</h4>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4"><label class="form-label">Nome</label><input type="text" class="form-control uppercase" id="srv-nome" placeholder="Digite o nome"></div>
+          <div class="col-md-3"><label class="form-label">Matrícula</label><input type="text" class="form-control uppercase" id="srv-matricula" placeholder="Digite a matrícula"></div>
+          <div class="col-md-3"><label class="form-label">Data de Nascimento</label><input type="date" class="form-control" id="srv-nascimento"></div>
+          <div class="col-md-2"><label class="form-label">Qtd. de Cargos</label>
+            <select class="form-control" id="srv-qtd-cargos">
+              <option value="1">1 cargo</option>
+              <option value="2">2 cargos</option>
+              <option value="3">3 cargos</option>
+              <option value="4">4 cargos</option>
+              <option value="5">5 cargos</option>
+              <option value="6">6 cargos</option>
+              <option value="7">7 cargos</option>
+              <option value="8">8 cargos</option>
+              <option value="9">9 cargos</option>
+              <option value="10" selected>10 cargos</option>
+            </select>
+          </div>
+        </div>
+        <div class="row g-3 align-items-end mt-1">
+          <div class="col-md-4"><label class="form-label">Processo SEI <span class="text-muted fw-normal" style="font-size:.8rem">(opcional)</span></label>
+            <input type="text" class="form-control" id="srv-processo-sei" placeholder="Ex.: 00000.000000/2025-00"></div>
+        </div>
+        <button class="btn btn-sm btn-dark mt-3 btn-toggle-regras" aria-expanded="false">Mostrar regras de cálculo</button>
+        <div class="regras-calculo d-none mt-2">
+          <div class="alert alert-warning mb-0">
+            <strong>Regras:</strong><br>
+            • Cada cargo é calculado de forma <strong>totalmente independente</strong>.<br>
+            • Direito de férias = (PAs vencidos × 30) + (ávos prop. ÷ 12 × 30)<br>
+            • Saldo positivo → devolve • Saldo negativo → recebe<br>
+            • Adiantamento de 13º recebido → <strong>sempre</strong> aparece como devolução (60891)<br>
+            • Múltiplos 1/3: 1º usa ávos disponíveis, demais são integrais<br>
+            • Havendo <strong>mais de 1 cargo</strong>, o cálculo automático de 60% só fica disponível no <strong>último cargo lançado</strong>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="tab-pane" id="pane-c1"></div>
+    <div class="tab-pane" id="pane-c2"></div>
+    <div class="tab-pane" id="pane-c3"></div>
+    <div class="tab-pane" id="pane-c4"></div>
+    <div class="tab-pane" id="pane-c5"></div>
+    <div class="tab-pane" id="pane-c6"></div>
+    <div class="tab-pane" id="pane-c7"></div>
+    <div class="tab-pane" id="pane-c8"></div>
+    <div class="tab-pane" id="pane-c9"></div>
+    <div class="tab-pane" id="pane-c10"></div>
+
+    <div class="tab-pane" id="pane-resumo">
+      <div class="card shadow-sm"><div class="card-body">
+        <h4 class="card-title mb-2">Resumo Geral</h4>
+        <div class="alert alert-info py-2 px-3 mb-3" id="resumo-cabecalho-servidor" style="font-size:.9rem"></div>
+        <p class="text-muted">Clique em <em>Atualizar Resumo</em> após calcular nas abas de cargos.</p>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle" id="resumo-table">
+            <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:280px">TOTAL R$</th></tr></thead>
+            <tbody>
+              <tr data-code="20014"><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="40950"><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="21593"><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="40951"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="20875"><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="20857"><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="20872"><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="20883"><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
+              <tr data-code="60891"><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="resumo-total" class="mt-2 fw-bold fs-5 text-end"></div>
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-primary" id="btn-atualizar-resumo">Atualizar Resumo</button>
+          <button class="btn btn-secondary" id="btn-exportar-resumo">Exportar JSON</button>
+          <button class="btn btn-success" id="btn-imprimir-resumo">🖨️ Imprimir / Gerar PDF</button>
+           <button class="btn btn-secondary" id="salvar-portal" type="button">Salvar no Portal</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
+        </div>
+      </div></div>
+    </div>
+  </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+// Funções utilitárias
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+const serverData = { nome: '', matricula: '', nascimento: '', processoSei: '' };
+const TOTAL_CARGOS = 10;
+const cargoPanesSel = Array.from({ length: TOTAL_CARGOS }, (_, i) => `#pane-c${i + 1}`);
+const CODIGOS_RESUMO = ['20014', '40950', '21593', '40951', '20875', '20857', '20872', '20883', '60891'];
+let qtdCargos = TOTAL_CARGOS; // quantidade de cargos que serão de fato lançados (padrão: todos visíveis)
+
+const TABELA_VERBAS = {
+  'CDA-01': 18040, 'CNE-01': 13930, 'CNE-02': 12010, 'CNE-03': 10355, 'CNE-04': 8925,
+  'CNE-05': 6510, 'CNE-06': 5860, 'CNE-07': 4685, 'CNE-08': 3915,
+  'CPE-01': 13930, 'CPE-02': 12010, 'CPE-03': 10355, 'CPE-04': 8925,
+  'CPE-05': 6510, 'CPE-06': 5860, 'CPE-07': 4685, 'CPE-08': 3915,
+  'CC-08': 2940, 'CC-07': 2555, 'CC-06': 2245, 'CC-05': 1930,
+  'CC-04': 1620, 'CC-03': 1450, 'CC-02': 1280, 'CC-01': 1110,
+  'CPC-08': 2940, 'CPC-07': 2555, 'CPC-06': 2245, 'CPC-05': 1930,
+  'CPC-04': 1620, 'CPC-03': 1450, 'CPC-02': 1280, 'CPC-01': 1110
+};
+
+/* ================================================================
+   IRRF 2026 — Tabela progressiva mensal (vigente desde 05/2025,
+   inalterada em 2026) + redutor da Lei nº 15.270/2025 (isenção
+   efetiva até R$ 5.000,00 e desconto parcial até R$ 7.350,00).
+================================================================ */
+const TABELA_IRRF_2026 = [
+  { ate: 2428.80, aliquota: 0,     deducao: 0 },
+  { ate: 2826.65, aliquota: 0.075, deducao: 182.16 },
+  { ate: 3751.05, aliquota: 0.15,  deducao: 394.16 },
+  { ate: 4664.68, aliquota: 0.225, deducao: 675.49 },
+  { ate: Infinity, aliquota: 0.275, deducao: 908.73 }
+];
+const DEDUCAO_DEPENDENTE_IR_2026 = 189.59; // por dependente, mensal
+
+function calcularIRRF2026(rendaBruta, deducoes) {
+  if (!rendaBruta || rendaBruta <= 0) return 0;
+  deducoes = deducoes || 0;
+  const baseCalculo = Math.max(0, rendaBruta - deducoes);
+  const faixa = TABELA_IRRF_2026.find(f => baseCalculo <= f.ate);
+  const irTabela = Math.max(0, baseCalculo * faixa.aliquota - faixa.deducao);
+
+  /* Redutor da Lei 15.270/2025: zera o imposto até R$5.000,00 de base e
+     reduz parcialmente entre R$5.000,01 e R$7.350,00. Acima disso, não
+     há redução — vale o cálculo tradicional acima. Nunca gera crédito
+     (o redutor é limitado ao próprio imposto apurado). A lei determina
+     usar a RENDA BRUTA (antes de deduções) nesta fórmula. */
+  let redutor = 0;
+  if (rendaBruta <= 7350) {
+    redutor = Math.max(0, 978.62 - (0.133145 * rendaBruta));
+  }
+  const irFinal = Math.max(0, irTabela - redutor);
+  return Math.round(irFinal * 100) / 100;
+}
+
+const parseDateYMD = ymd => {
+  if (!ymd) return null;
+  const [y, m, d] = ymd.split('-').map(Number);
+  if ([y, m, d].some(isNaN)) return null;
+  return new Date(y, m - 1, d);
+};
+
+const toYMD = d =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const formatarDataBR = ymd => {
+  const d = parseDateYMD(ymd);
+  return d ? `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}` : '';
+};
+
+const addMonths = (d, m) => new Date(d.getFullYear(), d.getMonth() + m, d.getDate());
+
+const diffMesesComQuinzena = (iStr, fStr, max12 = false) => {
+  const I = parseDateYMD(iStr), F = parseDateYMD(fStr);
+  if (!I || !F || F < I) return 0;
+  let m = (F.getFullYear() - I.getFullYear()) * 12 + (F.getMonth() - I.getMonth());
+  if (F.getDate() < I.getDate()) m--;
+  m = Math.max(0, m);
+  const cursor = addMonths(I, m);
+  const rest = Math.floor((F - cursor) / (24 * 60 * 60 * 1000)) + 1;
+  if (rest >= 15) m++;
+  if (max12) m = Math.min(m, 12);
+  return m;
+};
+
+const calcularDiferencaDias = (d1, d2) => {
+  const a = parseDateYMD(d1), b = parseDateYMD(d2);
+  if (!a || !b) return 0;
+  return Math.max(0, Math.floor((b - a) / (24 * 60 * 60 * 1000)) + 1);
+};
+
+const clamp2 = el => { const v = parseFloat(el.value); if (!isNaN(v)) el.value = v.toFixed(2); };
+
+/* Pares de código "irregulares", que não seguem o padrão genérico de troca
+   de prefixo 2↔6 (ex.: códigos de Imposto de Renda, cujo par negativo muda
+   mais do que o primeiro dígito). Mapeados explicitamente nos dois sentidos. */
+const PARES_CODIGO_ESPECIAIS = { '40950': '30950', '40951': '30953' };
+const PARES_CODIGO_ESPECIAIS_REV = Object.fromEntries(
+  Object.entries(PARES_CODIGO_ESPECIAIS).map(([pos, neg]) => [neg, pos])
+);
+const toCodigoNegativo = c => {
+  if (PARES_CODIGO_ESPECIAIS[c]) return PARES_CODIGO_ESPECIAIS[c];
+  return c?.startsWith('2') ? '6' + c.slice(1) : c;
+};
+const toCodigoPositivo = c => {
+  if (PARES_CODIGO_ESPECIAIS_REV[c]) return PARES_CODIGO_ESPECIAIS_REV[c];
+  return c?.startsWith('6') ? '2' + c.slice(1) : c;
+};
+const ajustarCodigo = (c, v) => v < 0 ? toCodigoNegativo(c) : toCodigoPositivo(c);
+
+function comFeedback(btn, fn) {
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Calculando...`;
+  try {
+    fn();
+  } finally {
+    requestAnimationFrame(() => {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    });
+  }
+}
+
+function calcularDiasTrabalhados(ctx){
+  const exoStr=$('.input-exoneracao',ctx)?.value;
+  const admStr=$('.input-admissao',ctx)?.value;
+  const diasInf=parseInt($('.input-dias-trabalhados',ctx)?.value||'0',10)||0;
+  const vv=parseFloat($('.input-valor-verba',ctx)?.value)||0;
+  if(!exoStr||!admStr||vv<=0)
+    return {valor:0,diasInformados:0,diasNoMes:0,diferenca:0,tipo:'neutro',valorPorDia:0,totalDiasMes:0};
+  const exo=parseDateYMD(exoStr),adm=parseDateYMD(admStr);
+  if(!exo||!adm) return {valor:0,diasInformados:0,diasNoMes:0,diferenca:0,tipo:'neutro',valorPorDia:0,totalDiasMes:0};
+
+  /* Mês comercial: todo mês é considerado como tendo 30 dias para fins
+     de pagamento. O último dia REAL de qualquer mês (28, 29, 30 ou 31)
+     é tratado como "dia 30 comercial" — assim, um servidor exonerado
+     no dia 31 (ou no último dia de fevereiro) não recebe/devolve o dia
+     "extra" que excederia os 30 dias fechados. */
+  const diaComercial = d => {
+    const ultimoDiaReal = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    return d.getDate() === ultimoDiaReal ? 30 : Math.min(d.getDate(), 30);
+  };
+
+  const tdm = 30; // total de dias do mês comercial (sempre 30)
+  const diaExoComercial = diaComercial(exo);
+  let dm = (adm.getFullYear()===exo.getFullYear()&&adm.getMonth()===exo.getMonth())
+    ? diaExoComercial - diaComercial(adm) + 1 : diaExoComercial;
+  dm=Math.min(dm,tdm); // Dias efetivamente trabalhados no mês da exoneração (limitado ao mês comercial de 30 dias)
+  const vpd=vv/30; // Valor por dia, baseado em 30 dias
+
+  let valor,tipo,diferenca;
+
+  if(diasInf > dm){
+    // Se os dias informados são MAIORES que os dias efetivamente trabalhados no mês
+    diferenca = diasInf - dm;
+    valor = -(diferenca * vpd); // Devolução
+    tipo = 'devolucao';
+  } else if(diasInf < dm){
+    // Se os dias informados são MENORES que os dias efetivamente trabalhados no mês
+    diferenca = dm - diasInf; // Diferença de dias a pagar
+    valor = diferenca * vpd; // Pagamento
+    tipo = 'pagamento';
+  } else {
+    // Se os dias informados são IGUAIS aos dias efetivamente trabalhados no mês
+    valor = 0; // Acerto zerado
+    tipo = 'neutro';
+    diferenca = 0;
+  }
+
+  return {valor,diasInformados:diasInf,diasNoMes:dm,diferenca:diferenca,tipo,valorPorDia:vpd,totalDiasMes:tdm};
+}
+
+function validarDatasFeriasCtx(ctx) {
+  const adm = $('.input-admissao', ctx)?.value;
+  const exo = $('.input-exoneracao', ctx)?.value;
+  const box = $('.ferias-error-box', ctx);
+  const txt = $('.ferias-error-text', ctx);
+  const allInputs = $$('.ferias-body input[type="date"]', ctx);
+
+  // Limpa validações anteriores
+  allInputs.forEach(e => e.classList.remove('is-invalid'));
+
+  if (!adm || !exo) {
+    box.classList.add('d-none');
+    return true;
+  }
+
+  const A = parseDateYMD(adm);
+  const E = parseDateYMD(exo);
+
+  if (!A || !E) {
+    box.classList.add('d-none');
+    return true;
+  }
+
+  const erros = [];
+  $$('.ferias-body tr', ctx).forEach((tr, ri) => {
+    ['1', '2', '3'].forEach(n => {
+      const iEl = $(`.inicio${n}`, tr);
+      const fEl = $(`.fim${n}`, tr);
+      const iv = iEl?.value;
+      const fv = fEl?.value;
+
+      if (!iv && !fv) return;
+
+      if (iv && !fv) {
+        erros.push(`Linha ${ri + 1}, ${n}º: informe o fim.`);
+        fEl?.classList.add('is-invalid');
+        return;
+      }
+      if (!iv && fv) {
+        erros.push(`Linha ${ri + 1}, ${n}º: informe o início.`);
+        iEl?.classList.add('is-invalid');
+        return;
+      }
+
+      const dI = parseDateYMD(iv);
+      const dF = parseDateYMD(fv);
+
+      if (!dI || !dF) return; // Já tratado acima, mas para segurança
+
+      if (dI > dF) {
+        erros.push(`Linha ${ri + 1}, ${n}º: início posterior ao fim.`);
+        iEl?.classList.add('is-invalid');
+        fEl?.classList.add('is-invalid');
+        return;
+      }
+
+      if (dI < A || dI > E || dF < A || dF > E) {
+        erros.push(`Linha ${ri + 1}, ${n}º: datas fora do período do cargo.`);
+        iEl?.classList.add('is-invalid');
+        fEl?.classList.add('is-invalid');
+      }
+    });
+  });
+
+  if (erros.length) {
+    txt.innerHTML = erros.join('<br>');
+    box.classList.remove('d-none');
+    return false;
+  }
+  box.classList.add('d-none');
+  return true;
+}
+
+function calcularAvosGratificacaoNataliciaCtx(ctx) {
+  const adm = $('.input-admissao', ctx)?.value;
+  const exo = $('.input-exoneracao', ctx)?.value;
+  if (!adm || !exo) return 0;
+
+  const A = parseDateYMD(adm);
+  const E = parseDateYMD(exo);
+  if (!A || !E) return 0;
+
+  const ini = new Date(E.getFullYear(), 0, 1); // Início do ano da exoneração
+  const start = (A > ini) ? A : ini; // Pega a data de admissão ou 01/01 do ano da exoneração, o que for mais recente
+  if (start > E) return 0; // Se a admissão for depois da exoneração no mesmo ano, não há avos
+
+  /* Contagem mês a mês (calendário): para cada mês entre "start" e "E",
+     conta quantos dias o servidor efetivamente trabalhou NAQUELE mês
+     específico. Se trabalhou mais de 14 dias (ou seja, 15 dias ou
+     mais) naquele mês, tem direito a 1 ávo de 13º. */
+  let avos = 0;
+  let cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  const fimCursor = new Date(E.getFullYear(), E.getMonth(), 1);
+  while (cursor <= fimCursor) {
+    const anoM = cursor.getFullYear(), mesM = cursor.getMonth();
+    const ultimoDiaMes = new Date(anoM, mesM + 1, 0).getDate();
+    const diaIni = (anoM === start.getFullYear() && mesM === start.getMonth()) ? start.getDate() : 1;
+    const diaFim = (anoM === E.getFullYear() && mesM === E.getMonth()) ? E.getDate() : ultimoDiaMes;
+    const diasNoMes = diaFim - diaIni + 1;
+    if (diasNoMes > 14) avos++;
+    cursor = new Date(anoM, mesM + 1, 1);
+  }
+  return Math.min(12, avos);
+}
+
+function mesExoneracaoAposNascimentoCtx(ctx) {
+  const nasc = serverData.nascimento;
+  const exo = $('.input-exoneracao', ctx)?.value;
+  if (!nasc || !exo) return false;
+
+  const n = parseDateYMD(nasc);
+  const e = parseDateYMD(exo);
+  if (!n || !e) return false;
+
+  return (e.getMonth() + 1) > (n.getMonth() + 1);
+}
+
+function contarPeriodosCompletosPA(admStr, exoStr) {
+  const A = parseDateYMD(admStr);
+  const E = parseDateYMD(exoStr);
+  if (!A || !E || E < A) return { periodos: 0, boundary: admStr };
+
+  let p = 0;
+  let s = new Date(A.getFullYear(), A.getMonth(), A.getDate()); // Copia a data de admissão
+  while (addMonths(s, 12) <= E) {
+    p++;
+    s = addMonths(s, 12);
+  }
+  return { periodos: p, boundary: toYMD(s) };
+}
+
+function calcularAvosFeriasCtx(ctx) {
+  const adm = ctx.querySelector('.input-admissao')?.value;
+  const exo = ctx.querySelector('.input-exoneracao')?.value;
+  if (!adm || !exo) {
+    return {
+      avosVencidos: 0, avosProporcionais: 0, totalAvos: 0,
+      periodosCompletos: 0, boundary: null, avosUltimoPeriodo: 0, admissaoBase: ''
+    };
+  }
+
+  const { periodos, boundary } = contarPeriodosCompletosPA(adm, exo);
+  const avUlt = diffMesesComQuinzena(boundary, exo, true); // Avos proporcionais do último período
+  const venc = periodos * 12; // Avos vencidos
+
+  return {
+    avosVencidos: venc, avosProporcionais: avUlt, totalAvos: venc + avUlt,
+    periodosCompletos: periodos, boundary, avosUltimoPeriodo: avUlt, admissaoBase: adm
+  };
+}
+
+function totalDiasUsufruidosPorLinha(tr) {
+  let td = 0;
+  ['1', '2', '3'].forEach(n => {
+    const i = $(`.inicio${n}`, tr)?.value;
+    const f = $(`.fim${n}`, tr)?.value;
+    if (i && f) td += calcularDiferencaDias(i, f);
+  });
+  return Math.min(30, td);
+}
+
+function atualizarTotaisDiasUsufruidos(ctx) {
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    const total = totalDiasUsufruidosPorLinha(tr);
+    const totEl = $('.dias-usufruidos', tr);
+    if (totEl) totEl.value = total;
+  });
+}
+
+function totalDiasUsufruidos(ctx) {
+  let total = 0;
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    total += totalDiasUsufruidosPorLinha(tr);
+  });
+  return total;
+}
+
+/* ================================================================
+   NÚCLEO DO CÁLCULO DE FÉRIAS
+================================================================ */
+function calcularFeriasCompleto(ctx, valorVerba, avos) {
+  const vPorDia = valorVerba / 30;
+  const V3 = valorVerba / 3;
+  const diasVencidosDireito = avos.periodosCompletos * 30;
+  const diasProporcDireito = (avos.avosUltimoPeriodo / 12) * 30;
+  const direitoTotal = diasVencidosDireito + diasProporcDireito;
+  const totalUsufruido = totalDiasUsufruidos(ctx);
+  const saldo = totalUsufruido - direitoTotal;
+  const linhasComTerco = $$('.recebeu-terco:checked', ctx).length;
+  const recebeuTerco = linhasComTerco > 0;
+  const avosDisp = avos.avosUltimoPeriodo;
+  const avFaltantes = 12 - avosDisp;
+
+  let valorFeriasVencidas = 0;
+  let valorFeriasProporc = 0;
+
+  /* ══════════════════════════════════════════════════════════════
+     DIAS DE FÉRIAS (indenização) — contagem FIFO.
+     Os dias usufruídos preenchem, na ordem das linhas, primeiro a
+     capacidade dos períodos VENCIDOS e depois o PROPORCIONAL (ver
+     alocação FIFO abaixo, usada também para o 1/3). Por isso o saldo
+     de dias (diferença entre direito total e usufruído total) não
+     fica "preso" a um período vencido específico — ele é sempre
+     lançado inteiro em FÉRIAS PROPORCIONAIS (20872/60872):
+     saldo negativo (usufruiu menos do que tinha direito) → positivo,
+     a receber; saldo positivo (usufruiu mais do que tinha direito)
+     → negativo, a devolver.
+     FÉRIAS VENCIDAS (20875) permanece sempre zerada nesta contagem.
+  ══════════════════════════════════════════════════════════════ */
+  if (Math.abs(saldo) > 0.0001) {
+    valorFeriasProporc = -(saldo * vPorDia);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     RECONCILIAÇÃO DO 1/3 DE FÉRIAS — alocação FIFO por linha.
+     Cada linha de usufruto é processada NA ORDEM DA TABELA. Os dias
+     que ela representa preenchem primeiro o(s) período(s) VENCIDO(S)
+     (capacidade total = periodosCompletos × 30 dias) e só depois
+     "vazam" para o período PROPORCIONAL em curso.
+     Se a linha estiver marcada "Recebeu 1/3?", o crédito é imputado
+     ao período em que ela COMEÇA a contar: se, antes desta linha, a
+     capacidade vencida ainda não foi totalmente preenchida, o 1/3
+     desta linha é creditado ao VENCIDO — mesmo que a própria linha
+     continue e acabe "vazando" dias para o proporcional.
+     Resultado positivo = falta pagar (a receber); negativo = deve
+     devolver o que recebeu além do direito.
+  ══════════════════════════════════════════════════════════════ */
+  const capacidadeVencido = avos.periodosCompletos * 30;
+  let cumulativoDias = 0;
+  let recebidoVencidoQtd = 0;
+  let recebidoProporcQtd = 0;
+  $$('.ferias-body tr', ctx).forEach(tr => {
+    const diasLinha = totalDiasUsufruidosPorLinha(tr);
+    const marcouTerco = $('.recebeu-terco', tr)?.checked || false;
+    if (marcouTerco) {
+      if (cumulativoDias < capacidadeVencido) recebidoVencidoQtd++;
+      else recebidoProporcQtd++;
+    }
+    cumulativoDias += diasLinha;
+  });
+
+  const owedProporc = V3 * (avosDisp / 12);
+  const owedVencido = V3 * avos.periodosCompletos;
+  const paidProporc = recebidoProporcQtd * V3;
+  const paidVencido = recebidoVencidoQtd * V3;
+
+  const valorTercoProporc = owedProporc - paidProporc;
+  const valorTercoVencidas = owedVencido - paidVencido;
+
+  return {
+    valorFeriasVencidas, valorTercoVencidas,
+    valorFeriasProporc, valorTercoProporc,
+    direitoTotal, diasVencidosDireito, diasProporcDireito,
+    totalUsufruido, saldo, recebeuTerco, linhasComTerco,
+    avosUlt: avosDisp, avFaltantes
+  };
+}
+
+function setResultRowValueCtx(ctx, baseCode, value) {
+  const tbody = $('.results-body', ctx);
+  if (!tbody) return;
+
+  // Normaliza para a forma canônica "positiva" (2xxxx) antes de buscar,
+  // e procura tanto a forma positiva quanto a negativa (6xxxx) — assim
+  // funciona independente de qual delas está atualmente na célula
+  // (ex.: 60891, que nasce "negativo" por padrão, mas pode já ter virado
+  // 20891 numa apuração anterior em que o valor era zero).
+  const codigoPos = toCodigoPositivo(baseCode);
+  const codigoNeg = toCodigoNegativo(codigoPos);
+  const row = Array.from(tbody.children).find(tr => {
+    const c = tr.cells?.[0]?.textContent?.trim();
+    return c === codigoPos || c === codigoNeg;
+  });
+
+  if (!row) return;
+
+  const v = parseFloat(value) || 0;
+  row.cells[0].textContent = ajustarCodigo(codigoPos, v);
+  row.cells[2].textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
+  row.cells[2].className = v < 0 ? 'valor-negativo' : 'valor-positivo';
+}
+
+function atualizarTotalResultados(resultsBody) {
+  let total = 0;
+  $$('tr', resultsBody).forEach(tr => {
+    if (tr.classList.contains('total-row')) return;
+    const v = tr.cells?.[2];
+    if (!v) return;
+    const abs = parseFloat(v.textContent.trim().replace('-', '')) || 0;
+    total += (v.classList.contains('valor-negativo') ? -1 : 1) * abs;
+  });
+
+  let trow = $('tr.total-row', resultsBody);
+  if (!trow) {
+    trow = document.createElement('tr');
+    trow.className = 'total-row fw-bold';
+    const c1 = document.createElement('td');
+    c1.colSpan = 2;
+    c1.className = 'text-end';
+    c1.textContent = 'TOTAL';
+    const c2 = document.createElement('td');
+    trow.appendChild(c1);
+    trow.appendChild(c2);
+    resultsBody.appendChild(trow);
+  }
+  trow.cells[1].textContent = (total < 0 ? '-' : '') + Math.abs(total).toFixed(2);
+  trow.cells[1].className = total >= 0 ? 'valor-positivo' : 'valor-negativo';
+  return total;
+}
+
+function bindManualRows(ctx) {
+  $$('.manual-row', ctx).forEach(tr => {
+    const valorCell = $('.manual-valor', tr);
+    valorCell.addEventListener('blur', () => {
+      let raw = valorCell.textContent.replace(/[^\d,.\-]/g, '').replace(',', '.');
+      let v = parseFloat(raw);
+      if (isNaN(v)) v = 0;
+      valorCell.textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
+      valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
+      const resultsBody = tr.closest('.results-body');
+      if (resultsBody) atualizarTotalResultados(resultsBody);
+    });
+    valorCell.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
+    });
+  });
+}
+
+function lerValorDeCodigoNaAba(ctx, code) {
+  const codigoPos = toCodigoPositivo(code);
+  const codigoNeg = toCodigoNegativo(codigoPos);
+  for (const tr of $$('.results-body tr', ctx)) {
+    const c = tr.cells?.[0]?.textContent?.trim();
+    if (!c) continue;
+    if (c === codigoPos || c === codigoNeg) {
+      const td = tr.cells[2];
+      if (!td) continue;
+      const abs = parseFloat(td.textContent.trim().replace('-', '')) || 0;
+      return td.classList.contains('valor-negativo') ? -abs : abs;
+    }
+  }
+  return 0;
+}
+
+function coletarSnapshotCargo(ctx, idx) {
+  const adm = $('.input-admissao', ctx)?.value || '';
+  const exo = $('.input-exoneracao', ctx)?.value || '';
+  const vv = parseFloat($('.input-valor-verba', ctx)?.value) || 0;
+  const quitado13 = $('.chk-13-quitado', ctx)?.checked || false;
+  const paga13Neste = ehUltimoCargoIdx(idx) && !quitado13;
+  const ad = quitado13 ? 0 : (parseFloat($('.input-adiantamento', ctx)?.value || '0') || 0);
+  const avos = calcularAvosFeriasCtx(ctx);
+
+  let total = 0;
+  $$('tr', $('.results-body', ctx)).forEach(tr => {
+    const td = tr.cells?.[2];
+    if (!td) return;
+    const abs = parseFloat(td.textContent.trim().replace('-', '').replace('R$', '').trim()) || 0;
+    total += (td.classList.contains('valor-negativo') ? -1 : 1) * abs;
+  });
+
+  return {
+    servidor: { ...serverData },
+    simbolo: ($('.input-simbolo', ctx)?.value || '').toUpperCase(),
+    admissao: adm, exoneracao: exo,
+    diasTrabalhadosMes: parseInt($('.input-dias-trabalhados', ctx)?.value || '0', 10) || 0,
+    remuneracaoTotal: vv, adiantamento: ad,
+    avosVencidas: avos.avosVencidos, avosProporcionais: avos.avosUltimoPeriodo,
+    avos13: paga13Neste ? calcularAvosGratificacaoNataliciaCtx(ctx) : 0,
+    treze13JaQuitado: quitado13, totalCalculado: total
+  };
+}
+
+function gerarRelatorioHTML(conteudo) {
+  const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Relatório</title>
+  <style>body{font-family:Arial,sans-serif;margin:30px}h2{color:#556B2F}pre{white-space:pre-wrap;font-size:14px;line-height:1.6}</style>
+  </head><body><h2>RELATÓRIO DE ACERTO</h2><pre>${conteudo}</pre></body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function ensureNomeMatricula() {
+  if (!serverData.nome || !serverData.matricula) {
+    alert('Preencha NOME e MATRÍCULA na aba "Dados Pessoais".');
+    Tabs.showByTarget('#pane-pessoais');
+    return false;
+  }
+  return true;
+}
+
+function cargoTemplate(idx) {
+  const linhas=[1,2,3,4,5,6,7,8,9,10].map(l => `
+    <tr>
+      <td><input type="text" class="form-control form-control-sm periodo-aquisitivo uppercase" placeholder="Ex.: 2023-2024"></td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio1"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim1"></div>
+        </div>
+        <div class="terco-ferias-checkbox">
+          <input type="checkbox" class="form-check-input recebeu-terco" id="r-terco-${idx}-${l}">
+          <label for="r-terco-${idx}-${l}" class="form-check-label">Recebeu 1/3?</label>
+        </div>
+      </td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio2"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim2"></div>
+        </div>
+      </td>
+      <td>
+        <div class="periodo-ferias-container">
+          <div class="periodo-ferias"><label>Início</label><input type="date" class="form-control form-control-sm inicio3"></div>
+          <div class="periodo-ferias"><label>Fim</label><input type="date" class="form-control form-control-sm fim3"></div>
+        </div>
+      </td>
+      <td><input type="number" min="0" max="30" class="form-control form-control-sm dias-usufruidos" placeholder="0" readonly></td>
+    </tr>`).join('');
+  const opts = Object.keys(TABELA_VERBAS).map(s => `<option value="${s}">`).join('');
+  return `
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h4 class="card-title mb-3">Cargo ${idx} <small class="text-muted fs-6 fw-normal">(independente)</small></h4>
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-7">
+        <label class="form-label">Símbolo (verba)</label>
+        <input type="text" class="form-control uppercase input-simbolo" placeholder="Ex.: CNE-01, CC-05" list="ls-${idx}" autocomplete="off">
+        <datalist id="ls-${idx}">${opts}</datalist>
+        <div class="simbolo-feedback mt-1"></div>
+      </div>
+      <div class="col-lg-5"><label class="form-label">Valor da verba (mensal)</label>
+        <input type="number" step="0.01" class="form-control input-valor-verba" placeholder="0.00"></div>
+    </div>
+    <div class="row g-3 align-items-end mt-1">
+      <div class="col-lg-3"><label class="form-label">Admissão no cargo</label>
+        <input type="date" class="form-control input-admissao"></div>
+      <div class="col-lg-3"><label class="form-label">Exoneração do cargo</label>
+        <input type="date" class="form-control input-exoneracao"></div>
+      <div class="col-lg-3"><label class="form-label">Dias trabalhados no mês da exoneração
+        <span class="text-danger fw-normal" style="font-size:.8rem">(se > dias → devolução)</span></label>
+        <input type="number" min="0" max="31" value="0" class="form-control input-dias-trabalhados"></div>
+      <div class="col-lg-3"><label class="form-label">Dependentes (IR)
+        <span class="text-muted fw-normal" style="font-size:.8rem">R$ 189,59/dep.</span></label>
+        <input type="number" min="0" max="20" value="0" class="form-control input-dependentes-ir"></div>
+    </div>
+    <div class="row g-3 align-items-end mt-1">
+      <div class="col-lg-6" style="flex-grow: 1;">
+        <label class="form-label">Adiantamento recebido (13º)
+          <span class="text-danger fw-normal" style="font-size:.8rem">← sempre gera devolução 60891</span>
+        </label>
+        <input type="number" step="0.01" class="form-control input-adiantamento" placeholder="0.00">
+      </div>
+      <div class="col-lg-6" style="flex-grow: 1;"><label class="form-label d-none d-lg-block">&nbsp;</label>
+        <button class="btn btn-primary btn-calcular-60">Calcular 60% automaticamente</button>
+        <div class="hint-60 text-danger mt-1" style="font-size:.8rem"></div>
+      </div>
+    </div>
+    <div class="lembrete-13-dezembro d-none mt-2">
+      <div class="alert alert-warning py-2 px-3 mb-0" style="display:flex;align-items:flex-start;gap:8px">
+        <input type="checkbox" class="form-check-input chk-13-quitado" id="chk13quitado-${idx}" style="margin-top:3px">
+        <label for="chk13quitado-${idx}" style="cursor:pointer">
+          <strong>⚠ Exoneração em dezembro:</strong> confira se os 12 ávos do 13º já foram pagos integralmente
+          ao servidor. Se sim, marque esta caixa — o campo "Adiantamento recebido" será <strong>zerado
+          automaticamente</strong> e <strong>nenhum valor de 13º nem de adiantamento de 13º</strong> será
+          calculado, pago ou devolvido neste acerto (códigos 21593 e 60891 ficam zerados). O campo de
+          adiantamento continua <strong>editável manualmente</strong> depois, se precisar registrar algo,
+          mas o valor digitado nele não entrará no cálculo enquanto esta caixa estiver marcada.
+        </label>
+      </div>
+    </div>
+    <div class="alert alert-primary mt-3 mb-0">
+      <strong>Regras:</strong> Férias: direito total vs usufruído •
+      Adiantamento 13º → <strong>sempre</strong> devolvido no acerto (60891)
+    </div>
+  </div></div>
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h6 class="fw-bold">Períodos de usufruto (máx 30 dias por linha):</h6>
+    <div class="alert alert-danger py-2 px-3 d-none ferias-error-box"><strong>ERRO:</strong> <span class="ferias-error-text"></span></div>
+    <div class="table-responsive">
+      <table class="ferias-table table">
+        <thead><tr>
+          <th class="col-aquisitivo"><span class="th-wrap">PERÍODO<br>AQUISITIVO</span></th>
+          <th class="col-usufruto-1"><span class="th-wrap">1º USUFRUTO</span></th>
+          <th class="col-usufruto-2"><span class="th-wrap">2º USUFRUTO</span></th>
+          <th class="col-usufruto-3"><span class="th-wrap">3º USUFRUTO</span></th>
+          <th class="col-total-dias"><span class="th-wrap">DIAS<br>TOTAL</span></th>
+        </tr></thead>
+        <tbody class="ferias-body">${linhas}</tbody>
+      </table>
+    </div>
+    <div class="alert alert-info py-2 px-3 mb-2">Marque "Recebeu 1/3?" em cada linha onde o servidor recebeu.</div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-primary btn-calcular-avos">Calcular Ávos</button>
+      <button class="btn btn-success btn-gerar-relatorio">Gerar Relatório</button>
+      <button class="btn btn-outline-secondary btn-exportar">Exportar JSON</button>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <button class="btn btn-lg btn-primary btn-calcular-acerto">Calcular Acerto</button>
+      <button class="btn btn-lg btn-outline-danger btn-limpar">Limpar</button>
+    </div>
+  </div></div>
+  <div class="card shadow-sm mb-3"><div class="card-body">
+    <h5 class="fw-bold">Resultados — Cargo ${idx}</h5>
+    <button class="btn btn-sm btn-dark mb-2 btn-toggle-detalhes" disabled aria-expanded="false">Mostrar detalhes</button>
+    <div class="calculation-details detalhes-calculo d-none"><strong>Detalhes:</strong><div class="detalhes-texto mt-1"></div></div>
+    <div class="rubricas-dias-trabalhados detalhes-rubricas d-none" data-hascontent="0"><strong>Dias Trabalhados:</strong><div class="detalhes-rubricas-texto mt-1"></div></div>
+    <div class="table-responsive mt-2">
+      <table class="table table-bordered results-table">
+        <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th></tr></thead>
+        <tbody class="results-body">
+          <tr><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
+          <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td></tr>
+          ${[1,2,3,4,5,6].map(() => `
+          <tr class="manual-row">
+            <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
+            <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
+            <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0.00</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="text-muted mt-1" style="font-size:.8rem">As 6 linhas em branco acima são editáveis — clique para inserir código, descrição e valor manualmente (use "-" na frente do valor para devolução). Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais).</div>
+  </div></div>`;
+}
+
+/* ================================================================
+   INICIALIZAÇÃO DO PAINEL DE CARGO
+================================================================ */
+function posInitCargoPane(ctx, idx) {
+  // Cache de elementos DOM para evitar múltiplas consultas
+  const elements = {
+    inputSimb: $('.input-simbolo', ctx),
+    inputVerba: $('.input-valor-verba', ctx),
+    feedbackEl: $('.simbolo-feedback', ctx),
+    btnToggle: $('.btn-toggle-detalhes', ctx),
+    detBox: $('.detalhes-calculo', ctx),
+    detRub: $('.detalhes-rubricas', ctx),
+    detRubTxt: $('.detalhes-rubricas-texto', ctx),
+    btnCalcular60: $('.btn-calcular-60', ctx),
+    btnCalcularAvos: $('.btn-calcular-avos', ctx),
+    btnCalcularAcerto: $('.btn-calcular-acerto', ctx),
+    btnExportar: $('.btn-exportar', ctx),
+    btnLimpar: $('.btn-limpar', ctx),
+    btnGerarRelatorio: $('.btn-gerar-relatorio', ctx),
+    inputAdmissao: $('.input-admissao', ctx),
+    inputExoneracao: $('.input-exoneracao', ctx),
+    inputAdiantamento: $('.input-adiantamento', ctx),
+    inputDiasTrabalhados: $('.input-dias-trabalhados', ctx),
+    inputDependentesIR: $('.input-dependentes-ir', ctx),
+    resultsBody: $('.results-body', ctx),
+    feriasErrorBox: $('.ferias-error-box', ctx),
+    feriasTableInputs: $$('.ferias-table input', ctx),
+    uppercaseInputs: $$('.uppercase', ctx),
+    clampInputs: $$('.input-valor-verba, .input-adiantamento', ctx),
+    feriasDateInputs: $$('.inicio1, .fim1, .inicio2, .fim2, .inicio3, .fim3', ctx),
+    lembrete13Dezembro: $('.lembrete-13-dezembro', ctx),
+    chk13Quitado: $('.chk-13-quitado', ctx)
+  };
+
+  elements.uppercaseInputs.forEach(el => {
+    const up = () => el.value = (el.value || '').toUpperCase();
+    el.addEventListener('input', up);
+    el.addEventListener('blur', up);
+    up(); // Executa uma vez para garantir que valores iniciais sejam uppercase
+  });
+
+  elements.clampInputs.forEach(el => el.addEventListener('blur', () => clamp2(el)));
+
+  bindManualRows(ctx);
+
+  /* Lembrete de dezembro: se a exoneração cair em qualquer dia de
+     dezembro, mostra o aviso para conferir se os 12 ávos do 13º já
+     foram pagos. Se o mês mudar para fora de dezembro, o aviso some e
+     a marcação é desfeita automaticamente (a regra só vale para
+     exoneração em dezembro). */
+  function atualizarLembreteDezembro() {
+    const exo = parseDateYMD(elements.inputExoneracao?.value);
+    const ehDezembro = exo && exo.getMonth() === 11; // dezembro = índice 11
+    if (elements.lembrete13Dezembro) elements.lembrete13Dezembro.classList.toggle('d-none', !ehDezembro);
+    if (!ehDezembro && elements.chk13Quitado) elements.chk13Quitado.checked = false;
+    aplicarRegra60Ultimo();
+  }
+  elements.inputExoneracao?.addEventListener('change', atualizarLembreteDezembro);
+
+  /* Ao marcar a caixa "13º já quitado", zera o adiantamento automaticamente
+     nesse instante — mas o campo continua editável manualmente depois (não
+     é desabilitado). O botão "Calcular 60%" é bloqueado enquanto a caixa
+     estiver marcada, para não sobrescrever o campo com um valor calculado. */
+  elements.chk13Quitado?.addEventListener('change', () => {
+    if (elements.chk13Quitado.checked && elements.inputAdiantamento) {
+      elements.inputAdiantamento.value = '0.00';
+    }
+    aplicarRegra60Ultimo();
+  });
+
+  elements.feriasDateInputs.forEach(el => {
+    el.addEventListener('change', () => {
+      atualizarTotaisDiasUsufruidos(ctx);
+      validarDatasFeriasCtx(ctx);
+    });
+  });
+
+  /* Autopreenchimento pelo símbolo */
+  function aplicarTabelaVerba() {
+    const s = (elements.inputSimb.value || '').trim().toUpperCase();
+    const v = TABELA_VERBAS[s];
+    if (v !== undefined) {
+      elements.inputVerba.value = v.toFixed(2);
+      elements.inputVerba.classList.remove('is-invalid');
+      elements.inputVerba.classList.add('is-valid');
+      elements.inputSimb.classList.remove('is-invalid');
+      elements.inputSimb.classList.add('is-valid');
+      elements.feedbackEl.innerHTML = `<span class="text-success fw-semibold">✔ ${s} — ` +
+        `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ` +
+        `<small class="text-muted">(Jul/2023)</small></span>`;
+    } else if (s.length > 0) {
+      elements.inputVerba.classList.remove('is-valid');
+      elements.inputSimb.classList.remove('is-valid');
+      elements.feedbackEl.innerHTML = `<span class="text-warning">⚠ Símbolo não encontrado. Informe o valor manualmente.</span>`;
+    } else {
+      elements.inputVerba.classList.remove('is-valid', 'is-invalid');
+      elements.inputSimb.classList.remove('is-valid', 'is-invalid');
+      elements.feedbackEl.innerHTML = '';
+    }
+  }
+  elements.inputSimb.addEventListener('input', aplicarTabelaVerba);
+  elements.inputSimb.addEventListener('blur', aplicarTabelaVerba);
+  elements.inputSimb.addEventListener('change', aplicarTabelaVerba);
+
+  /* Toggle detalhes */
+  elements.btnToggle.addEventListener('click', () => {
+    const open = elements.btnToggle.getAttribute('aria-expanded') === 'true';
+    elements.btnToggle.setAttribute('aria-expanded', String(!open));
+    elements.btnToggle.textContent = open ? 'Mostrar detalhes' : 'Esconder detalhes';
+    elements.detBox.classList.toggle('d-none', open);
+    if (elements.detRub.dataset.hascontent === '1') elements.detRub.classList.toggle('d-none', open);
+  });
+
+  /* Calcular 60% — apenas para fins do botão, não bloqueia adiantamento */
+  elements.btnCalcular60.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    if (elements.chk13Quitado?.checked) {
+      alert('O 13º deste ano foi marcado como já quitado integralmente — não é possível calcular o adiantamento automático de 60%.');
+      return;
+    }
+    const nasc = serverData.nascimento;
+    const exo = elements.inputExoneracao?.value;
+    if (!nasc || !exo) { alert('Informe Nascimento e Exoneração.'); return; }
+    if (!mesExoneracaoAposNascimentoCtx(ctx)) {
+      const mn = parseDateYMD(nasc)?.getMonth() + 1;
+      const me = parseDateYMD(exo)?.getMonth() + 1;
+      alert(`Não é possível calcular 60%.\nMês exoneração (${me}) não posterior ao nascimento (${mn}).`);
+      return;
+    }
+    const verba = parseFloat(elements.inputVerba?.value) || 0;
+    if (verba <= 0) { alert('Informe o Valor da verba antes.'); return; }
+    const r = (verba * 0.6).toFixed(2);
+    elements.inputAdiantamento.value = r;
+    alert(`60% de R$ ${verba.toFixed(2)} = R$ ${r}.`);
+  });
+
+  /* Calcular Ávos */
+  elements.btnCalcularAvos.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    comFeedback(this, () => {
+      const av = calcularAvosFeriasCtx(ctx);
+      const av13 = calcularAvosGratificacaoNataliciaCtx(ctx);
+      const ehUltimo = ehUltimoCargoIdx(idx);
+      const tu = totalDiasUsufruidos(ctx);
+      const dirVenc = av.periodosCompletos * 30;
+      const dirProp = (av.avosUltimoPeriodo / 12) * 30;
+      const dirTotal = dirVenc + dirProp;
+      const saldo = tu - dirTotal;
+      const linhasComTerco = $$('.recebeu-terco:checked', ctx).length;
+      const quitado13 = elements.chk13Quitado?.checked || false;
+      const adiant = quitado13 ? 0 : (parseFloat(elements.inputAdiantamento?.value) || 0);
+
+      // Habilita o botão de detalhes, mas mantém escondido até o usuário clicar
+      elements.detBox.classList.add('d-none');
+      elements.btnToggle.disabled = false;
+      elements.btnToggle.setAttribute('aria-expanded', 'false');
+      elements.btnToggle.textContent = 'Mostrar detalhes';
+
+      $('.detalhes-texto', ctx).innerHTML = `
+        <strong>Período:</strong> ${formatarDataBR(av.admissaoBase)} a ${formatarDataBR(elements.inputExoneracao?.value)}<br>
+        Períodos completos: ${av.periodosCompletos} • Início último PA: ${formatarDataBR(av.boundary)}<br><br>
+        <strong>Ávos de férias:</strong><br>
+        - Vencidos: ${av.avosVencidos} → ${dirVenc} dias de direito<br>
+        - Proporcionais: ${av.avosUltimoPeriodo}/12 → ${dirProp.toFixed(4)} dias de direito<br>
+        - <strong>Direito total: ${dirTotal.toFixed(4)} dias</strong><br>
+        - Total usufruído: ${tu} dias<br>
+        - Saldo: ${saldo >= 0 ? '+' : ''}${saldo.toFixed(4)} dias
+        ${saldo > 0.001 ? '→ <span class="valor-negativo">DEVOLUÇÃO</span>' :
+          saldo < -0.001 ? '→ <span class="valor-positivo">A RECEBER</span>' : '→ zerado'}<br>
+        - "Recebeu 1/3?" marcado em: <strong>${linhasComTerco} linha(s)</strong><br>
+        ${quitado13
+          ? `- <span class="text-danger">⚠ 13º marcado como já quitado integralmente — nenhum adiantamento considerado neste acerto</span><br><br>`
+          : `- Adiantamento 13º informado: <strong>R$ ${adiant.toFixed(2)}</strong>
+             ${adiant > 0 ? ' → <span class="valor-negativo">será devolvido (60891)</span>' : ''}<br><br>`}
+        <strong>13º (ano exoneração):</strong> ${quitado13 ? 0 : av13} ávos
+        ${quitado13 ? ' → <span class="text-danger">já quitado integralmente (marcado)</span>' :
+          (ehUltimo ? '' : ` → <span class="text-danger">não pago neste cargo (só no último — Cargo ${qtdCargos})</span>`)}
+      `;
+    });
+  });
+
+  /* ============================================================
+     CALCULAR ACERTO
+  ============================================================ */
+  elements.btnCalcularAcerto.addEventListener('click', function () {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    const adm = elements.inputAdmissao?.value;
+    const exo = elements.inputExoneracao?.value;
+    if (!adm || !exo) { alert('Informe Admissão e Exoneração.'); return; }
+
+    elements.clampInputs.forEach(el => clamp2(el));
+    const valorVerba = parseFloat(elements.inputVerba?.value) || 0;
+    if (valorVerba <= 0) { alert('Informe o Valor da verba (mensal).'); return; }
+
+    comFeedback(this, () => {
+      const avos = calcularAvosFeriasCtx(ctx);
+      const quitado13 = elements.chk13Quitado?.checked || false;
+      const ehUltimo = ehUltimoCargoIdx(idx);
+      const av13 = (quitado13 || !ehUltimo) ? 0 : calcularAvosGratificacaoNataliciaCtx(ctx);
+      const rdias = calcularDiasTrabalhados(ctx);
+
+      /* ═══════════════════════════════════════════════════════
+         ADIANTAMENTO DE 13º
+         Regra: SE o servidor recebeu adiantamento (valor > 0)
+         SEMPRE gera devolução no acerto (código 60891)
+         independente de qualquer outra condição — EXCETO se o 13º
+         deste ano já foi marcado como quitado integralmente (caixa
+         de dezembro), caso em que nenhum adiantamento é considerado.
+      ═══════════════════════════════════════════════════════ */
+      const adiantRecebido = quitado13 ? 0 : (parseFloat(elements.inputAdiantamento?.value) || 0);
+      const adiantamento = adiantRecebido > 0 ? -adiantRecebido : 0;
+      /* valor negativo → setResultRowValueCtx converte para 60891 automaticamente */
+
+      const valor13 = (valorVerba / 12) * av13;
+      const fc = calcularFeriasCompleto(ctx, valorVerba, avos);
+
+      /* ═══════════════════════════════════════════════════════
+         IMPOSTO DE RENDA (IRRF 2026)
+         Base 1 (40950/30950): valor RECEBIDO (positivo) de 20014
+         (dias trabalhados) apenas. Indenização de férias e o
+         respectivo 1/3 (vencidas/proporcionais, códigos 20875,
+         20857, 20872, 20883) são ISENTOS de imposto de renda em
+         acerto de contas/rescisão (Súmula 125 do TST / RE 66.732
+         do STF) — por isso NÃO entram nesta base.
+         Base 2 (40951/30953): valor do 13º salário (21593),
+         calculado de forma independente (13º é tributável).
+         Em ambas as bases é descontada a dedução por dependente
+         (R$ 189,59/dependente em 2026) antes de aplicar a tabela —
+         a mesma quantidade de dependentes vale para as duas bases.
+         O imposto apurado é sempre lançado como dedução (negativo);
+         se a base for zero/isenta, o valor fica 0,00 no código
+         positivo.
+      ═══════════════════════════════════════════════════════ */
+      const qtdDependentesIR = parseInt(elements.inputDependentesIR?.value || '0', 10) || 0;
+      const deducaoDependentesIR = qtdDependentesIR * DEDUCAO_DEPENDENTE_IR_2026;
+      const baseIR1 = Math.max(0, rdias.valor);
+      const irValor1 = calcularIRRF2026(baseIR1, deducaoDependentesIR);
+      const baseIR2 = Math.max(0, valor13);
+      const irValor2 = calcularIRRF2026(baseIR2, deducaoDependentesIR);
+
+      /* Atualiza tabela de resultados */
+      setResultRowValueCtx(ctx, '20014', rdias.valor);
+      setResultRowValueCtx(ctx, '40950', -irValor1);
+      setResultRowValueCtx(ctx, '21593', valor13);
+      setResultRowValueCtx(ctx, '40951', -irValor2);
+      setResultRowValueCtx(ctx, '20875', fc.valorFeriasVencidas);
+      setResultRowValueCtx(ctx, '20857', fc.valorTercoVencidas);
+      setResultRowValueCtx(ctx, '20872', fc.valorFeriasProporc);
+      setResultRowValueCtx(ctx, '20883', fc.valorTercoProporc);
+      setResultRowValueCtx(ctx, '20891', adiantamento); /* ← sempre negativo se > 0; código canônico 20891 (vira 60891 quando negativo) */
+
+      /* TOTAL */
+      atualizarTotalResultados(elements.resultsBody);
+
+      /* ── DETALHES ── */
+      const vPorDia = valorVerba / 30;
+      const saldo = fc.saldo;
+
+      let html = `<strong>Período:</strong> ${formatarDataBR(avos.admissaoBase)} a ${formatarDataBR(exo)}<br>`;
+      html += `Períodos vencidos: ${avos.periodosCompletos} • Ávos prop.: ${avos.avosUltimoPeriodo}/12<br><br>`;
+
+      if (quitado13) {
+        html += `<strong>13º:</strong> <span class="valor-positivo">R$ 0.00</span> `;
+        html += `← marcado como já quitado integralmente (12 ávos) neste ano; nenhum valor de 13º ou adiantamento considerado<br>`;
+      } else if (ehUltimo) {
+        html += `<strong>13º:</strong> ${av13} ávos × R$ ${(valorVerba / 12).toFixed(4)} = `;
+        html += `<span class="valor-positivo">R$ ${valor13.toFixed(2)}</span><br>`;
+      } else {
+        html += `<strong>13º:</strong> <span class="valor-positivo">R$ 0.00</span> `;
+        html += `← este não é o último cargo lançado (Cargo ${qtdCargos}); o 13º deste ano só é apurado no acerto do último cargo<br>`;
+      }
+      if (irValor2 > 0.001) {
+        html += `<strong>IR sobre 13º (40951/30953):</strong> R$ ${baseIR2.toFixed(2)} `;
+        if (qtdDependentesIR > 0) html += `− ${qtdDependentesIR} dep. × R$ 189,59 = R$ ${deducaoDependentesIR.toFixed(2)} `;
+        html += `→ <span class="valor-negativo">- R$ ${irValor2.toFixed(2)}</span> (tabela IRRF 2026)<br>`;
+      } else if (baseIR2 > 0.001) {
+        html += `<strong>IR sobre 13º:</strong> base R$ ${baseIR2.toFixed(2)} → isento (redutor da Lei 15.270/2025${qtdDependentesIR > 0 ? ' e/ou dependentes' : ''})<br>`;
+      }
+
+      /* Adiantamento */
+      if (adiantRecebido > 0) {
+        html += `<strong>Adiantamento 13º (60891):</strong> `;
+        html += `<span class="valor-negativo">- R$ ${adiantRecebido.toFixed(2)}</span> `;
+        html += `← servidor recebeu e deve devolver no acerto<br>`;
+      }
+      html += `<br>`;
+
+      html += `<strong>FÉRIAS — Cálculo completo:</strong><br>`;
+      html += `- Direito PAs vencidos: ${avos.periodosCompletos} × 30 = <strong>${fc.diasVencidosDireito} dias</strong><br>`;
+      html += `- Direito proporcional: (${avos.avosUltimoPeriodo}/12) × 30 = <strong>${fc.diasProporcDireito.toFixed(4)} dias</strong><br>`;
+      html += `- <strong>Direito total: ${fc.direitoTotal.toFixed(4)} dias</strong><br>`;
+      html += `- Total usufruído: <strong>${fc.totalUsufruido} dias</strong><br>`;
+
+      if (Math.abs(saldo) < 0.001) {
+        html += `- Saldo de dias: <strong>zero</strong> (tudo gozado corretamente, sem indenização de dias)<br>`;
+      } else if (saldo > 0) {
+        html += `- Saldo de dias: <span class="valor-negativo">+${saldo.toFixed(4)} dias a DEVOLVER</span><br>`;
+        html += `- ${saldo.toFixed(4)} × R$ ${vPorDia.toFixed(4)} = `;
+        html += `<span class="valor-negativo">- R$ ${Math.abs(fc.valorFeriasProporc).toFixed(2)}</span> (20872/60872)<br>`;
+      } else {
+        html += `- Saldo de dias: <span class="valor-positivo">${Math.abs(saldo).toFixed(4)} dias a RECEBER</span><br>`;
+        html += `- ${Math.abs(saldo).toFixed(4)} × R$ ${vPorDia.toFixed(4)} = `;
+        html += `<span class="valor-positivo">R$ ${Math.abs(fc.valorFeriasProporc).toFixed(2)}</span> (20872/60872)<br>`;
+      }
+      html += `- Férias vencidas (20875): sempre <strong>R$ 0,00</strong> nesta contagem FIFO — o saldo de dias vai inteiro para proporcionais acima<br>`;
+
+      /* ── 1/3 de férias: reconciliação única, sempre exibida ── */
+      const V3 = valorVerba / 3;
+      html += `<br><strong>1/3 de férias — reconciliação (${fc.linhasComTerco} marcação${fc.linhasComTerco !== 1 ? 'ões' : ''} de "Recebeu 1/3?"):</strong><br>`;
+      html += `- Direito vencidas: ${avos.periodosCompletos} período(s) × R$ ${V3.toFixed(2)} = <strong>R$ ${(V3 * avos.periodosCompletos).toFixed(2)}</strong><br>`;
+      html += `- Direito proporcional: (${avos.avosUltimoPeriodo}/12) × R$ ${V3.toFixed(2)} = <strong>R$ ${(V3 * avos.avosUltimoPeriodo / 12).toFixed(2)}</strong><br>`;
+      if (Math.abs(fc.valorTercoVencidas) > 0.001) {
+        const cls = fc.valorTercoVencidas >= 0 ? 'valor-positivo' : 'valor-negativo';
+        const sinal = fc.valorTercoVencidas >= 0 ? '' : '- ';
+        html += `- 1/3 vencidas (20857/60857): <span class="${cls}">${sinal}R$ ${Math.abs(fc.valorTercoVencidas).toFixed(2)}</span> `;
+        html += fc.valorTercoVencidas >= 0 ? '← faltou pagar<br>' : '← recebeu além do direito, devolve<br>';
+      }
+      if (Math.abs(fc.valorTercoProporc) > 0.001) {
+        const cls = fc.valorTercoProporc >= 0 ? 'valor-positivo' : 'valor-negativo';
+        const sinal = fc.valorTercoProporc >= 0 ? '' : '- ';
+        html += `- 1/3 proporcional (20883/60883): <span class="${cls}">${sinal}R$ ${Math.abs(fc.valorTercoProporc).toFixed(2)}</span> `;
+        html += fc.valorTercoProporc >= 0 ? '← faltou pagar<br>' : '← recebeu além do direito, devolve<br>';
+      }
+      if (Math.abs(fc.valorTercoVencidas) <= 0.001 && Math.abs(fc.valorTercoProporc) <= 0.001) {
+        html += `- 1/3 recebido bate exatamente com o direito acumulado, nenhum ajuste necessário.<br>`;
+      }
+
+      html += `<br><strong>IR sobre dias trabalhados (40950/30950):</strong><br>`;
+      html += `- Base: R$ ${baseIR1.toFixed(2)} (20014 — férias e 1/3 são isentos de IR em acerto de contas)`;
+      if (qtdDependentesIR > 0) html += `<br>- Dedução: ${qtdDependentesIR} dependente(s) × R$ 189,59 = R$ ${deducaoDependentesIR.toFixed(2)}`;
+      html += `<br>`;
+      if (irValor1 > 0.001) {
+        html += `- IR apurado (tabela 2026): <span class="valor-negativo">- R$ ${irValor1.toFixed(2)}</span><br>`;
+      } else {
+        html += `- Isento (base zerada, dependentes ou redutor da Lei 15.270/2025)<br>`;
+      }
+
+      $('.detalhes-texto', ctx).innerHTML = html;
+
+      /* Detalhes dias trabalhados */
+      if (rdias.tipo === 'devolucao' || rdias.tipo === 'pagamento') {
+        const nome = `CARGO ${idx}`;
+        const simb = (elements.inputSimb?.value || '').toUpperCase();
+        let rhtml = '';
+        if (rdias.tipo === 'devolucao') {
+          rhtml += `<div class="alert alert-warning py-2 px-3 mb-2">⚠️ <strong>Devolução:</strong> ` +
+            `informados <strong>${rdias.diasInformados} dias</strong>, máximo: ` +
+            `<strong>${rdias.diasNoMes} dias</strong>. ` +
+            `Diferença: <strong>${rdias.diferenca} dias</strong>.</div>`;
+          rhtml += `<strong>${nome}${simb ? ' [' + simb + ']' : ''}:</strong><br>`;
+          rhtml += `${rdias.diferenca} × R$ ${rdias.valorPorDia.toFixed(4)} = `;
+          rhtml += `<span class="valor-negativo">- R$ ${Math.abs(rdias.valor).toFixed(2)}</span><br>`;
+          rhtml += `<strong>Total <span class="valor-negativo">60014</span>: ` +
+            `<span class="valor-negativo">- R$ ${Math.abs(rdias.valor).toFixed(2)}</span></strong>`;
+        } else {
+          rhtml += `<strong>${nome}${simb ? ' [' + simb + ']' : ''}:</strong><br>`;
+          rhtml += `${rdias.diasInformados} × R$ ${rdias.valorPorDia.toFixed(4)} = `;
+          rhtml += `<span class="valor-positivo">R$ ${rdias.valor.toFixed(2)}</span><br>`;
+          rhtml += `<strong>Total <span class="valor-positivo">20014</span>: ` +
+            `<span class="valor-positivo">R$ ${rdias.valor.toFixed(2)}</span></strong>`;
+        }
+        elements.detRubTxt.innerHTML = rhtml;
+        elements.detRub.dataset.hascontent = '1';
+        elements.detRub.classList.add('d-none');
+      } else {
+        elements.detRubTxt.innerHTML = '';
+        elements.detRub.dataset.hascontent = '0';
+        elements.detRub.classList.add('d-none');
+      }
+
+      // Habilita o botão de detalhes, mas mantém escondido até o usuário clicar
+      elements.btnToggle.disabled = false;
+      elements.detBox.classList.add('d-none');
+      elements.btnToggle.setAttribute('aria-expanded', 'false');
+      elements.btnToggle.textContent = 'Mostrar detalhes';
+    });
+  });
+
+  /* Exportar JSON */
+  elements.btnExportar.addEventListener('click', () => {
+    const dados = coletarSnapshotCargo(ctx, idx);
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `acerto_cargo${idx}_${serverData.matricula || 'dados'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  /* Limpar */
+  elements.btnLimpar.addEventListener('click', () => {
+    // Limpa inputs principais
+    elements.inputSimb.value = '';
+    elements.inputVerba.value = '';
+    elements.inputAdmissao.value = '';
+    elements.inputExoneracao.value = '';
+    elements.inputAdiantamento.value = '';
+    elements.inputAdiantamento.disabled = false;
+    elements.inputDiasTrabalhados.value = '0';
+    if (elements.inputDependentesIR) elements.inputDependentesIR.value = '0';
+    if (elements.chk13Quitado) elements.chk13Quitado.checked = false;
+    if (elements.lembrete13Dezembro) elements.lembrete13Dezembro.classList.add('d-none');
+
+    // Limpa feedback do símbolo
+    if (elements.feedbackEl) elements.feedbackEl.innerHTML = '';
+    elements.inputSimb?.classList.remove('is-valid', 'is-invalid');
+    elements.inputVerba?.classList.remove('is-valid', 'is-invalid');
+
+    // Limpa inputs da tabela de férias
+    elements.feriasTableInputs.forEach(el => {
+      if (el.type === 'number') el.value = '0';
+      else if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+      el.classList.remove('is-invalid'); // Limpa validação
+    });
+
+    // Reseta a tabela de resultados
+    $$('tr', elements.resultsBody).forEach(tr => {
+      if (tr.classList.contains('total-row')) return;
+      if (tr.classList.contains('manual-row')) {
+        $('.manual-codigo', tr).textContent = '';
+        $('.manual-descricao', tr).textContent = '';
+        const mv = $('.manual-valor', tr);
+        mv.textContent = '0.00';
+        mv.className = 'manual-valor valor-positivo';
+        return;
+      }
+      const v = tr.cells[2];
+      const c = tr.cells[0];
+      const codigoAtual = c?.textContent.trim();
+      const codigoPos = toCodigoPositivo(codigoAtual);
+      if (v) v.textContent = '0.00';
+      if (codigoPos === '20891') {
+        // Convenção original: a linha de adiantamento reinicia mostrando o código negativo (60891)
+        if (c) c.textContent = toCodigoNegativo(codigoPos);
+        if (v) v.className = 'valor-negativo';
+      } else {
+        if (c) c.textContent = codigoPos;
+        if (v) v.className = 'valor-positivo';
+      }
+    });
+    $('tr.total-row', elements.resultsBody)?.remove();
+
+    // Esconde caixas de erro e detalhes
+    elements.feriasErrorBox.classList.add('d-none');
+    elements.detBox.classList.add('d-none');
+    elements.detRub.classList.add('d-none');
+    elements.detRub.dataset.hascontent = '0';
+
+    // Reseta botão de toggle
+    elements.btnToggle.disabled = true;
+    elements.btnToggle.setAttribute('aria-expanded', 'false');
+    elements.btnToggle.textContent = 'Mostrar detalhes';
+
+    alert(`Dados do Cargo ${idx} foram limpos.`);
+  });
+
+  /* Gerar Relatório */
+  elements.btnGerarRelatorio.addEventListener('click', () => {
+    if (!ensureNomeMatricula()) return;
+    if (!validarDatasFeriasCtx(ctx)) return;
+    const snap = coletarSnapshotCargo(ctx, idx);
+    const avos = calcularAvosFeriasCtx(ctx);
+    const fc = calcularFeriasCompleto(ctx, snap.remuneracaoTotal, avos);
+    const rdias = calcularDiasTrabalhados(ctx);
+    const adiantRecebido = snap.adiantamento;
+
+    const rows = $$('tr', elements.resultsBody)
+      .filter(tr => !tr.classList.contains('total-row'))
+      .map(tr => `${tr.cells?.[0]?.textContent?.trim()} - ` +
+        `${tr.cells?.[1]?.textContent?.trim()}: R$ ` +
+        `${tr.cells?.[2]?.textContent?.trim()}`);
+
+    let rel = `RELATÓRIO DE ACERTO - CARGO ${idx}\n`;
+    rel += `=============================================\n\n`;
+    rel += `DATA: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+    rel += `SERVIDOR\n`;
+    rel += `- Nome: ${serverData.nome}\n`;
+    rel += `- Matrícula: ${serverData.matricula}\n`;
+    rel += `- Nascimento: ${formatarDataBR(serverData.nascimento)}\n`;
+    if (serverData.processoSei) rel += `- Processo SEI: ${serverData.processoSei}\n`;
+    rel += `\n`;
+    rel += `DADOS DO CARGO\n`;
+    rel += `- Símbolo: ${snap.simbolo || '—'}\n`;
+    rel += `- Período: ${formatarDataBR(snap.admissao)} a ${formatarDataBR(snap.exoneracao)}\n`;
+    rel += `- Dias trabalhados informados: ${snap.diasTrabalhadosMes}\n`;
+    if (rdias.tipo === 'devolucao')
+      rel += `- ⚠ DEVOLUÇÃO dias: ${rdias.diferenca} dias (max ${rdias.diasNoMes})\n`;
+    rel += `\nFÉRIAS\n`;
+    rel += `- Direito total: ${fc.direitoTotal.toFixed(2)} dias\n`;
+    rel += `- Total usufruído: ${fc.totalUsufruido} dias\n`;
+    rel += `- Saldo: ${fc.saldo >= 0 ? '+' : ''}${fc.saldo.toFixed(2)} dias ` +
+         `${fc.saldo > 0.001 ? '(DEVOLUÇÃO)' : fc.saldo < -0.001 ? '(A RECEBER)' : '(zerado)'}\n`;
+    if (fc.linhasComTerco > 0) {
+      rel += `- 1/3 recebido: ${fc.linhasComTerco} vez(es)\n`;
+      rel += `  1º: devolve ${fc.avFaltantes}/12\n`;
+      if (fc.linhasComTerco > 1)
+        rel += `  + ${fc.linhasComTerco - 1}x 1/3 integral\n`;
+    }
+    rel += `\nREMUNERAÇÃO\n`;
+    rel += `- Verba mensal: R$ ${snap.remuneracaoTotal.toFixed(2)}\n`;
+    if (adiantRecebido > 0)
+      rel += `- Adiantamento 13º recebido: R$ ${adiantRecebido.toFixed(2)} → devolução (60891)\n`;
+    rel += `\nÁVOS\n`;
+    rel += `- Férias vencidas: ${snap.avosVencidas}\n`;
+    rel += `- Férias proporcionais: ${snap.avosProporcionais}\n`;
+    rel += `- 13º: ${snap.avos13}${snap.treze13JaQuitado ? ' (marcado como já quitado integralmente neste ano)' : ''}\n\n`;
+    rel += `RESULTADOS\n-------------------------\n`;
+    rel += rows.join('\n');
+    rel += `\n\nTOTAL LÍQUIDO: R$ ${snap.totalCalculado.toFixed(2)}\n`;
+    gerarRelatorioHTML(rel);
+  });
+}
+
+/* ================================================================
+   CONTROLADOR DE ABAS (substitui o bootstrap.Tab — puro JS, ~25 linhas)
+================================================================ */
+const Tabs = (() => {
+  const nav = $('#mainTabs');
+  const links = $$('.nav-link', nav);
+  let onShownCb = () => {};
+
+  function activate(link) {
+    links.forEach(l => l.classList.remove('active'));
+    $$('.tab-pane').forEach(p => p.classList.remove('active'));
+    link.classList.add('active');
+    const target = link.getAttribute('data-target');
+    $(target)?.classList.add('active');
+    onShownCb(target);
+  }
+
+  links.forEach(link => link.addEventListener('click', () => activate(link)));
+
+  return {
+    showByTarget(target) {
+      const link = links.find(l => l.getAttribute('data-target') === target);
+      if (link) activate(link);
+    },
+    setOnShown(fn) { onShownCb = fn; }
+  };
+})();
+
+/* Lazy init: só monta o HTML do cargo na primeira vez que a aba é aberta */
+Tabs.setOnShown(target => {
+  const idx = cargoPanesSel.indexOf(target) + 1;
+  if (idx < 1 || idx > TOTAL_CARGOS) return;
+  const pane = $(target);
+  if (pane.dataset.ready === '1') return;
+  pane.innerHTML = cargoTemplate(idx);
+  pane.dataset.ready = '1';
+  posInitCargoPane(pane, idx);
+  aplicarRegra60Ultimo();
+});
+
+/* ================================================================
+   QUANTIDADE DE CARGOS A LANÇAR
+   • Mostra/esconde as abas de Cargo conforme a quantidade escolhida.
+   • Quando houver mais de 1 cargo, o cálculo automático de 60% só
+     fica habilitado no ÚLTIMO cargo (idx === qtdCargos); nos demais,
+     o botão fica desabilitado e o adiantamento deve ser informado
+     manualmente.
+================================================================ */
+function atualizarVisibilidadeAbas() {
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const link = $(`.nav-link[data-target="${cargoPanesSel[i - 1]}"]`);
+    const li = link?.closest('.nav-item');
+    if (!li) continue;
+    const visivel = i <= qtdCargos;
+    li.classList.toggle('d-none', !visivel);
+    if (!visivel && link.classList.contains('active')) {
+      Tabs.showByTarget('#pane-pessoais');
+    }
+  }
+}
+
+function ehUltimoCargoIdx(idx) {
+  return qtdCargos <= 1 || idx === qtdCargos;
+}
+
+function aplicarRegra60Ultimo() {
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (!pane || pane.dataset.ready !== '1') continue;
+    const btn = $('.btn-calcular-60', pane);
+    const hint = $('.hint-60', pane);
+    if (!btn) continue;
+    const quitado13 = $('.chk-13-quitado', pane)?.checked || false;
+    const naoEhUltimo = qtdCargos > 1 && i !== qtdCargos;
+    const bloqueado = quitado13 || naoEhUltimo;
+    btn.disabled = bloqueado;
+    if (quitado13) {
+      btn.title = '13º marcado como já quitado integralmente (dezembro) — cálculo automático de 60% desabilitado.';
+    } else if (naoEhUltimo) {
+      btn.title = `O cálculo automático de 60% só se aplica ao último cargo lançado (Cargo ${qtdCargos}).`;
+    } else {
+      btn.title = '';
+    }
+    if (hint) {
+      if (quitado13) {
+        hint.textContent = '🔒 13º já quitado integralmente — cálculo automático de 60% desabilitado. O campo de adiantamento pode ser editado manualmente, se necessário.';
+      } else if (naoEhUltimo) {
+        hint.textContent = `🔒 Somente habilitado no último cargo (Cargo ${qtdCargos}). Informe o adiantamento manualmente acima.`;
+      } else {
+        hint.textContent = '';
+      }
+    }
+  }
+}
+
+function atualizarQuantidadeCargos(novaQtd) {
+  qtdCargos = Math.min(TOTAL_CARGOS, Math.max(1, parseInt(novaQtd, 10) || TOTAL_CARGOS));
+  atualizarVisibilidadeAbas();
+  aplicarRegra60Ultimo();
+}
+
+$('#srv-qtd-cargos').addEventListener('change', e => atualizarQuantidadeCargos(e.target.value));
+
+/* ================================================================
+   DADOS PESSOAIS
+================================================================ */
+function atualizarCabecalhoResumo() {
+  const el = $('#resumo-cabecalho-servidor');
+  if (!el) return;
+  el.innerHTML = `<strong>Servidor:</strong> ${serverData.nome || '—'} &nbsp;•&nbsp; ` +
+    `<strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;•&nbsp; ` +
+    `<strong>Processo SEI:</strong> ${serverData.processoSei || '—'}`;
+}
+
+(function bindPessoais() {
+  const nome = $('#srv-nome');
+  const mat = $('#srv-matricula');
+  const nasc = $('#srv-nascimento');
+  const sei = $('#srv-processo-sei');
+
+  const toUp = el => el.value = (el.value || '').toUpperCase();
+  const sync = () => {
+    serverData.nome = (nome.value || '').trim().toUpperCase();
+    serverData.matricula = (mat.value || '').trim().toUpperCase();
+    serverData.nascimento = nasc.value || '';
+    serverData.processoSei = (sei?.value || '').trim();
+    atualizarCabecalhoResumo();
+  };
+
+  nome.addEventListener('input', () => { toUp(nome); sync(); });
+  nome.addEventListener('blur', () => { toUp(nome); sync(); });
+  mat.addEventListener('input', () => { toUp(mat); sync(); });
+  mat.addEventListener('blur', () => { toUp(mat); sync(); });
+  nasc.addEventListener('change', sync);
+  sei?.addEventListener('input', sync);
+  sei?.addEventListener('blur', sync);
+
+  toUp(nome);
+  toUp(mat);
+  sync();
+})();
+
+/* Mostrar/esconder o bloco unificado de regras de cálculo */
+(function bindToggleRegras() {
+  const btn = $('.btn-toggle-regras');
+  const box = $('.regras-calculo');
+  if (!btn || !box) return;
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    btn.textContent = open ? 'Mostrar regras de cálculo' : 'Esconder regras de cálculo';
+    box.classList.toggle('d-none', open);
+  });
+})();
+
+/* ================================================================
+   RESUMO GERAL
+================================================================ */
+$('#btn-atualizar-resumo').addEventListener('click', () => {
+  const totals = Object.fromEntries(CODIGOS_RESUMO.map(c => [c, 0]));
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (!pane || pane.dataset.ready !== '1') continue;
+    CODIGOS_RESUMO.forEach(c => { totals[c] += lerValorDeCodigoNaAba(pane, c); });
+  }
+
+  const tbody = $('#resumo-table tbody');
+  $$('tr', tbody).forEach(tr => {
+    const oc = tr.getAttribute('data-code');
+    const tot = totals[oc] || 0;
+    tr.cells[0].textContent = ajustarCodigo(oc, tot);
+    tr.cells[2].textContent = (tot < 0 ? '-' : '') + Math.abs(tot).toFixed(2);
+    tr.cells[2].className = tot < 0 ? 'valor-negativo' : 'valor-positivo';
+  });
+
+  let tg = 0;
+  Object.values(totals).forEach(v => tg += v);
+  $('#resumo-total').innerHTML =
+    `TOTAL LÍQUIDO (todos os cargos): ` +
+    `<span class="${tg < 0 ? 'valor-negativo' : 'valor-positivo'}">` +
+    `${(tg < 0 ? '-' : '') + Math.abs(tg).toFixed(2)}</span>`;
+});
+
+$('#btn-exportar-resumo').addEventListener('click', () => {
+  $('#btn-atualizar-resumo').click();
+  const tbody = $('#resumo-table tbody');
+  const itens = $$('tr', tbody).map(tr => ({
+    codigo: tr.cells[0].textContent,
+    descricao: tr.cells[1].textContent,
+    valor: tr.cells[2].textContent
+  }));
+  const dados = {
+    servidor: { ...serverData },
+    itens,
+    totalGeralTexto: ($('#resumo-total').innerText || ''),
+    dataExportacao: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `resumo_${serverData.matricula || 'dados'}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+/* ================================================================
+   IMPRESSÃO / GERAÇÃO DE PDF (Resumo)
+   Usa window.print() nativo do navegador — sem bibliotecas externas.
+   Gera um relatório limpo e independente (não reaproveita as abas em
+   tela): uma página por cargo já calculado (com férias usufruídas e
+   resultado do acerto) + 1 página final com o layout do Resumo.
+================================================================ */
+function formatarMoedaBR(v) {
+  const abs = Math.abs(v);
+  return (v < 0 ? '-' : '') + abs.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function construirTabelaFeriasUsufruidasHTML(pane) {
+  const linhas = $$('.ferias-body tr', pane).map(tr => {
+    const periodo = ($('.periodo-aquisitivo', tr)?.value || '').trim().toUpperCase();
+    const partes = [];
+    ['1', '2', '3'].forEach(n => {
+      const i = $(`.inicio${n}`, tr)?.value;
+      const f = $(`.fim${n}`, tr)?.value;
+      if (i && f) partes.push(`${n}º: ${formatarDataBR(i)} a ${formatarDataBR(f)}`);
+    });
+    const dias = totalDiasUsufruidosPorLinha(tr);
+    if (partes.length === 0 && dias === 0) return null;
+    return { periodo: periodo || '—', datas: partes.join('<br>') || '—', dias };
+  }).filter(Boolean);
+
+  if (linhas.length === 0) {
+    return '<p class="print-empty">Nenhum período de usufruto informado.</p>';
+  }
+
+  let html = `<table><thead><tr><th style="width:20%">Período Aquisitivo</th><th>Datas de Usufruto</th><th style="width:16%">Dias Usufruídos</th></tr></thead><tbody>`;
+  linhas.forEach(l => {
+    html += `<tr><td>${l.periodo}</td><td>${l.datas}</td><td>${l.dias}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function construirTabelaResultadosHTML(pane, filtrarZerados) {
+  const linhas = $$('.results-body tr', pane).filter(tr => !tr.classList.contains('total-row'));
+  let total = 0;
+  const linhasValidas = linhas.filter(tr => {
+    const codigo = tr.cells[0]?.textContent.trim();
+    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    total += valorNum;
+    if (!filtrarZerados) return true;
+    return codigo && Math.abs(valorNum) > 0.001;
+  });
+
+  if (linhasValidas.length === 0) {
+    return { html: '<p class="print-empty">Nenhum valor lançado.</p>', total };
+  }
+
+  let html = `<table><thead><tr><th style="width:15%">Código</th><th>Descrição</th><th style="width:20%">Valor R$</th></tr></thead><tbody>`;
+  linhasValidas.forEach(tr => {
+    const codigo = tr.cells[0]?.textContent.trim();
+    const desc = tr.cells[1]?.textContent.trim();
+    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    const cls = valorNum < 0 ? 'valor-negativo' : 'valor-positivo';
+    html += `<tr><td>${codigo}</td><td>${desc}</td><td class="${cls}">${formatarMoedaBR(valorNum)}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  return { html, total };
+}
+
+function construirPaginaImpressaoCargo(pane, idx, dataAtual) {
+  const simbolo = ($('.input-simbolo', pane)?.value || '').trim().toUpperCase();
+  const admissao = formatarDataBR($('.input-admissao', pane)?.value) || '—';
+  const exoneracao = formatarDataBR($('.input-exoneracao', pane)?.value) || '—';
+  const diasTrab = $('.input-dias-trabalhados', pane)?.value || '0';
+  const feriasHTML = construirTabelaFeriasUsufruidasHTML(pane);
+  const totalUsufruidoDias = totalDiasUsufruidos(pane);
+  const { html: resultadosHTML, total } = construirTabelaResultadosHTML(pane, true);
+  const clsTotal = total < 0 ? 'valor-negativo' : 'valor-positivo';
+
+  const div = document.createElement('div');
+  div.className = 'print-page';
+  div.innerHTML = `
+    <h2>Sistema de Acerto — Cargos Comissionados</h2>
+    <div class="print-sub">Simulação do Acerto de Contas • Emitido em ${dataAtual}</div>
+    <div class="print-meta"><strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;&nbsp; <strong>Processo SEI:</strong> ${serverData.processoSei || '—'}</div>
+    <div class="print-meta"><strong>Nome:</strong> ${serverData.nome || '—'}</div>
+    <hr>
+    <div class="print-cargo-head">
+      <h3>Cargo ${idx}${simbolo ? ' — Símbolo: ' + simbolo : ''}</h3>
+      <div class="print-meta">Total do Cargo: <strong class="${clsTotal}">R$ ${formatarMoedaBR(total)}</strong></div>
+    </div>
+    <div class="print-meta">Data de Admissão: ${admissao} &nbsp;&nbsp; Data de Exoneração: ${exoneracao}</div>
+    <div class="print-meta">Dias trabalhados no mês da exoneração: ${diasTrab}</div>
+    <h4>Férias Usufruídas</h4>
+    ${feriasHTML}
+    <div class="print-meta">Total usufruído: ${totalUsufruidoDias} dia(s)</div>
+    <h4>Resultado do Acerto de Contas</h4>
+    ${resultadosHTML}
+    <div class="print-total">TOTAL DO ACERTO: <span class="${clsTotal}">R$ ${formatarMoedaBR(total)}</span></div>
+  `;
+  return div;
+}
+
+function construirPaginaImpressaoResumo(dataAtual) {
+  const tbody = $('#resumo-table tbody');
+  let total = 0;
+  let html = `<table><thead><tr><th style="width:15%">Código</th><th>Descrição</th><th style="width:20%">Total R$</th></tr></thead><tbody>`;
+  $$('tr', tbody).forEach(tr => {
+    const codigo = tr.cells[0]?.textContent.trim();
+    const desc = tr.cells[1]?.textContent.trim();
+    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    total += valorNum;
+    const cls = valorNum < 0 ? 'valor-negativo' : 'valor-positivo';
+    html += `<tr><td>${codigo}</td><td>${desc}</td><td class="${cls}">${formatarMoedaBR(valorNum)}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  const clsTotal = total < 0 ? 'valor-negativo' : 'valor-positivo';
+
+  const div = document.createElement('div');
+  div.className = 'print-page';
+  div.innerHTML = `
+    <h2>Sistema de Acerto — Cargos Comissionados</h2>
+    <div class="print-meta"><strong>Servidor:</strong> ${serverData.nome || '—'} &nbsp;•&nbsp; <strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;•&nbsp; <strong>Processo SEI:</strong> ${serverData.processoSei || '—'} &nbsp;•&nbsp; <strong>Data:</strong> ${dataAtual}</div>
+    <hr>
+    <h3>RESUMO GERAL (TODOS OS CARGOS)</h3>
+    ${html}
+    <div class="print-total">TOTAL LÍQUIDO (todos os cargos): <span class="${clsTotal}">R$ ${formatarMoedaBR(total)}</span></div>
+  `;
+  return div;
+}
+
+function prepararImpressao() {
+  const paginas = [];
+  for (let i = 1; i <= TOTAL_CARGOS; i++) {
+    const pane = $(cargoPanesSel[i - 1]);
+    if (pane && pane.dataset.ready === '1') paginas.push({ pane, idx: i });
+  }
+  if (paginas.length === 0) {
+    alert('Calcule ao menos um cargo (botão "Calcular Acerto") antes de gerar o PDF.');
+    return false;
+  }
+
+  const dataAtual = new Date().toLocaleDateString('pt-BR');
+  $('.print-container')?.remove();
+  const container = document.createElement('div');
+  container.className = 'print-container';
+
+  paginas.forEach(({ pane, idx }) => {
+    container.appendChild(construirPaginaImpressaoCargo(pane, idx, dataAtual));
+  });
+  container.appendChild(construirPaginaImpressaoResumo(dataAtual));
+
+  document.body.appendChild(container);
+  return true;
+}
+
+function limparImpressao() {
+  $('.print-container')?.remove();
+}
+
+$('#btn-imprimir-resumo').addEventListener('click', () => {
+  $('#btn-atualizar-resumo').click();
+  if (!prepararImpressao()) return;
+  window.print();
+});
+
+/* Garante limpeza tanto se o print foi concluído quanto se foi cancelado */
+window.addEventListener('afterprint', limparImpressao);
+</script>
+   <script type="module">
+  import { exigirLogin, salvarAcerto, checkConnection, observarLogin, logout, buscarAcerto, atualizarAcerto } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+
+  function coletarResumo() {
+    const linhas = [];
+    document.querySelectorAll('#resumo-table tbody tr').forEach((tr) => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 3) {
+        linhas.push({
+          codigo: tds[0].textContent.trim(),
+          descricao: tds[1].textContent.trim(),
+          valor: tds[2].textContent.trim()
+        });
+      }
+    });
+    return linhas;
+  }
+
+  // ---- Edição de acerto já salvo ----
+  // Gera uma "chave" estável para cada campo: se tiver id, usa o id.
+  // Se não tiver (caso de tabelas de rubricas/cargos geradas dinamicamente,
+  // que usam só classe), usa o container mais próximo com id + posição do
+  // campo dentro dele (ex: 3º campo da classe X dentro de #rubricas-body).
+  function chaveElemento(el) {
+    if (el.id) return 'id:' + el.id;
+    const container = el.closest('[id]') || document.body;
+    // Classes de estado/validação são transitórias (aparecem/somem conforme o
+    // usuário digita) — não podem fazer parte da chave, senão um campo recém
+    // criado (sem a classe ainda) não é encontrado na hora de restaurar.
+    const CLASSES_DINAMICAS = ['is-valid', 'is-invalid'];
+    const cls = Array.from(el.classList).filter(c => !CLASSES_DINAMICAS.includes(c)).join('.');
+    const seletor = el.tagName.toLowerCase() + (cls ? '.' + cls : '');
+    const lista = Array.from(container.querySelectorAll(seletor));
+    const idx = lista.indexOf(el);
+    return 'pos:' + (container.id || '') + '::' + seletor + '::' + idx;
+  }
+
+  function elementoPelaChave(chave) {
+    if (chave.indexOf('id:') === 0) {
+      return document.getElementById(chave.slice(3));
+    }
+    if (chave.indexOf('pos:') === 0) {
+      const partes = chave.slice(4).split('::');
+      const containerId = partes[0];
+      const seletor = partes[1];
+      const idx = parseInt(partes[2], 10);
+      const container = containerId ? document.getElementById(containerId) : document.body;
+      if (!container) return null;
+      let lista = container.querySelectorAll(seletor);
+      if (!lista[idx]) {
+        // Compatibilidade com chaves salvas ANTES desta correção, que podiam
+        // incluir is-valid/is-invalid dentro do seletor — remove essas classes
+        // do seletor e tenta de novo.
+        const seletorLimpo = seletor.split('.').filter(p => p !== 'is-valid' && p !== 'is-invalid').join('.');
+        if (seletorLimpo !== seletor) lista = container.querySelectorAll(seletorLimpo);
+      }
+      return lista[idx] || null;
+    }
+    return null;
+  }
+
+  function coletarEntradas() {
+    const entradas = {};
+    document.querySelectorAll('input, select, textarea').forEach((el) => {
+      const chave = chaveElemento(el);
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        entradas[chave] = el.checked;
+      } else {
+        entradas[chave] = el.value;
+      }
+    });
+    return entradas;
+  }
+
+  function restaurarEntradas(entradas) {
+    if (!entradas) return;
+    Object.keys(entradas).forEach((chave) => {
+      const el = elementoPelaChave(chave);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = entradas[chave];
+      } else {
+        el.value = entradas[chave];
+      }
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const idEdicao = params.get('editar');
+
+  if (idEdicao) {
+    buscarAcerto(idEdicao).then((registro) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      if (registro && registro.dados && registro.dados.entradas) {
+        // Este arquivo só "constrói" os campos de cada cargo na primeira vez que a aba
+        // é aberta (carregamento preguiçoso). Por isso, antes de preencher, forçamos a
+        // abertura de todas as abas de cargo, e só então restauramos os valores.
+        document.querySelectorAll('.nav-link[data-target^="#pane-c"]').forEach((btn) => btn.click());
+        restaurarEntradas(registro.dados.entradas);
+        document.querySelector('.nav-link[data-target="#pane-pessoais"]')?.click();
+        banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule (e clique em "Atualizar Resumo") antes de clicar em "Salvar no Portal" para atualizar este mesmo registro.';
+      } else {
+        banner.textContent = 'Este acerto foi salvo antes da função de edição existir — não é possível recarregar os campos automaticamente. Ao salvar de novo, será criado um registro novo.';
+        banner.style.background = '#FBEAEA';
+        banner.style.borderColor = '#E9B4B4';
+        banner.style.color = '#7A2E2E';
+      }
+    }).catch((err) => {
+      const banner = document.getElementById('banner-edicao');
+      banner.style.display = 'block';
+      banner.textContent = 'Erro ao carregar o acerto para edição: ' + err.message;
+      banner.style.background = '#FBEAEA';
+      banner.style.borderColor = '#E9B4B4';
+      banner.style.color = '#7A2E2E';
+    });
+  }
+
+  document.getElementById('salvar-portal').addEventListener('click', async () => {
+    const status = document.getElementById('salvar-portal-status');
+    const dados = {
+      nome: document.getElementById('srv-nome').value,
+      matricula: document.getElementById('srv-matricula').value,
+      nascimento: document.getElementById('srv-nascimento').value,
+      processoSei: document.getElementById('srv-processo-sei').value,
+      qtdCargos: document.getElementById('srv-qtd-cargos').value,
+      totalGeral: document.getElementById('resumo-total').textContent.trim(),
+      resumo: coletarResumo(),
+      entradas: coletarEntradas()
+    };
+
+    if (!dados.matricula) {
+      status.textContent = 'Preencha ao menos a matrícula antes de salvar.';
+      status.style.color = '#B23B3B';
+      return;
+    }
+
+    status.textContent = 'Salvando...';
+    status.style.color = '';
+    try {
+      if (idEdicao) {
+        await atualizarAcerto(idEdicao, 'comissionado_com_vinculo', dados);
+        status.textContent = 'Acerto atualizado no portal com sucesso.';
+      } else {
+        await salvarAcerto('comissionado_com_vinculo', dados);
+        status.textContent = 'Acerto salvo no portal com sucesso.';
+      }
+      status.style.color = '#3E7A4C';
+    } catch (err) {
+      status.textContent = 'Erro ao salvar: ' + err.message;
+      status.style.color = '#B23B3B';
+    }
+  });
+</script>
+</body>
+</html>
