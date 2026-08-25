@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Legislação — Portal DIGEP/IBRAM</title>
+<title>Manual de Instrução — Portal DIGEP/IBRAM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -65,14 +65,28 @@
     padding-bottom:0.5rem; border-bottom:2px solid var(--line);
   }
 
-  .norma{
+  .grade{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:0.9rem; }
+
+  .modulo{
     background:var(--card); border:1px solid var(--line); border-radius:8px;
-    padding:1rem 1.2rem; margin-bottom:0.7rem;
+    padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.5rem;
+    text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s;
   }
-  .norma .titulo{ font-weight:600; font-size:0.95rem; margin-bottom:0.25rem; }
-  .norma .titulo .codigo{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--teal); margin-right:0.5rem; }
-  .norma p{ margin:0.3rem 0 0; font-size:0.87rem; color:var(--ink-soft); line-height:1.55; }
-  .norma a.link{ font-size:0.82rem; display:inline-block; margin-top:0.4rem; }
+  .modulo:hover{ border-color:var(--teal); box-shadow:0 2px 10px -4px rgba(0,0,0,0.15); }
+  .modulo .cabecalho{ display:flex; align-items:center; gap:0.65rem; }
+  .modulo .selo-modulo{
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.62rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .modulo .titulo{ font-weight:600; font-size:0.95rem; color:var(--ink); }
+  .modulo p{ margin:0; font-size:0.82rem; color:var(--ink-soft); line-height:1.5; }
+  .modulo .status{
+    font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.03em; text-transform:uppercase;
+    padding:0.15rem 0.5rem; border-radius:4px; align-self:flex-start; margin-top:0.15rem;
+  }
+  .modulo .status.pronto{ background:#EAF6F0; color:#1F5A3C; }
+  .modulo .status.pendente{ background:#F1EEE7; color:#7A6F5C; }
+  .modulo.desabilitado{ opacity:0.6; pointer-events:none; }
 
   @media(max-width:840px){
     .shell{ flex-direction:column; }
@@ -102,8 +116,8 @@
       <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
       <div class="divisor"></div>
       <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
-      <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
-      <a href="legislacao.html" class="ativo"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
     </nav>
     <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
   </aside>
@@ -115,69 +129,91 @@
     </div>
 
     <div class="conteudo-modulo">
-      <h2 class="titulo-pagina">Legislação de Referência</h2>
+      <h2 class="titulo-pagina">Manual de Instrução</h2>
 
       <div class="aviso">
-        <strong>Sobre esta página:</strong> é um material de referência rápida, mantido por você — não é
-        consulta oficial nem substitui a verificação da norma vigente e suas alterações antes de aplicar em
-        um caso concreto. Edite este arquivo (<code>modulos/legislacao.html</code>) sempre que quiser
-        adicionar, corrigir ou atualizar uma norma.
+        <strong>Sobre esta página:</strong> reúne o passo a passo de uso de cada módulo do portal —
+        como preencher os campos, o que cada rubrica do resultado significa e como salvar/imprimir o acerto.
+        Clique em um módulo abaixo para abrir o manual correspondente. Módulos ainda sem manual aparecem
+        marcados como "Em breve".
       </div>
 
       <section class="bloco">
-        <h2>Regime jurídico geral (servidores do GDF)</h2>
+        <h2>Módulos de cálculo</h2>
+        <div class="grade">
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">LC 840/2011</span>Estatuto dos Servidores Públicos Civis do Distrito Federal</div>
-          <p>Base geral para férias, 13º salário, exoneração, licenças e demais direitos e deveres dos servidores do GDF — incluindo IBRAM.</p>
-          <a class="link" href="https://www.sinj.df.gov.br/sinj/Norma/70196/Lei_Complementar_840_23_12_2011.html" target="_blank" rel="noopener">Consultar no SINJ-DF ↗</a>
-        </div>
+          <a class="modulo" href="brigadistas.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#8B0000;">G54</span>
+              <span class="titulo">Brigadistas</span>
+            </div>
+            <p>Cálculo de acerto de contas do Grupo 54 (brigadistas).</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">LC 840/2011, arts. 119–120</span>Cálculo de indenização/restituição por desligamento</div>
-          <p>Base normativa usada em despachos de restituição decorrente de exoneração de cargo em comissão.</p>
-        </div>
+          <a class="modulo" href="manual-comissionado-sem-vinculo.html">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#6B21A8;">SV</span>
+              <span class="titulo">Comissionado sem vínculo</span>
+            </div>
+            <p>Acerto de contas de cargo em comissão sem vínculo efetivo (RGPS).</p>
+            <span class="status pronto">Manual disponível</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">IN nº 01/2024 (SEEC)</span>Instrução Normativa nº 1, de 26/12/2024</div>
-          <p>Regulamenta diretamente a concessão, fruição e pagamento de férias, o abono de permanência, o pagamento do 13º salário e o <strong>acerto de contas</strong> do servidor da Administração direta, autárquica e fundacional do Poder Executivo do DF. Revogou a IN nº 01/2019 (que alterava a antiga IN nº 01/2014). Alterada posteriormente pela IN nº 01, de 19/03/2025 — ao consultar, confira se está na versão atualizada.</p>
-          <a class="link" href="https://www.sinj.df.gov.br/sinj/Norma/66317a83287340c0b774057b37a54aa5/seec_int_01_2024.html" target="_blank" rel="noopener">Consultar no SINJ-DF ↗</a>
-        </div>
-      </section>
+          <a class="modulo" href="comissionado-com-vinculo.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#556B2F;">CV</span>
+              <span class="titulo">Comissionado com vínculo</span>
+            </div>
+            <p>Acerto de contas de cargo em comissão com vínculo efetivo (RPPS).</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-      <section class="bloco">
-        <h2>Contribuição previdenciária / RGPS</h2>
+          <a class="modulo" href="efetivos.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#0B5394;">EF</span>
+              <span class="titulo">Servidores efetivos</span>
+            </div>
+            <p>Acerto de contas de servidores efetivos.</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">Lei 8.212/1991</span>Plano de Custeio da Seguridade Social</div>
-          <p>Regras de contribuição previdenciária aplicáveis aos segurados do RGPS (comissionados sem vínculo, brigadistas).</p>
-        </div>
+          <a class="modulo" href="substituicoes.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#2F6FA5;">SUB</span>
+              <span class="titulo">Substituições</span>
+            </div>
+            <p>Cálculo de substituições e gratificações correlatas.</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">Lei 8.213/1991</span>Plano de Benefícios da Previdência Social</div>
-          <p>Regula os benefícios do RGPS — referência complementar para cálculo de incidência de INSS sobre verbas rescisórias.</p>
-        </div>
-      </section>
+          <a class="modulo" href="correcao-folha-v09.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#C1560C;">CF</span>
+              <span class="titulo">Correção de folha (v09)</span>
+            </div>
+            <p>Correção de valores da folha de pagamento, versão SIGRH v09.</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-      <section class="bloco">
-        <h2>Jurisprudência</h2>
+          <a class="modulo" href="inss.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#B45309;">INSS</span>
+              <span class="titulo">Memória de Cálculo — INSS</span>
+            </div>
+            <p>Memória de cálculo detalhada de contribuições ao INSS/RGPS.</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">STJ — Tema Repetitivo 531</span>Restituição ao erário de valores recebidos de boa-fé</div>
-          <p>Usado para distinguir erro de cálculo (dever de restituir) de erro de interpretação/aplicação normativa pela Administração (dispensa de restituição em certos casos).</p>
-        </div>
+          <a class="modulo" href="atualizacao-lpa.html" title="Manual ainda não disponível para este módulo (o link abre o módulo em si)">
+            <div class="cabecalho">
+              <span class="selo-modulo" style="background:#0F766E;">LPA</span>
+              <span class="titulo">Atualização LPA</span>
+            </div>
+            <p>Atualização monetária de valores por LPA (IPCA/INPC/IGP-M).</p>
+            <span class="status pendente">Em breve</span>
+          </a>
 
-        <div class="norma">
-          <div class="titulo"><span class="codigo">STF — Súmulas 346 e 473</span>Autotutela administrativa</div>
-          <p>Fundamentam o poder-dever da Administração de anular seus próprios atos quando eivados de vício, e de revogá-los por conveniência e oportunidade, respeitados direitos adquiridos.</p>
-        </div>
-      </section>
-
-      <section class="bloco">
-        <h2>Normas internas / IBRAM-DF</h2>
-        <div class="norma">
-          <div class="titulo">Espaço reservado</div>
-          <p>Adicione aqui portarias, instruções normativas ou regulamentos internos específicos do IBRAM que orientem os cálculos (ex: sobre Grupo 54 / brigadistas, auxílio-alimentação, etc.).</p>
         </div>
       </section>
     </div>
