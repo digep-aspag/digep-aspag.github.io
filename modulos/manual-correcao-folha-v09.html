@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Correção de Folha (Versão 09)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --sub:#C1560C; --sub-claro:#FCEADA; --sub-borda:#F0C08A;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--sub); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--sub); margin:0 0 1.6rem; }
+
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--sub); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--sub); text-decoration:underline; }
+
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--sub);
+    border-bottom:2px solid var(--sub-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--sub); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--sub-claro); color:var(--sub); border:1px solid var(--sub-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--sub-claro); color:#7A3406; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+  table.tbl td.num, table.tbl th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+
+  dl.glossario{ margin:0; }
+  dl.glossario dt{ font-weight:600; color:var(--sub); margin-top:.9rem; font-size:.95rem; }
+  dl.glossario dt:first-child{ margin-top:0; }
+  dl.glossario dd{ margin:.15rem 0 0; font-size:.9rem; color:var(--ink); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0; padding:0; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; padding:.55rem .2rem; border-bottom:1px dashed var(--line); font-size:.93rem;
+  }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist .caixa{
+    flex-shrink:0; width:1.15rem; height:1.15rem; border:2px solid var(--sub); border-radius:4px; margin-top:.1rem;
+  }
+
+  .faq details{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:.7rem 1rem; margin-bottom:.6rem; }
+  .faq summary{ font-weight:600; cursor:pointer; font-size:.93rem; color:var(--ink); }
+  .faq summary::marker{ color:var(--sub); }
+  .faq details[open] summary{ margin-bottom:.5rem; }
+  .faq p{ margin:.3rem 0 0; font-size:.9rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--sub); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+    .faq details{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="correcao-folha-v09.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Correção de Folha (Versão 09)</div>
+      <div class="page-sub">Guia passo a passo para lançar uma correção de folha por faltas e repouso remunerado, e calcular o INSS a devolver — escrito para quem está usando o sistema pela primeira vez e não trabalha com essa terminologia no dia a dia.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#o-que-e">O que é uma "correção de folha"?</a></li>
+          <li><a href="#glossario">Glossário de termos usados no módulo</a></li>
+          <li><a href="#dados-pessoais">Dados Pessoais</a></li>
+          <li><a href="#rubricas">Rubricas da Remuneração</a></li>
+          <li><a href="#competencias">Lançamento por competência</a></li>
+          <li><a href="#como-calcula">Como o sistema calcula (em linguagem simples)</a></li>
+          <li><a href="#exemplo">Exemplo completo, do início ao fim</a></li>
+          <li><a href="#imprimir">Imprimir / Salvar PDF</a></li>
+          <li><a href="#salvar">Salvar no Portal e editar pelo Histórico</a></li>
+          <li><a href="#faq">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist final antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="o-que-e">
+        <h2 class="sec-title"><span class="num">1</span>O que é uma "correção de folha"?</h2>
+        <p>Todo mês, o servidor recebe um valor de salário calculado <strong>supondo que ele trabalhou (ou esteve de repouso remunerado) o mês inteiro</strong>. Quando isso não acontece exatamente assim — por exemplo, o servidor faltou alguns dias sem direito a receber por eles, ou passou por um período de repouso remunerado (afastamento, licença, etc.) que muda a forma de calcular — é preciso <strong>corrigir</strong> o que já foi pago naquele mês (chamado de "competência").</p>
+        <p>Este módulo serve exatamente para isso: você informa, mês a mês, quantos <strong>dias de falta</strong> e quantos <strong>dias de repouso remunerado</strong> aquele servidor teve, e o sistema calcula sozinho:</p>
+        <ul>
+          <li>Quanto deve ser <strong>descontado do salário</strong> por causa dos dias de falta e de repouso (o "Valor da Falta" e o "Valor do Repouso");</li>
+          <li>Quanto do <strong>INSS que já foi descontado</strong> na folha daquele mês precisa ser <strong>devolvido</strong> ao servidor, já que a base de cálculo do INSS diminui quando parte do salário deixa de ser devida.</li>
+        </ul>
+        <p>No final, o resultado deste módulo é usado para lançar um <strong>ajuste manual na folha de pagamento do SIGRH</strong> — por isso o nome "Lançamento SIGRH v09" aparece no topo da folha de impressão.</p>
+        <div class="box box-info">
+          <strong>Quando esse lançamento é feito</strong>
+          Normalmente depois que se identifica, em um mês já fechado na folha, uma diferença de dias que não foi considerada corretamente — seja por falta não informada a tempo, seja por um período de repouso remunerado que só foi formalizado depois. O lançamento neste módulo serve para apurar o valor da correção e, quando chegar a hora de fechar a folha, gerar o ajuste de INSS a devolver.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário de termos usados no módulo</h2>
+        <p>Antes de entrar nos campos da tela, vale conhecer alguns termos que vão aparecer. Você pode voltar a esta seção a qualquer momento.</p>
+        <dl class="glossario">
+          <dt>Rubrica</dt>
+          <dd>Cada "linha" de pagamento que aparece no contracheque do servidor (ex.: vencimento, gratificação). Tem sempre um código e um valor.</dd>
+
+          <dt>Código (da rubrica)</dt>
+          <dd>O número de 5 dígitos que identifica a rubrica no SIGRH (ex.: <span class="campo">00035</span> = Vencimento Básico). Aparece no contracheque, ao lado da descrição.</dd>
+
+          <dt>Competência</dt>
+          <dd>O mês/ano de referência do pagamento (ex.: "08/2026" = agosto de 2026). É o mês da folha que está sendo corrigido — não necessariamente o mês em que você está fazendo o lançamento hoje.</dd>
+
+          <dt>Dias de falta</dt>
+          <dd>Quantidade de dias, naquele mês, em que o servidor faltou sem direito a receber por eles (ex.: falta injustificada, licença sem vencimento).</dd>
+
+          <dt>Dias de repouso remunerado</dt>
+          <dd>Quantidade de dias, naquele mês, em que o servidor esteve afastado/licenciado mas mantendo direito à remuneração — porém sob uma regra diferente de cálculo, por isso entram separados das faltas.</dd>
+
+          <dt>INSS / RGPS</dt>
+          <dd>O desconto obrigatório da Previdência Social que já sai do salário todo mês. Quando a base de cálculo do salário diminui (por causa de faltas/repouso), parte desse desconto precisa ser devolvida ao servidor.</dd>
+
+          <dt>Base de cálculo do INSS</dt>
+          <dd>O valor sobre o qual o INSS é calculado. Neste módulo, é o total das rubricas informadas na tabela de Remuneração.</dd>
+
+          <dt>INSS a devolver</dt>
+          <dd>A diferença entre o INSS que seria descontado sobre o salário cheio e o INSS que seria descontado sobre o salário já reduzido pelas faltas/repouso daquele mês. É esse valor que volta para o servidor.</dd>
+
+          <dt>Mês comercial</dt>
+          <dd>Para calcular o valor proporcional de cada dia, o sistema sempre considera o mês como tendo 30 dias — mesmo que o mês real tenha 28, 29 ou 31. É a forma padrão de calcular na folha de pagamento.</dd>
+
+          <dt>SIGRH</dt>
+          <dd>O sistema oficial de folha de pagamento do GDF, onde o contracheque e os lançamentos de rubricas do servidor ficam registrados.</dd>
+
+          <dt>Matrícula</dt>
+          <dd>Número que identifica o servidor no SIGRH. Aparece no contracheque e no cabeçalho da ficha financeira.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="dados-pessoais">
+        <h2 class="sec-title"><span class="num">3</span>Dados Pessoais</h2>
+        <p>É a primeira caixa da tela. Preencha com os dados do servidor cuja folha está sendo corrigida:</p>
+        <ol class="passos">
+          <li><strong>Nome</strong> — nome completo do servidor. Confira exatamente como está escrito no contracheque ou no SIGRH, para evitar divergência na hora de localizar depois no Histórico.</li>
+          <li><strong>Matrícula</strong> — o número de matrícula funcional do servidor. Está no contracheque, no cabeçalho do SIGRH, ou você pode confirmar com o RH/DIGEP caso não tenha em mãos.</li>
+          <li><strong>Cargo/Função</strong> — o cargo ou função que o servidor ocupa (ex.: "Auxiliar Administrativo", "Agente Ambiental"). Também aparece no contracheque, logo abaixo do nome.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Atenção</strong>
+          O sistema exige pelo menos <strong>Nome</strong> e <strong>Matrícula</strong> preenchidos para permitir imprimir ou salvar. Sem esses dois campos, o botão de imprimir mostra um aviso pedindo para completá-los primeiro.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="rubricas">
+        <h2 class="sec-title"><span class="num">4</span>Rubricas da Remuneração</h2>
+        <p>Esta caixa tem <strong>6 linhas fixas</strong>, uma para cada rubrica que compõe a remuneração mensal do servidor (vencimento, gratificações, adicionais, etc.), mais uma linha de <strong>total</strong> ao final. Você não precisa preencher as 6 — só as que existirem para aquele servidor; o restante pode ficar em branco/zerado.</p>
+        <ol class="passos">
+          <li><strong>Código</strong> — o número de 5 dígitos da rubrica. Consulte no <strong>contracheque do servidor</strong> ou diretamente no <strong>SIGRH</strong> (tela de ficha financeira/consulta de proventos).</li>
+          <li><strong>Descrição</strong> — o nome da rubrica (ex.: "VENCIMENTO BÁSICO", "GRATIFICAÇÃO DE ATIVIDADE"). Copie exatamente como aparece no contracheque, para facilitar a conferência depois.</li>
+          <li><strong>Valor (R$)</strong> — o valor mensal daquela rubrica. Digite só os números; o sistema formata automaticamente para o formato de moeda (ex.: digite <span class="campo">400000</span> e o campo mostra <span class="campo">4.000,00</span>).</li>
+        </ol>
+        <p>Assim que você preencher os valores, a linha <strong>"TOTAL DA REMUNERAÇÃO"</strong>, no rodapé da tabela, soma tudo automaticamente. <strong>Esse total é o valor mais importante da tela</strong>: é ele que o sistema usa como base para calcular o valor de cada dia de falta/repouso e a diferença de INSS de cada mês lançado mais abaixo.</p>
+        <div class="box box-info">
+          <strong>Por que a remuneração precisa estar certa antes de lançar os meses?</strong>
+          Toda a conta da próxima seção (Lançamento por Competência) depende do total desta tabela. Se você lançar os meses antes de terminar de preencher as rubricas, os valores calculados mudam automaticamente assim que você completar o total — é normal, e não é preciso refazer nada, o sistema recalcula sozinho.
+        </div>
+        <div class="box box-dica">
+          <strong>Dica</strong>
+          Se não souber o código de uma rubrica de cabeça, não invente: consulte no contracheque do próprio servidor ou pergunte ao RH/DIGEP. O código errado não muda a conta (o cálculo usa apenas o valor, não o código), mas dificulta a conferência posterior.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="competencias">
+        <h2 class="sec-title"><span class="num">5</span>Lançamento por competência</h2>
+        <p>Aqui você registra, <strong>mês a mês</strong>, os dias de falta e de repouso remunerado que precisam ser corrigidos. A tela já vem com 3 linhas prontas; você pode adicionar quantas precisar.</p>
+        <ol class="passos">
+          <li><strong>Competência</strong> — escolha o mês e o ano da folha que está sendo corrigida (ex.: agosto de 2026).</li>
+          <li><strong>Dias de Falta</strong> — quantidade de dias de falta naquele mês. Confira no espelho de ponto, no processo SEI de afastamento, ou pergunte ao RH/DIGEP se não tiver certeza.</li>
+          <li><strong>Dias de Repouso Remunerado</strong> — quantidade de dias de repouso remunerado naquele mês, pela mesma fonte de consulta.</li>
+        </ol>
+        <p>As três últimas colunas (<strong>Valor da Falta</strong>, <strong>Valor do Repouso</strong> e <strong>INSS a devolver</strong>) são <strong>calculadas automaticamente</strong> pelo sistema assim que você preenche os dias — você não digita nada nelas.</p>
+        <ol class="passos" start="4">
+          <li>Para lançar mais um mês, clique em <strong>"+ ADICIONAR MÊS"</strong> — uma nova linha em branco aparece no final da tabela.</li>
+          <li>Para remover um mês lançado por engano, clique no <strong>"×"</strong> ao final daquela linha.</li>
+          <li>A linha <strong>TOTAL</strong>, no rodapé da tabela, soma os dias e os valores de todos os meses lançados.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Atenção</strong>
+          O botão <strong>"LIMPAR TUDO"</strong> apaga <strong>todos</strong> os campos da tela (Dados Pessoais, Rubricas e todos os meses lançados), não apenas a tabela de competências. Use com cuidado — o sistema pede confirmação antes de apagar.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="como-calcula">
+        <h2 class="sec-title"><span class="num">6</span>Como o sistema calcula (em linguagem simples)</h2>
+        <p>Você não precisa fazer nenhuma conta na mão, mas para conferir se os valores fazem sentido, veja a lógica por trás de cada coluna calculada:</p>
+        <h3 class="sub-title">Valor de um dia</h3>
+        <p>O sistema sempre considera o <strong>mês comercial de 30 dias</strong>, então o valor de um único dia é sempre:</p>
+        <div class="card-mock"><div class="rot">Fórmula</div>Valor de 1 dia = Total da Remuneração ÷ 30</div>
+        <h3 class="sub-title">Valor da Falta e Valor do Repouso</h3>
+        <p>Cada coluna é o valor de 1 dia multiplicado pela quantidade de dias informada:</p>
+        <div class="card-mock"><div class="rot">Fórmula</div>Valor da Falta = (Total ÷ 30) × Dias de Falta<br>Valor do Repouso = (Total ÷ 30) × Dias de Repouso</div>
+        <h3 class="sub-title">INSS a devolver</h3>
+        <p>Primeiro o sistema soma os dias de falta com os de repouso daquele mês e calcula quanto isso "tira" do salário. Esse valor é subtraído do total da remuneração, formando uma <strong>base reduzida</strong>. Depois, o sistema calcula o INSS (pelas faixas progressivas oficiais) duas vezes — uma sobre o salário cheio, outra sobre a base reduzida — e a diferença entre os dois é o valor que deve ser devolvido ao servidor:</p>
+        <div class="card-mock"><div class="rot">Fórmula</div>Base reduzida = Total da Remuneração − [(Total ÷ 30) × (Dias de Falta + Dias de Repouso)]<br>INSS a devolver = INSS sobre o Total − INSS sobre a Base reduzida</div>
+        <div class="box box-info">
+          <strong>Por que o INSS "some" um pouco?</strong>
+          O desconto de INSS é calculado em faixas — quem ganha mais paga uma porcentagem maior sobre a parte que excede cada faixa. Quando o salário do mês diminui (por causa das faltas/repouso), a base cai e o INSS calculado sobre ela também cai. A diferença entre o INSS que já foi descontado (sobre o valor cheio) e o que deveria ter sido descontado (sobre o valor reduzido) é o que volta para o servidor.
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">7</span>Exemplo completo, do início ao fim</h2>
+        <p>Vamos acompanhar um caso fictício, com números redondos, para você comparar com o que estiver fazendo.</p>
+        <h3 class="sub-title">Situação</h3>
+        <div class="card-mock">
+          <div class="rot">Servidora</div>
+          Maria da Silva Santos &nbsp;·&nbsp; Matrícula: <strong>123456</strong> &nbsp;·&nbsp; Cargo: <strong>Auxiliar Administrativo</strong>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Ocorrência no mês</div>
+          Competência: <strong>08/2026</strong> &nbsp;·&nbsp; Dias de Falta: <strong>4</strong> &nbsp;·&nbsp; Dias de Repouso Remunerado: <strong>2</strong>
+        </div>
+        <h3 class="sub-title">1) Dados Pessoais</h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td style="width:180px;"><strong>Nome</strong></td><td>MARIA DA SILVA SANTOS</td></tr>
+            <tr><td><strong>Matrícula</strong></td><td>123456</td></tr>
+            <tr><td><strong>Cargo/Função</strong></td><td>AUXILIAR ADMINISTRATIVO</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">2) Rubricas da Remuneração</h3>
+        <table class="tbl">
+          <thead><tr><th>Código</th><th>Descrição</th><th class="num">Valor (R$)</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">00035</td><td>VENCIMENTO BÁSICO</td><td class="num">4.000,00</td></tr>
+            <tr><td class="codigo">00120</td><td>GRATIFICAÇÃO DE ATIVIDADE</td><td class="num">2.000,00</td></tr>
+            <tr><td colspan="2"><em>(demais linhas em branco)</em></td><td class="num">0,00</td></tr>
+          </tbody>
+        </table>
+        <p><strong>TOTAL DA REMUNERAÇÃO = R$ 6.000,00</strong></p>
+        <h3 class="sub-title">3) Lançamento por competência</h3>
+        <table class="tbl">
+          <thead><tr><th>Competência</th><th class="num">Dias de Falta</th><th class="num">Dias de Repouso</th><th class="num">Valor da Falta</th><th class="num">Valor do Repouso</th><th class="num">INSS a devolver</th></tr></thead>
+          <tbody>
+            <tr><td>08/2026</td><td class="num">4</td><td class="num">2</td><td class="num">800,00</td><td class="num">400,00</td><td class="num">168,00</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">Conferindo a conta</h3>
+        <table class="tbl">
+          <thead><tr><th>Passo</th><th>Cálculo</th><th class="num">Resultado</th></tr></thead>
+          <tbody>
+            <tr><td>Valor de 1 dia</td><td>6.000,00 ÷ 30</td><td class="num">200,00</td></tr>
+            <tr><td>Valor da Falta</td><td>200,00 × 4 dias</td><td class="num">800,00</td></tr>
+            <tr><td>Valor do Repouso</td><td>200,00 × 2 dias</td><td class="num">400,00</td></tr>
+            <tr><td>Valor retirado do salário no mês</td><td>200,00 × (4+2) dias</td><td class="num">1.200,00</td></tr>
+            <tr><td>Base reduzida</td><td>6.000,00 − 1.200,00</td><td class="num">4.800,00</td></tr>
+            <tr><td>INSS sobre a remuneração cheia</td><td>faixas progressivas sobre 6.000,00</td><td class="num">641,51</td></tr>
+            <tr><td>INSS sobre a base reduzida</td><td>faixas progressivas sobre 4.800,00</td><td class="num">473,51</td></tr>
+            <tr><td><strong>INSS a devolver</strong></td><td>641,51 − 473,51</td><td class="num"><strong>168,00</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>Use este exemplo como referência</strong>
+          Se você preencher os mesmos números fictícios acima num lançamento de teste (remuneração de R$ 6.000,00, 4 dias de falta e 2 dias de repouso em um único mês), o resultado deve bater exatamente com esta tabela. Se não bater, revise se todas as linhas de rubrica realmente somam R$ 6.000,00.
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section id="imprimir">
+        <h2 class="sec-title"><span class="num">8</span>Imprimir / Salvar PDF</h2>
+        <ol class="passos">
+          <li>Confira se <strong>Nome</strong> e <strong>Matrícula</strong> estão preenchidos.</li>
+          <li>Clique em <strong>"IMPRIMIR / SALVAR PDF"</strong>.</li>
+          <li>O sistema monta uma folha oficial com os Dados Pessoais, o total da remuneração e a tabela de competências lançadas, pronta para impressão ou para salvar como PDF pela própria caixa de impressão do navegador.</li>
+        </ol>
+        <div class="box box-info">
+          <strong>O que entra na impressão?</strong>
+          Só entram as competências que tiverem pelo menos o mês preenchido e algum dia de falta ou repouso informado. Linhas totalmente em branco são ignoradas automaticamente — não é preciso removê-las antes de imprimir.
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">9</span>Salvar no Portal e editar pelo Histórico</h2>
+        <ol class="passos">
+          <li>Preencha ao menos a <strong>Matrícula</strong>.</li>
+          <li>Clique em <strong>"SALVAR NO PORTAL"</strong> — o lançamento fica gravado no banco de dados, vinculado à sua conta de acesso.</li>
+          <li>Para reabrir e editar depois, vá até <strong>Histórico de acertos</strong> na barra lateral, localize o registro pelo nome ou matrícula e clique para editar. Os campos são preenchidos automaticamente com os dados salvos.</li>
+          <li>Depois de editar, confira se os valores calculados continuam corretos antes de salvar novamente.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Atenção</strong>
+          Ao editar um lançamento salvo, o sistema grava as alterações <strong>no mesmo registro</strong> (não cria um novo). Se quiser criar um lançamento separado a partir de um existente, use "LIMPAR TUDO" e comece do zero, em vez de editar o antigo.
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="faq" class="faq">
+        <h2 class="sec-title"><span class="num">10</span>Erros comuns e perguntas frequentes</h2>
+
+        <details>
+          <summary>O "INSS a devolver" apareceu zerado. É normal?</summary>
+          <p>Sim, em dois casos: (1) você ainda não preencheu nenhuma rubrica de remuneração (o total está em 0,00), ou (2) você preencheu a competência mas deixou os dias de falta e de repouso em 0. Verifique essas duas coisas antes de considerar um erro.</p>
+        </details>
+
+        <details>
+          <summary>Preenchi as rubricas, mas o total continua 0,00</summary>
+          <p>Confira se você digitou o valor no campo correto (a coluna "Valor (R$)") e se não deixou algum espaço em branco antes dos números. Também vale clicar fora do campo depois de digitar — o sistema formata o valor ao sair do campo.</p>
+        </details>
+
+        <details>
+          <summary>Não sei o código de uma das rubricas, só o valor. Posso deixar o código em branco?</summary>
+          <p>Pode. O código serve apenas para identificação e conferência — o cálculo usa somente o campo "Valor". Ainda assim, recomenda-se preencher o código sempre que possível, para facilitar auditoria futura.</p>
+        </details>
+
+        <details>
+          <summary>Cliquei em "IMPRIMIR" e apareceu um aviso, sem gerar nada</summary>
+          <p>O sistema bloqueia a impressão em dois casos, com um aviso explicando qual: (1) Nome ou Matrícula não preenchidos, ou (2) nenhuma competência com mês e dias preenchidos. Complete a informação indicada no aviso e tente novamente.</p>
+        </details>
+
+        <details>
+          <summary>Cliquei em "LIMPAR TUDO" sem querer. Meus dados foram perdidos?</summary>
+          <p>O sistema sempre pede confirmação antes de apagar ("Isso vai apagar todos os lançamentos desta tela. Deseja continuar?"). Se você já tinha salvado o lançamento no Portal antes de limpar, os dados continuam no Histórico — basta abrir o registro salvo de novo para editar.</p>
+        </details>
+
+        <details>
+          <summary>Lancei o mesmo servidor duas vezes por engano. O que fazer?</summary>
+          <p>Acesse o Histórico de acertos, identifique o registro duplicado e utilize a opção de exclusão disponível ali. Se tiver dúvida sobre qual dos dois manter, confira a data/hora de criação de cada um no próprio Histórico.</p>
+        </details>
+
+        <details>
+          <summary>Os valores da tabela de competências mudaram sozinhos depois que terminei de preencher as rubricas</summary>
+          <p>Isso é esperado: os valores de Falta, Repouso e INSS a devolver dependem diretamente do total da remuneração. Sempre preencha as rubricas <strong>antes</strong> de conferir os valores finais da tabela de competências.</p>
+        </details>
+      </section>
+
+      <!-- 11 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">11</span>Checklist final antes de salvar</h2>
+        <p>Antes de clicar em "SALVAR NO PORTAL", confira rapidamente:</p>
+        <ul class="checklist">
+          <li><span class="caixa"></span> Nome, Matrícula e Cargo/Função preenchidos e conferidos</li>
+          <li><span class="caixa"></span> Todas as rubricas necessárias lançadas e o TOTAL DA REMUNERAÇÃO conferindo com o contracheque do servidor</li>
+          <li><span class="caixa"></span> Todos os meses (competências) que precisavam de correção foram lançados, sem duplicar nenhum</li>
+          <li><span class="caixa"></span> Em pelo menos um mês, o Valor da Falta, o Valor do Repouso e o INSS a devolver fazem sentido em relação aos dias informados</li>
+          <li><span class="caixa"></span> Se for imprimir, os dados pessoais e o total aparecem corretamente na prévia antes de confirmar</li>
+        </ul>
+        <div class="box box-dica">
+          <strong>Ficou com alguma dúvida no meio do caminho?</strong>
+          Volte à seção <a href="#faq">Erros comuns e perguntas frequentes</a> ou ao <a href="#glossario">Glossário</a> no início deste manual.
+        </div>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Sistema de Acerto — Correção de Folha (Versão 09) · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>
