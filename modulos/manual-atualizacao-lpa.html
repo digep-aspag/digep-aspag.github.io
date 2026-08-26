@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Atualização LPA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --lpa:#0F766E; --lpa-claro:#E4F3F1; --lpa-borda:#9CD3CC;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  /* Cabeçalho da página */
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--lpa); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--lpa); margin:0 0 1.6rem; }
+
+  /* Sumário */
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--lpa); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--lpa); text-decoration:underline; }
+
+  /* Seções */
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--lpa);
+    border-bottom:2px solid var(--lpa-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--lpa); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--lpa-claro); color:var(--lpa); border:1px solid var(--lpa-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  /* Caixas de destaque */
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  /* Tabelas */
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--lpa-claro); color:#0B5D53; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--lpa); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="atualizacao-lpa.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Atualização LPA</div>
+      <div class="page-sub">Passo a passo para atualizar monetariamente as parcelas de Licença-Prêmio por Assiduidade (LPA), conforme a metodologia oficial da Calculadora do Cidadão do Banco Central.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#visao-geral">Visão geral do módulo</a></li>
+          <li><a href="#data-final">Data final de referência</a></li>
+          <li><a href="#linha-servidor">Preenchendo uma linha de servidor</a></li>
+          <li><a href="#mes-fim">Mês fim das parcelas</a></li>
+          <li><a href="#metodologia">Como o valor atualizado é calculado</a></li>
+          <li><a href="#atualizar">Atualizando os valores</a></li>
+          <li><a href="#indice-nao-publicado">Quando o BCB ainda não publicou o índice</a></li>
+          <li><a href="#rascunho">Rascunho salvo automaticamente</a></li>
+          <li><a href="#exportar">Exportar CSV</a></li>
+          <li><a href="#imprimir">Imprimir / Gerar PDF</a></li>
+          <li><a href="#salvar">Salvar mês no histórico e editar pelo Histórico</a></li>
+          <li><a href="#codigos">Glossário de códigos do resultado</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">1</span>Visão geral do módulo</h2>
+        <p>Este módulo automatiza a <strong>atualização monetária das parcelas de LPA</strong> — o cálculo que antes era feito manualmente, mês a mês e servidor por servidor, no site da Calculadora do Cidadão do Banco Central. Ele consulta em tempo real os índices oficiais publicados pelo Banco Central (API do SGS) e aplica a mesma metodologia de correção: o <strong>produtório dos índices mensais</strong> entre a data da aposentadoria do servidor e a data final de referência escolhida.</p>
+        <div class="box box-info">
+          <strong>A lista de servidores é fixa, o mês muda</strong>
+          Como normalmente são sempre os mesmos servidores recebendo a parcela mês a mês, a tabela deste módulo funciona como um <strong>cadastro permanente</strong>: tudo o que você digita fica salvo automaticamente (veja a seção <a href="#rascunho">Rascunho salvo automaticamente</a>). Todo mês, você só precisa trocar a <a href="#data-final">Data final de referência</a> e clicar em "Atualizar todos" — não é necessário redigitar a lista.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="data-final">
+        <h2 class="sec-title"><span class="num">2</span>Data final de referência</h2>
+        <p>Fica no topo da página. É o <strong>mês-base</strong> da atualização — normalmente o mês corrente do acerto — e vale para <strong>todas as linhas</strong> da tabela ao mesmo tempo. Logo abaixo do campo aparece um aviso informativo:</p>
+        <div class="card-mock">
+          <div class="rot">Exemplo do aviso</div>
+          "Último mês do INPC publicado pelo BCB: julho/2026."
+        </div>
+        <p>Essa informação é consultada automaticamente ao abrir a página e serve para você já saber, antes de calcular qualquer linha, até qual mês o Banco Central já publicou o índice. Veja a seção <a href="#indice-nao-publicado">Quando o BCB ainda não publicou o índice</a> para entender o que acontece se a data escolhida for além disso.</p>
+      </section>
+
+      <!-- 3 -->
+      <section id="linha-servidor">
+        <h2 class="sec-title"><span class="num">3</span>Preenchendo uma linha de servidor</h2>
+        <p>Use o botão <strong>"+ Adicionar linha"</strong> para criar uma linha nova. Cada linha representa um servidor:</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Matrícula</span></td><td>Matrícula funcional do servidor. Aparece na impressão e no CSV exportado.</td></tr>
+            <tr><td><span class="campo">Nome</span></td><td>Nome do servidor.</td></tr>
+            <tr><td><span class="campo">Índice</span></td><td>Índice de correção a aplicar nesta linha. Começa em <strong>INPC</strong> por padrão, mas pode ser trocado para IPCA ou IGP-M por linha, se necessário.</td></tr>
+            <tr><td><span class="campo">Data da aposentadoria</span></td><td>Mês/ano usado como <strong>início</strong> do período de correção (proxy da data de início do direito à parcela).</td></tr>
+            <tr><td><span class="campo">Mês fim das parcelas</span></td><td>Opcional. Veja a seção <a href="#mes-fim">Mês fim das parcelas</a>.</td></tr>
+            <tr><td><span class="campo">Valor da parcela (código 10034)</span></td><td>Valor original da parcela mensal, antes da correção.</td></tr>
+          </tbody>
+        </table>
+        <p>Os botões <strong>↻</strong> (recalcular esta linha) e <strong>✕</strong> (excluir linha) ficam ao final de cada linha.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="mes-fim">
+        <h2 class="sec-title"><span class="num">4</span>Mês fim das parcelas</h2>
+        <p>Preencha este campo apenas quando o servidor tiver um <strong>mês-limite</strong> a partir do qual deixa de receber a parcela de LPA. Quando a <a href="#data-final">Data final de referência</a> escolhida for posterior a esse mês, a linha não é tratada como erro — ela mostra <strong>"Parcela encerrada"</strong> em itálico, e é automaticamente excluída dos totais, da impressão calculada e da validação de "Salvar mês".</p>
+        <div class="box box-dica">
+          <strong>Deixe em branco quando não houver limite</strong>
+          Se o servidor continua recebendo a parcela normalmente, não preencha este campo — assim ele nunca cai no estado "Parcela encerrada".
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="metodologia">
+        <h2 class="sec-title"><span class="num">5</span>Como o valor atualizado é calculado</h2>
+        <p>O sistema consulta a API pública do Banco Central (Sistema Gerenciador de Séries Temporais — SGS) e multiplica, mês a mês, o fator <strong>(1 + índice do mês ÷ 100)</strong> entre a <strong>Data da aposentadoria</strong> (inclusive) e a <strong>Data final de referência</strong> (inclusive) — a mesma metodologia usada pela Calculadora do Cidadão do BCB.</p>
+        <p>Passe o mouse sobre o valor em <strong>"Valor atualizado"</strong> para ver o índice usado, o período considerado e o fator de correção aplicado — útil para conferência antes de salvar ou imprimir.</p>
+        <div class="box box-info">
+          <strong>IGP-M — mudança de série em 12/04/2021</strong>
+          Se algum servidor usar IGP-M, o sistema já aplica automaticamente a série correta: a partir de 12/04/2021, o cálculo passou a usar a nova série do BCB (3 casas decimais), no lugar da série antiga (2 casas decimais). Você não precisa se preocupar com isso — a troca é automática.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="atualizar">
+        <h2 class="sec-title"><span class="num">6</span>Atualizando os valores</h2>
+        <ol class="passos">
+          <li>Clique em <strong>"Atualizar todos"</strong> para recalcular todas as linhas preenchidas de uma vez, ou use o botão <strong>↻</strong> em uma linha específica.</li>
+          <li>Enquanto calcula, a célula de "Valor atualizado" mostra "…"; ao concluir, mostra o valor ou, em caso de problema, <strong>"Erro"</strong> em vermelho.</li>
+          <li>Passe o mouse sobre uma célula marcada como "Erro" para ver a mensagem exata do problema.</li>
+        </ol>
+        <p>As situações mais comuns de erro são: data final de referência não preenchida, data da aposentadoria em branco, valor da parcela em branco, data da aposentadoria posterior à data final, ou o índice ainda não ter sido publicado pelo BCB para o mês pedido (veja a próxima seção).</p>
+      </section>
+
+      <!-- 7 -->
+      <section id="indice-nao-publicado">
+        <h2 class="sec-title"><span class="num">7</span>Quando o BCB ainda não publicou o índice</h2>
+        <p>O Banco Central normalmente publica o índice de um mês só <strong>no mês seguinte</strong>. Se você pedir a atualização para um mês que ainda não foi publicado, o sistema <strong>não calcula silenciosamente com o mês anterior</strong> — ele bloqueia a linha e avisa, do mesmo jeito que a Calculadora do Cidadão do BCB avisa em vermelho.</p>
+        <div class="card-mock">
+          <div class="rot">Exemplo da mensagem de erro</div>
+          "Índice INPC de agosto/2026 ainda não publicado pelo BCB. Último mês disponível: julho/2026."
+        </div>
+        <div class="box box-atencao">
+          <strong>O que fazer</strong>
+          Ajuste a <strong>Data final de referência</strong> para o último mês já publicado (mostrado no aviso logo abaixo do campo, no topo da página) e clique em "Atualizar todos" novamente.
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section id="rascunho">
+        <h2 class="sec-title"><span class="num">8</span>Rascunho salvo automaticamente</h2>
+        <p>Tudo o que você digita nesta tabela — servidores, índices, datas, valores — é salvo automaticamente na sua conta poucos segundos depois de você parar de digitar. Um texto abaixo dos botões mostra o status: <span class="campo">Salvando…</span> ou <span class="campo">Salvo automaticamente às HH:MM</span>.</p>
+        <ol class="passos">
+          <li>Você pode trocar de módulo e voltar para Atualização LPA a qualquer momento — a tabela é recarregada exatamente como você deixou.</li>
+          <li>O botão <strong>"Limpar tudo"</strong> apaga a tabela <strong>e</strong> o rascunho salvo — use com cuidado, pois não afeta os registros já salvos no Histórico, mas apaga o cadastro corrente de servidores.</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Diferença entre o rascunho e o Histórico</strong>
+          O rascunho é o seu cadastro de trabalho — sempre o mesmo, mês a mês. O Histórico guarda uma "fotografia" congelada de cada mês que você efetivamente salvou (veja a seção <a href="#salvar">Salvar mês no histórico</a>). Editar um registro antigo do Histórico não altera o rascunho corrente.
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="exportar">
+        <h2 class="sec-title"><span class="num">9</span>Exportar CSV</h2>
+        <p>O botão <strong>"Exportar CSV"</strong> gera um arquivo com todas as linhas da tabela — matrícula, nome, índice, datas, valores, fator aplicado e situação (calculado / parcela encerrada / erro) — pronto para abrir no Excel, já formatado com vírgula decimal e separador ponto e vírgula.</p>
+      </section>
+
+      <!-- 10 -->
+      <section id="imprimir">
+        <h2 class="sec-title"><span class="num">10</span>Imprimir / Gerar PDF</h2>
+        <p>Clique em <strong>"Imprimir"</strong> para gerar uma folha em <strong>orientação paisagem</strong> com Matrícula, Nome, Valor da parcela, Valor atualizado e Diferença de todos os servidores, além de um cabeçalho com o mês de referência, o total de servidores, a data/hora de geração e o usuário que gerou.</p>
+        <div class="box box-dica">
+          <strong>Dica</strong>
+          É preciso ter a <strong>Data final de referência</strong> preenchida antes de imprimir — ela aparece no cabeçalho da folha. Linhas com "Parcela encerrada" aparecem identificadas assim na impressão, em vez de um valor calculado.
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">11</span>Salvar mês no histórico e editar pelo Histórico</h2>
+        <ol class="passos">
+          <li>Preencha a <strong>Data final de referência</strong> e clique em <strong>"Atualizar todos"</strong> até que todas as linhas estejam calculadas (sem "Erro").</li>
+          <li>Clique em <strong>"Salvar mês no histórico"</strong> — isso cria um <strong>novo registro</strong> no Histórico com a "fotografia" daquele mês específico (não sobrescreve o mês anterior).</li>
+          <li>Para reabrir um mês salvo, vá até <strong>Histórico de acertos</strong> na barra lateral e clique para editar. A tabela é preenchida com os dados daquele registro, e um aviso no topo confirma qual mês e quando foi salvo.</li>
+          <li>Ao editar um registro assim, o botão passa a se chamar <strong>"Salvar alterações neste registro"</strong> — clicar nele atualiza <strong>somente aquele registro específico</strong> do Histórico, sem alterar o seu rascunho de trabalho do mês corrente.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Atenção</strong>
+          Se você clicar em "Salvar mês no histórico" mais de uma vez para a mesma competência sem estar em modo de edição, o sistema cria registros duplicados no Histórico — confira ali antes de salvar de novo.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="codigos">
+        <h2 class="sec-title"><span class="num">12</span>Glossário de códigos do resultado</h2>
+        <table class="tbl">
+          <caption>Códigos que aparecem nos cabeçalhos da tabela de resultados e na impressão</caption>
+          <thead><tr><th>Código</th><th>Coluna</th><th>O que significa</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">10034</td><td>Valor da parcela</td><td>Código de rubrica SIGRH referente ao valor original da parcela de LPA, antes da correção monetária.</td></tr>
+            <tr><td class="codigo">10047</td><td>Diferença</td><td>Código de rubrica SIGRH referente à diferença apurada (valor atualizado − valor original), a ser lançada no acerto.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>Valor atualizado</strong>
+          A coluna "Valor atualizado" não tem um código de rubrica próprio — ela é o resultado do cálculo (valor da parcela × fator de correção), usado apenas para conferência; o que efetivamente é lançado na folha são os códigos 10034 (valor original) e 10047 (diferença).
+        </div>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Sistema de Atualização LPA · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>

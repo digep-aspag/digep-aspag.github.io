@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Memória de Cálculo INSS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --inss:#B45309; --inss-claro:#FDF1E2; --inss-borda:#E9C08A;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  /* Cabeçalho da página */
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--inss); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--inss); margin:0 0 1.6rem; }
+
+  /* Sumário */
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--inss); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--inss); text-decoration:underline; }
+
+  /* Seções */
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--inss);
+    border-bottom:2px solid var(--inss-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--inss); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--inss-claro); color:var(--inss); border:1px solid var(--inss-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  /* Caixas de destaque */
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  /* Tabelas */
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--inss-claro); color:#7A3C05; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl td.num{ text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+  table.tbl tfoot td{ font-weight:700; background:var(--inss-claro); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0 0 1rem; padding:0; font-size:.95rem; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; margin-bottom:.6rem; padding:.6rem .8rem;
+    background:#fff; border:1px solid var(--line); border-radius:7px;
+  }
+  .checklist li::before{
+    content:"☐"; font-size:1.1rem; color:var(--inss); flex-shrink:0; line-height:1.3;
+  }
+
+  .glossario dt{ font-weight:600; color:var(--inss); font-family:'IBM Plex Mono',monospace; font-size:.85rem; margin-top:.9rem; }
+  .glossario dd{ margin:.2rem 0 0; font-size:.92rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--inss); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="inss.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Memória de Cálculo INSS</div>
+      <div class="page-sub">Passo a passo para calcular o INSS Patronal, o RAT e o desconto do segurado da folha do mês, e gerar as três guias (DARFs) a pagar — escrito para quem nunca preencheu este módulo antes.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#visao-geral">O que é este cálculo e para que serve</a></li>
+          <li><a href="#glossario">Glossário — termos que você vai encontrar</a></li>
+          <li><a href="#dados-orgao">Dados do órgão, competência e parâmetros</a></li>
+          <li><a href="#patronal">Anexando o PDF do SIGRH (INSS Patronal por versão)</a></li>
+          <li><a href="#codigos">Detalhamento por código de recolhimento (segurado)</a></li>
+          <li><a href="#base-calculo">Base de cálculo e valores a recolher</a></li>
+          <li><a href="#maternidade">Dedução salário maternidade</a></li>
+          <li><a href="#conferencia">Conferência por versão de folha</a></li>
+          <li><a href="#resultado">Resultado — gerando os 3 DARFs</a></li>
+          <li><a href="#salvar">Salvar, imprimir e exportar</a></li>
+          <li><a href="#exemplo">Exemplo completo, do início ao fim</a></li>
+          <li><a href="#erros">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">1</span>O que é este cálculo e para que serve</h2>
+        <p>Todo mês, depois que a folha de pagamento do IBRAM fecha, o órgão precisa <strong>pagar ao INSS (Receita Federal)</strong> os encargos que incidem sobre os salários pagos — isso é obrigatório por lei, igual qualquer empregador precisa recolher a parte que cabe a ele e repassar a parte que foi descontada dos próprios servidores. Este módulo é a ferramenta que calcula esses valores e organiza as informações necessárias para gerar as guias de pagamento.</p>
+        <p>Ele <strong>não é</strong> um acerto de contas de um servidor específico (não é dinheiro que um servidor recebe ou devolve) — é um cálculo institucional: pega os relatórios de folha do SIGRH, calcula quanto o IBRAM deve pagar de encargos (RAT e INSS Patronal) e quanto já foi descontado dos servidores (desconto do segurado), e no final gera <strong>três guias de pagamento (DARFs)</strong> — uma para cada tipo de encargo — prontas para pagar no banco.</p>
+        <div class="box box-info">
+          <strong>Quando isso é feito</strong>
+          Uma vez por mês, depois que a folha de pagamento daquele mês (a "competência") está fechada no SIGRH. Normalmente é feito pela mesma pessoa da DIGEP/ASPAG responsável pelos encargos patronais, sempre logo depois de a folha sair.
+        </div>
+        <p>No final deste manual, a seção <a href="#exemplo">Exemplo completo</a> mostra o processo inteiro do começo ao fim, com números fictícios simples, para você comparar com o que estiver fazendo.</p>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário — termos que você vai encontrar</h2>
+        <p>Esta lista explica, em português simples, os termos técnicos usados nos campos e nos relatórios deste módulo. Vale a pena ler antes de começar a preencher.</p>
+        <dl class="glossario">
+          <dt>INSS Patronal</dt>
+          <dd>A parte do INSS que o <strong>órgão</strong> (empregador) paga sobre a folha de salários. É diferente do desconto que sai do salário do próprio servidor.</dd>
+
+          <dt>Desconto do segurado</dt>
+          <dd>A parte do INSS que já foi <strong>descontada diretamente do salário do servidor</strong> na folha de pagamento. O órgão não paga essa parte do próprio bolso — só repassa à Receita Federal o que já foi descontado.</dd>
+
+          <dt>RAT (Riscos Ambientais do Trabalho)</dt>
+          <dd>Um percentual extra que o órgão paga, calculado sobre a mesma base do INSS Patronal, usado para custear benefícios como aposentadoria especial. A Receita Federal também chama esse valor de <strong>GILRAT</strong> nas guias.</dd>
+
+          <dt>SAT / Agente nocivo</dt>
+          <dd>Um adicional que só existe quando há servidores expostos a algo que prejudica a saúde no trabalho (insalubridade/periculosidade). Neste órgão, costuma aparecer zerado (R$ 0,00) na maioria dos meses — isso é normal.</dd>
+
+          <dt>RGPS</dt>
+          <dd>Regime Geral de Previdência Social — o regime de aposentadoria pelo INSS. É o regime usado pelos servidores deste módulo (diferente do RPPS, que é o regime próprio de servidor efetivo, tratado em outros módulos do portal).</dd>
+
+          <dt>Competência / Período de apuração</dt>
+          <dd>O <strong>mês a que o cálculo se refere</strong> (por exemplo, a folha de agosto/2026) — não é o mês em que você está preenchendo o módulo, e sim o mês da folha que está sendo fechada.</dd>
+
+          <dt>Versão (01, 75, 76)</dt>
+          <dd>Identifica se é a <strong>folha normal do mês</strong> (Versão 01) ou uma <strong>reprocessagem/correção posterior</strong> feita pelo SIGRH depois que a folha normal já saiu (Versões 75 e 76). Na maioria dos meses, só a Versão 01 tem valores — 75 e 76 ficam zeradas, e isso é normal.</dd>
+
+          <dt>Grupo 53 / Grupo 54</dt>
+          <dd>Duas situações de contrato diferentes dentro da mesma folha: <strong>Grupo 53 = servidores ativos</strong> (RGPS normal) e <strong>Grupo 54 = contrato temporário</strong>. O relatório do SIGRH traz os dois separadamente, mas geralmente no mesmo PDF.</dd>
+
+          <dt>BASE I.N.S.S PATRONAL</dt>
+          <dd>O valor total de salários sobre o qual incide o cálculo do INSS Patronal e do RAT, mostrado no relatório do SIGRH. É a partir dele que o "Salário normal" deste módulo é calculado.</dd>
+
+          <dt>Código de recolhimento (40910, 30910, 40912, 40949)</dt>
+          <dd>Números que o SIGRH usa para identificar cada tipo de desconto do INSS descontado do servidor. Você não precisa decorar o que cada um significa — o sistema já sabe procurar esses números no PDF.</dd>
+
+          <dt>DARF</dt>
+          <dd>Documento de Arrecadação de Receitas Federais — é a <strong>guia de pagamento</strong> em si, que efetivamente é paga no banco (pelo SICALC da Receita Federal). Este módulo calcula os valores; o DARF é gerado depois, em outro sistema.</dd>
+
+          <dt>Código de receita</dt>
+          <dd>Um número que identifica qual dos três tipos de DARF está sendo gerado: <span class="campo">1138-01</span> (Patronal), <span class="campo">1082-01</span> (Segurado) e <span class="campo">1646-01</span> (RAT).</dd>
+
+          <dt>SIGRH / PAGEMP01</dt>
+          <dd>SIGRH é o sistema de folha de pagamento do GDF. PAGEMP01 é o nome do relatório específico ("Resumo de Proventos e Descontos") de onde vêm os PDFs usados neste módulo.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="dados-orgao">
+        <h2 class="sec-title"><span class="num">3</span>Dados do órgão, competência e parâmetros</h2>
+        <p>Fica no topo da página. A maioria destes campos já vem preenchida e raramente precisa ser alterada — mas é importante saber de onde vem cada informação.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>De onde vem / o que fazer se tiver dúvida</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Órgão</span> / <span class="campo">Unidade</span></td><td>Nome e código do órgão.</td><td>Já vem preenchido. Se estiver errado, avise a DIGEP — não altere por conta própria.</td></tr>
+            <tr><td><span class="campo">Competência (folha)</span></td><td>O mês da folha que está sendo fechada.</td><td>Pergunte ao setor de folha/RH qual mês está sendo processado, se tiver dúvida.</td></tr>
+            <tr><td><span class="campo">Data do documento</span></td><td>A data de hoje, normalmente.</td><td>Aparece no rodapé do demonstrativo impresso.</td></tr>
+            <tr><td><span class="campo">RAT (%)</span>, <span class="campo">INSS patronal (%)</span>, <span class="campo">SAT (%)</span></td><td>Percentuais fixos, definidos por legislação federal.</td><td>Não costumam mudar mês a mês. Só altere se a contabilidade/DIGEP confirmar explicitamente uma mudança de alíquota.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>Na dúvida, não altere</strong>
+          Estes campos já vêm com os valores corretos na maioria dos meses. Se algo parecer errado, confirme com a contabilidade antes de mudar — uma alíquota errada muda o cálculo inteiro.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="patronal">
+        <h2 class="sec-title"><span class="num">4</span>Anexando o PDF do SIGRH (INSS Patronal por versão)</h2>
+        <p>Esta é a etapa mais importante: você anexa o relatório do SIGRH e o sistema lê os valores sozinho.</p>
+        <ol class="passos">
+          <li>No SIGRH, gere o relatório <strong>PAGEMP01 — Resumo de Proventos e Descontos</strong> da competência do mês (peça ao setor de folha se você não tiver acesso direto ao SIGRH).</li>
+          <li>Baixe o PDF. Ele normalmente já traz os dois blocos juntos: <strong>Folha Normal Ativo-RGPS</strong> (Grupo 53) e <strong>Folha Normal Contrato Temporário-RGPS</strong> (Grupo 54).</li>
+          <li>No módulo, clique em <strong>"Escolher arquivo"</strong> no card da versão correspondente (na maioria dos meses, é a <strong>Versão 01</strong>) e selecione o PDF.</li>
+          <li>Aguarde — o sistema lê o PDF automaticamente e preenche os dois campos, <strong>Grupo 53 (Ativo)</strong> e <strong>Grupo 54 (Temporário)</strong>, de uma vez só.</li>
+        </ol>
+        <div class="box box-info">
+          <strong>Versões 75 e 76</strong>
+          Só existe PDF para essas versões quando o SIGRH gerou uma reprocessagem/correção da folha naquele mês. Se não houver, deixe os campos zerados — é o normal na maioria dos meses.
+        </div>
+        <div class="box box-dica">
+          <strong>Um valor não bateu ou não apareceu?</strong>
+          Você pode digitar ou corrigir qualquer campo manualmente, a qualquer momento — o preenchimento automático é uma ajuda, não uma obrigação.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="codigos">
+        <h2 class="sec-title"><span class="num">5</span>Detalhamento por código de recolhimento (segurado)</h2>
+        <p>Esta tabela mostra quanto foi descontado do salário dos próprios servidores para o INSS, separado pelos códigos que o SIGRH usa (40910, 30910, 40912, 40949). Ela é preenchida <strong>automaticamente pelo mesmo PDF</strong> anexado na seção anterior — você não precisa mexer aqui na maioria dos meses.</p>
+        <table class="tbl">
+          <thead><tr><th>Código</th><th>Sinal</th><th>O que significa na prática</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">40910</td><td>+ soma</td><td>Desconto principal do INSS do segurado.</td></tr>
+            <tr><td class="codigo">30910</td><td>− subtrai</td><td>Um valor que <strong>diminui</strong> o total acima (ex.: uma correção/estorno). Costuma ficar zerado.</td></tr>
+            <tr><td class="codigo">40912</td><td>+ soma</td><td>Desconto do INSS sobre o 13º salário.</td></tr>
+            <tr><td class="codigo">40949</td><td>+ soma</td><td>Desconto do INSS sobre férias.</td></tr>
+          </tbody>
+        </table>
+        <p>Se um código aparecer com valor <strong>zerado</strong>, na maioria das vezes é porque simplesmente não houve esse tipo de desconto naquele mês — não é erro. Só vale a pena conferir manualmente no PDF (procurando pelo número do código, como <span class="campo">4.0910</span>) se o total final não bater com o esperado.</p>
+        <p>Use <strong>"+ adicionar código"</strong> apenas se a contabilidade indicar um código novo que não esteja na lista fixa — os 4 códigos padrão não podem ser removidos.</p>
+      </section>
+
+      <!-- 6 -->
+      <section id="base-calculo">
+        <h2 class="sec-title"><span class="num">6</span>Base de cálculo e valores a recolher</h2>
+        <p>Esta é a tabela central do módulo — uma linha por versão de folha (01, 75, 76) mais uma linha "Versão 4 - Suplementar". Duas colunas já chegam prontas das seções anteriores:</p>
+        <ul>
+          <li><strong>Salário normal</strong> — vem da soma dos Grupos 53+54 lidos na seção <a href="#patronal">INSS Patronal por versão</a>.</li>
+          <li><strong>Desc. do segurado</strong> — vem da soma dos códigos na seção <a href="#codigos">Detalhamento por código</a>.</li>
+        </ul>
+        <p>A partir daí, o sistema calcula sozinho três colunas:</p>
+        <table class="tbl">
+          <thead><tr><th>Coluna calculada</th><th>Como é calculada</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">RAT</span></td><td>(Salário normal + Rem. exp. ag. nocivo) × alíquota de RAT</td></tr>
+            <tr><td><span class="campo">INSS patronal</span></td><td>(Salário normal + 13º salário) × alíquota de INSS patronal</td></tr>
+            <tr><td><span class="campo">SAT / ag. nocivo</span></td><td>Rem. exp. ag. nocivo × alíquota de SAT</td></tr>
+          </tbody>
+        </table>
+        <p>As colunas <strong>Rem. exp. ag. nocivo</strong>, <strong>13º salário</strong>, <strong>Compensação</strong>, <strong>Salário maternidade</strong> e <strong>Dedução salário família</strong> raramente têm valor neste órgão — só preencha manualmente se a contabilidade/RH confirmar que existe esse caso específico no mês.</p>
+        <div class="box box-atencao">
+          <strong>Linha "Descontos" (ajuste manual)</strong>
+          É uma linha separada para correções pontuais que não se encaixam em nenhuma versão — pode ser um valor negativo. Ela é somada direto no <strong>Total geral</strong>. Não preencha por padrão; use só se a contabilidade pedir um ajuste específico.
+        </div>
+        <p>O <strong>Total a recolher</strong> de cada linha, e o <strong>Total geral</strong> no final da tabela, são o que efetivamente vira as guias — veja a seção <a href="#resultado">Resultado</a>.</p>
+      </section>
+
+      <!-- 7 -->
+      <section id="maternidade">
+        <h2 class="sec-title"><span class="num">7</span>Dedução salário maternidade</h2>
+        <p>Preencha esta seção <strong>somente</strong> se houver alguma servidora em licença-maternidade no mês da competência — pergunte ao RH quem está nessa situação, se tiver dúvida.</p>
+        <ol class="passos">
+          <li>Clique em <strong>"+ adicionar servidora"</strong>.</li>
+          <li>Preencha nome, matrícula e o valor da dedução.</li>
+        </ol>
+        <p>Se não houver nenhuma servidora em licença-maternidade naquele mês, deixe esta seção vazia — ela não afeta nada se estiver em branco.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="conferencia">
+        <h2 class="sec-title"><span class="num">8</span>Conferência por versão de folha</h2>
+        <p>Esta seção existe para <strong>bater os valores calculados pelo módulo com os valores que o próprio SIGRH já calculou</strong> no PDF, linha "VALOR I.N.S.S. A RECOLHER" — uma checagem de segurança antes de gerar as guias.</p>
+        <p>O campo <span class="campo">VALOR I.N.S.S. A RECOLHER</span> por versão e grupo é preenchido automaticamente pelo mesmo PDF anexado na seção 4. Logo abaixo, para <strong>cada versão</strong> (01, 75, 76), o sistema compara esse valor com o RAT + INSS Patronal que ele mesmo calculou:</p>
+        <ul>
+          <li><strong>Mensagem verde</strong> — os dois valores batem, nada a fazer.</li>
+          <li><strong>Mensagem amarela/vermelha com um botão</strong> — há uma pequena diferença (normalmente centavos, por arredondamento). Clique em <strong>"Aplicar diferença no RAT"</strong> daquela versão para corrigir automaticamente — o ajuste entra no cálculo do RAT só daquela versão específica.</li>
+        </ul>
+        <p>Mais abaixo, o bloco <strong>"Conferência total a recolher"</strong> soma o INSS a recolher (do PDF) + SAT + Desconto do segurado (da seção 5), e compara com o <strong>Total a recolher</strong> da <a href="#base-calculo">Base de Cálculo</a>. Também deve bater — se não bater, revise se algum valor de Compensação/Salário maternidade/Dedução salário família foi preenchido manualmente sem necessidade.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="resultado">
+        <h2 class="sec-title"><span class="num">9</span>Resultado — gerando os 3 DARFs</h2>
+        <p>No final da página, três cartões mostram o valor de cada guia a pagar:</p>
+        <table class="tbl">
+          <thead><tr><th>DARF</th><th>Código de receita</th><th>O que é</th></tr></thead>
+          <tbody>
+            <tr><td>DARF Patronal</td><td class="codigo">1138-01</td><td>INSS Patronal + SAT — a parte que o <strong>órgão</strong> paga.</td></tr>
+            <tr><td>DARF Segurado</td><td class="codigo">1082-01</td><td>O que já foi <strong>descontado dos servidores</strong> e precisa ser repassado.</td></tr>
+            <tr><td>DARF RAT</td><td class="codigo">1646-01</td><td>O adicional de RAT/GILRAT.</td></tr>
+          </tbody>
+        </table>
+        <p>Um quarto cartão mostra o <strong>Total geral a recolher</strong> — a soma dos três.</p>
+        <div class="box box-info">
+          <strong>Este módulo só calcula — quem gera o DARF de verdade é o SICALC</strong>
+          Os valores aqui são o que você vai usar para gerar as guias no SICALC (site da Receita Federal). O botão <strong>"Copiar dados para o SICALC"</strong> monta um texto pronto com os 3 códigos, período e valores, para colar no Claude in Chrome (se você usa essa automação) ou para digitar manualmente no site.
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">10</span>Salvar, imprimir e exportar</h2>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">💾 Salvar no Portal</span></td><td>Grava tudo o que está preenchido no banco de dados do portal, vinculado à sua conta. Exige que a <strong>Competência</strong> esteja preenchida.</td></tr>
+            <tr><td><span class="campo">🖨️ Imprimir demonstrativo</span></td><td>Gera uma folha com todos os valores, pronta para imprimir ou salvar em PDF.</td></tr>
+            <tr><td><span class="campo">⬇️ Exportar Excel</span></td><td>Baixa uma planilha com todas as tabelas do módulo.</td></tr>
+            <tr><td><span class="campo">📋 Copiar dados para o SICALC</span></td><td>Copia um texto pronto com os 3 DARFs para colar em outra ferramenta.</td></tr>
+            <tr><td><span class="campo">Limpar / reiniciar</span></td><td>Apaga tudo o que está preenchido na tela. <strong>Não afeta</strong> nada que já tenha sido salvo no Portal.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 11 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">11</span>Exemplo completo, do início ao fim</h2>
+        <p><em>Números fictícios e redondos, só para você comparar o raciocínio — não são valores reais.</em></p>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Competência 09/2026. Só a Versão 01 tem movimento (75 e 76 ficam zeradas). O PDF anexado traz Ativo (Grupo 53) e Contrato Temporário (Grupo 54).
+        </div>
+        <h3 class="sub-title">1. INSS Patronal por versão (lido do PDF)</h3>
+        <table class="tbl">
+          <thead><tr><th></th><th>Grupo 53 (Ativo)</th><th>Grupo 54 (Temporário)</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>BASE I.N.S.S PATRONAL</td><td class="num">R$ 100.000,00</td><td class="num">R$ 50.000,00</td><td class="num">R$ 150.000,00</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">2. Detalhamento por código (lido do mesmo PDF)</h3>
+        <table class="tbl">
+          <thead><tr><th>Código</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">40910</td><td class="num">R$ 12.000,00</td></tr>
+            <tr><td class="codigo">30910</td><td class="num">R$ 0,00</td></tr>
+            <tr><td class="codigo">40912</td><td class="num">R$ 200,00</td></tr>
+            <tr><td class="codigo">40949</td><td class="num">R$ 100,00</td></tr>
+          </tbody>
+          <tfoot><tr><td>Total (Desc. do segurado)</td><td class="num">R$ 12.300,00</td></tr></tfoot>
+        </table>
+        <h3 class="sub-title">3. Base de cálculo — Versão 01 (calculado automaticamente)</h3>
+        <table class="tbl">
+          <thead><tr><th>Salário normal</th><th>Desc. segurado</th><th>RAT (2,8496%)</th><th>INSS patronal (20%)</th><th>SAT</th><th>Total a recolher</th></tr></thead>
+          <tbody>
+            <tr><td class="num">150.000,00</td><td class="num">12.300,00</td><td class="num">4.274,40</td><td class="num">30.000,00</td><td class="num">0,00</td><td class="num"><strong>46.574,40</strong></td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">4. Conferência (também lida do PDF)</h3>
+        <p>VALOR I.N.S.S. A RECOLHER: Grupo 53 = R$ 22.849,60 · Grupo 54 = R$ 11.424,80 · <strong>Total = R$ 34.274,40</strong></p>
+        <p>Comparando: RAT (4.274,40) + INSS patronal (30.000,00) = <strong>R$ 34.274,40</strong> → bate exatamente, mensagem verde, nenhum ajuste necessário.</p>
+        <h3 class="sub-title">5. Resultado — os 3 DARFs</h3>
+        <table class="tbl">
+          <thead><tr><th>DARF</th><th>Código</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Patronal</td><td class="codigo">1138-01</td><td class="num">R$ 30.000,00</td></tr>
+            <tr><td>Segurado</td><td class="codigo">1082-01</td><td class="num">R$ 12.300,00</td></tr>
+            <tr><td>RAT</td><td class="codigo">1646-01</td><td class="num">R$ 4.274,40</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="2">Total geral</td><td class="num">R$ 46.574,40</td></tr></tfoot>
+        </table>
+        <div class="box box-dica">
+          <strong>Confira o "bater"</strong>
+          Repare que o Total geral dos 3 DARFs (R$ 46.574,40) é <strong>exatamente igual</strong> ao Total a recolher da Base de Cálculo, no passo 3. É esse "bater" que você deve conferir todo mês antes de salvar.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="erros">
+        <h2 class="sec-title"><span class="num">12</span>Erros comuns e perguntas frequentes</h2>
+
+        <h3 class="sub-title">Anexei o PDF e nada preencheu / demorou muito</h3>
+        <p>Alguns relatórios do SIGRH são gerados como "imagem" (não têm texto que o computador consegue ler direto). Nesses casos, o sistema usa <strong>reconhecimento automático de texto</strong>, que pode levar até 1 minuto. Espere um pouco antes de tentar de novo. Se mesmo assim não funcionar, digite os valores manualmente olhando o PDF.</p>
+
+        <h3 class="sub-title">Apareceu "Não encontrei este bloco (Ativo ou Temporário) no PDF"</h3>
+        <p>Confira se o PDF baixado do SIGRH realmente é o relatório PAGEMP01 certo, e se ele contém as seções "Folha Normal Ativo-RGPS" e/ou "Contrato Temporário". Se o PDF só tiver um dos dois blocos, é normal que o outro grupo fique zerado.</p>
+
+        <h3 class="sub-title">Um valor apareceu zerado (0,00), é normal?</h3>
+        <p>Na maioria dos meses, sim. SAT costuma ser sempre zero neste órgão; os códigos 30910 e 40949 às vezes não têm movimento em determinado mês; e as Versões 75/76 só têm valor quando há reprocessagem. Só se preocupe se o total não bater com o esperado na <a href="#conferencia">Conferência</a>.</p>
+
+        <h3 class="sub-title">A Conferência mostra uma diferença de alguns centavos</h3>
+        <p>É normal — costuma ser arredondamento. Use o botão <strong>"Aplicar diferença no RAT"</strong> daquela versão para corrigir automaticamente, sem precisar calcular nada na mão.</p>
+
+        <h3 class="sub-title">Esqueci de anexar o PDF de uma versão (75 ou 76)</h3>
+        <p>Sem problema — se não houve reprocessagem naquele mês, essas versões devem mesmo ficar zeradas. Elas só precisam de PDF quando o SIGRH efetivamente gerar uma versão de correção.</p>
+
+        <h3 class="sub-title">Cliquei em "Limpar / reiniciar" sem querer</h3>
+        <p>Isso apaga tudo o que estava preenchido na tela naquele momento. Não afeta nada que você já tenha salvo no Portal anteriormente — só o que estava sendo digitado nessa sessão.</p>
+
+        <h3 class="sub-title">Cliquei em "Salvar no Portal" e não aconteceu nada / deu erro</h3>
+        <p>Confira se a <strong>Competência</strong> está preenchida — é obrigatória para salvar. Confira também se você está com internet e logado no portal.</p>
+      </section>
+
+      <!-- 13 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">13</span>Checklist antes de salvar</h2>
+        <ul class="checklist">
+          <li>A <strong>Competência (folha)</strong> está preenchida com o mês correto.</li>
+          <li>O PDF da <strong>Versão 01</strong> foi anexado e os campos mostram "✓ lido do PDF" (e as Versões 75/76 foram conferidas — zeradas se não houver reprocessagem, ou com PDF anexado se houver).</li>
+          <li>Nenhum aviso vermelho ficou sem explicação na seção <strong>Conferência por versão de folha</strong> — diferenças de centavos já foram corrigidas com o botão de ajuste do RAT.</li>
+          <li>Os valores dos <strong>3 DARFs</strong> (Resultado) fazem sentido e o Total geral bate com o Total a recolher da Base de Cálculo.</li>
+          <li>Clicou em <strong>"Salvar no Portal"</strong> e viu a mensagem confirmando que salvou com sucesso.</li>
+        </ul>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Memória de Cálculo INSS · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Acerto de Brigadistas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --mod:#8B0000; --mod-claro:#FBEAEA; --mod-borda:#E3B3B3;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--mod); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--mod); margin:0 0 1.6rem; }
+
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--mod); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--mod); text-decoration:underline; }
+
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--mod);
+    border-bottom:2px solid var(--mod-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--mod); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--mod-claro); color:var(--mod); border:1px solid var(--mod-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--mod-claro); color:#6E0000; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+  table.tbl td.valor{ font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0 0 1rem; padding:0; font-size:.95rem; }
+  .checklist li{ display:flex; gap:.6rem; align-items:flex-start; margin-bottom:.55rem; }
+  .checklist li::before{
+    content:"☐"; color:var(--mod); font-size:1.1rem; line-height:1.3; flex-shrink:0;
+  }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--mod); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="brigadistas.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Acerto de Brigadistas</div>
+      <div class="page-sub">Guia passo a passo para calcular o acerto de contas de servidores temporários do Grupo 54 (brigadistas) — escrito para quem está usando o módulo pela primeira vez, sem exigir conhecimento prévio de legislação ou de folha de pagamento.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#o-que-e">O que é um "acerto de contas"</a></li>
+          <li><a href="#glossario">Glossário — termos que você vai encontrar</a></li>
+          <li><a href="#dados-pessoais">Aba 1 — Dados Pessoais</a></li>
+          <li><a href="#periodo-vinculo">Aba 2 — Período do vínculo e cálculo de avos</a></li>
+          <li><a href="#meses-sem-direito">Meses sem direito a avo (correção manual)</a></li>
+          <li><a href="#correcao-13">Correção de 13º de exercícios anteriores</a></li>
+          <li><a href="#remuneracao">Remuneração — a base de todo o cálculo</a></li>
+          <li><a href="#ferias">Período aquisitivo de férias</a></li>
+          <li><a href="#faltas">Faltas e horas não trabalhadas</a></li>
+          <li><a href="#resultado">O resultado do acerto — o que cada código significa</a></li>
+          <li><a href="#sigrh">Aba 3 — Lançamento SIGRH v09</a></li>
+          <li><a href="#acoes">Calcular, gerar relatório, imprimir e salvar</a></li>
+          <li><a href="#exemplo">Exemplo completo, passo a passo</a></li>
+          <li><a href="#duvidas">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="o-que-e">
+        <h2 class="sec-title"><span class="num">1</span>O que é um "acerto de contas"</h2>
+        <p>Quando um brigadista contratado temporariamente (Grupo 54) é <strong>exonerado ou tem o contrato encerrado</strong>, quase sempre sobram contas em aberto entre ele e o governo: dias de férias que ele nunca tirou, uma parte do 13º salário do ano que ele nem chegou a receber, ou, ao contrário, dias que ele já recebeu mas não trabalhou. O <strong>acerto de contas</strong> é justamente o cálculo que junta tudo isso numa conta só, e no final aponta um valor único: ou o servidor tem <strong>dinheiro a receber</strong>, ou ele precisa <strong>devolver</strong> alguma coisa ao governo.</p>
+        <p>Ele é feito no momento do desligamento do servidor (ou logo depois), antes de o pagamento final ser processado — é esse cálculo que garante que ninguém saia perdendo nem recebendo a mais do que tem direito.</p>
+        <div class="box box-info">
+          <strong>O que sai no final</strong>
+          Uma tabela com cada item calculado separadamente (alguns valores a favor do servidor, outros a favor do governo) e, na última linha, o <strong>total líquido</strong> do acerto — esse é o número que efetivamente vai para a folha de pagamento.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário — termos que você vai encontrar</h2>
+        <p>Antes de entrar nos campos do sistema, veja aqui o significado dos termos técnicos que aparecem no módulo — assim, quando você encontrar a palavra na tela, ela já não vai ser estranha.</p>
+        <table class="tbl">
+          <tbody>
+            <tr><td style="width:220px;"><strong>Período aquisitivo</strong></td><td>O "ano de trabalho" (12 meses) que dá direito a um período de férias. Todo servidor acumula períodos aquisitivos conforme o tempo trabalhado.</td></tr>
+            <tr><td><strong>Avos</strong></td><td>Cada "pedacinho" (1/12) de um direito que vai se acumulando mês a mês — tanto para férias quanto para o 13º salário.</td></tr>
+            <tr><td><strong>Proporcional</strong></td><td>Quando o direito ainda não completou os 12 avos de um "ano cheio", paga-se apenas a parte correspondente aos meses efetivamente trabalhados.</td></tr>
+            <tr><td><strong>Férias vencidas</strong></td><td>Férias de um período aquisitivo já <strong>completo</strong> (12 avos) que o servidor nunca chegou a tirar.</td></tr>
+            <tr><td><strong>Férias proporcionais</strong></td><td>Férias do período que ainda estava em andamento na data do desligamento (menos de 12 avos completos).</td></tr>
+            <tr><td><strong>1/3 de férias</strong></td><td>Um adicional obrigatório pago junto com as férias, equivalente a 1/3 do valor delas — é um direito garantido pela Constituição.</td></tr>
+            <tr><td><strong>Avos de 13º</strong></td><td>A fração do 13º salário (a "gratificação natalícia" de fim de ano) proporcional aos meses trabalhados naquele ano específico.</td></tr>
+            <tr><td><strong>RGPS</strong></td><td>Regime Geral de Previdência Social — é o regime de INSS que se aplica a este tipo de contrato temporário. (Não confundir com RPPS, o regime próprio dos servidores efetivos, que não se aplica aqui.)</td></tr>
+            <tr><td><strong>Seguridade Social / INSS</strong></td><td>O desconto obrigatório que incide sobre a remuneração, destinado à previdência social.</td></tr>
+            <tr><td><strong>Devolução</strong></td><td>Quando o servidor recebeu algo a mais do que tinha direito (por exemplo, foi pago por dias que não trabalhou) e precisa devolver esse valor.</td></tr>
+            <tr><td><strong>Diferença (DIF.)</strong></td><td>Um valor a mais que o servidor tem direito a receber — o oposto de uma devolução.</td></tr>
+            <tr><td><strong>Repouso remunerado (DSR)</strong></td><td>O dia de descanso semanal remunerado. Se o servidor faltou ao trabalho, esse dia de descanso também pode ser descontado.</td></tr>
+            <tr><td><strong>Competência</strong></td><td>O mês/ano específico a que uma informação se refere. Exemplo: uma falta em julho de 2026 tem "competência" 07/2026.</td></tr>
+            <tr><td><strong>SIGRH</strong></td><td>O sistema do GDF usado para processar oficialmente a folha de pagamento dos servidores. Este módulo ajuda a calcular os valores; quem lança de fato na folha é o SIGRH.</td></tr>
+            <tr><td><strong>Adiantamento de 13º</strong></td><td>Uma parte do 13º salário (geralmente metade) que costuma ser paga antecipadamente durante o ano, normalmente em julho ou agosto.</td></tr>
+            <tr><td><strong>Processo SEI</strong></td><td>O número do processo administrativo eletrônico (Sistema Eletrônico de Informações) aberto para tratar do desligamento/acerto deste servidor.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 3 -->
+      <section id="dados-pessoais">
+        <h2 class="sec-title"><span class="num">3</span>Aba 1 — Dados Pessoais</h2>
+        <p>É a primeira tela que aparece ao abrir o módulo. Aqui você identifica o servidor antes de começar a calcular qualquer coisa.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar essa informação</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Nome</span></td><td>Nome completo do servidor.</td><td>Carteira funcional, contrato ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Matrícula</span></td><td>Número da matrícula funcional.</td><td>Contracheque, SIGRH ou carteira funcional.</td></tr>
+            <tr><td><span class="campo">Cargo/Função</span></td><td>Nome do cargo (ex.: "Brigadista").</td><td>Contrato de trabalho ou portaria de nomeação.</td></tr>
+            <tr><td><span class="campo">Processo SEI</span></td><td>Número do processo eletrônico deste acerto, se já existir um aberto.</td><td>Consulte no SEI ou pergunte ao setor responsável pelo desligamento. Pode ficar em branco.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>Nome e matrícula são obrigatórios</strong>
+          O sistema só deixa você avançar para a aba "2. Acerto de Contas" depois de preencher <strong>Nome</strong> e <strong>Matrícula</strong>. O <strong>Processo SEI</strong> é opcional — você pode deixá-lo em branco e seguir em frente normalmente.
+        </div>
+        <p>O botão <strong>"IR PARA ACERTO DE CONTAS →"</strong> leva direto para a próxima aba (fazendo a mesma verificação acima). O botão <strong>"LIMPAR TODOS OS DADOS"</strong> apaga tudo o que foi preenchido no módulo inteiro — use com cuidado, pois não tem como desfazer.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="periodo-vinculo">
+        <h2 class="sec-title"><span class="num">4</span>Aba 2 — Período do vínculo e cálculo de avos</h2>
+        <p>Aqui você informa as datas do contrato e alguns valores que servem de base para o restante do cálculo.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar essa informação</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Admissão</span></td><td>Data em que o servidor começou a trabalhar.</td><td>Portaria de nomeação/admissão ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Desligamento/Exoneração</span></td><td>Data em que o vínculo terminou.</td><td>Portaria de exoneração ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Dias recebidos no mês do desligamento</span></td><td>Quantos dias já foram <strong>pagos</strong> ao servidor naquele mês, segundo a última folha processada.</td><td>Contracheque do mês do desligamento. Se não souber, pergunte ao RH/folha de pagamento — esse número não é o mesmo que "dias trabalhados", é o que já foi de fato pago.</td></tr>
+            <tr><td><span class="campo">Adiantamento de 13º salário (R$)</span></td><td>Valor que o servidor já recebeu de adiantamento do 13º durante o ano do desligamento (se houver).</td><td>Contracheque do mês em que o adiantamento foi pago (normalmente julho). Veja a caixa de aviso abaixo do campo — o sistema pode preencher isso sozinho.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>O campo de adiantamento pode se preencher sozinho</strong>
+          Se a data de desligamento for depois de junho, o sistema calcula automaticamente 6/12 avos da remuneração como sugestão ao clicar em "Calcular Acerto de Contas" — mas você pode apagar e digitar outro valor, se o que o servidor recebeu de fato foi diferente.
+        </div>
+        <p>Depois de preencher as datas, clique em <strong>"CALCULAR AVOS"</strong> para ver, logo abaixo, quantos avos de férias vencidas, férias proporcionais e 13º o servidor acumulou — esses números são recalculados automaticamente sempre que você mudar as datas.</p>
+      </section>
+
+      <!-- 5 -->
+      <section id="meses-sem-direito">
+        <h2 class="sec-title"><span class="num">5</span>Meses sem direito a avo (correção manual)</h2>
+        <p>O sistema calcula os avos <strong>só a partir das datas de admissão e desligamento</strong>, presumindo que o servidor trabalhou normalmente o tempo todo entre elas. Só que, se em algum mês <strong>no meio do contrato</strong> o servidor teve falta ou afastamento (por exemplo, um período de auxílio-doença) que fez com que ele trabalhasse <strong>menos de 15 dias</strong> naquele mês específico, o sistema não tem como saber disso sozinho — ele só enxerga as duas pontas (admissão e desligamento).</p>
+        <p>É para isso que servem estes dois campos: você informa manualmente quantos meses, fora das pontas, não devem contar como um avo completo.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>Quando usar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Meses sem direito a avo de férias</span></td><td>Conta para o total de avos de férias de todo o vínculo.</td></tr>
+            <tr><td><span class="campo">Meses sem direito a avo de 13º</span></td><td>Conta apenas para os avos de 13º do <strong>ano do desligamento</strong> (o 13º não olha o vínculo inteiro, só aquele ano).</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>De onde vem essa informação</strong>
+          Consulte o <strong>registro funcional / frequência</strong> do servidor no RH para verificar se houve algum mês, dentro do período trabalhado, em que ele não bateu os 15 dias efetivamente trabalhados. Se você não tiver certeza, é melhor perguntar ao setor de RH do que arriscar um número errado — esse campo <strong>diminui</strong> o total de avos, então preencher errado pode fazer o servidor receber menos do que devia.
+        </div>
+        <div class="box box-dica">
+          <strong>Se não houver nenhum caso assim</strong>
+          Deixe os dois campos em <strong>0</strong> (valor padrão) — é o caso mais comum, quando o servidor trabalhou normalmente o tempo todo.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="correcao-13">
+        <h2 class="sec-title"><span class="num">6</span>Correção de 13º de exercícios anteriores</h2>
+        <p>Às vezes, num mês de dezembro de um ano <strong>anterior</strong> ao do desligamento, o servidor acaba recebendo mais avos de 13º do que realmente tinha direito naquele momento (isso pode acontecer quando o sistema de folha já processa o 13º completo antes de saber de afastamentos que reduziriam o direito real). Esta seção (retrátil, clique para abrir) serve para corrigir isso.</p>
+        <ol class="passos">
+          <li>Verifique, no registro funcional do servidor, se em algum dezembro anterior ele recebeu mais avos de 13º do que deveria.</li>
+          <li>Se sim, informe o <strong>ano</strong> e a <strong>quantidade de avos recebidos indevidamente</strong> naquele ano.</li>
+          <li>O sistema desconta automaticamente esse valor do 13º calculado para o ano do desligamento, usando o mesmo código de lançamento — você não precisa fazer essa conta na mão.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Isso é opcional</strong>
+          Só preencha se você já <strong>confirmou</strong>, olhando o histórico funcional do servidor, que houve pagamento indevido em algum dezembro anterior. Se não houver certeza disso, deixe em branco — o cálculo do 13º do ano do desligamento segue normalmente sem nenhum desconto extra.
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="remuneracao">
+        <h2 class="sec-title"><span class="num">7</span>Remuneração — a base de todo o cálculo</h2>
+        <p>Esta tabela informa quanto o servidor ganha por mês — é a base usada para calcular praticamente tudo no acerto (férias, 13º, INSS etc.).</p>
+        <table class="tbl">
+          <thead><tr><th>Linha</th><th>O que é</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">10001 — Salário Contrato Temporário</span></td><td>Fixa (não muda de nome nem código). Só o valor em reais é editável.</td></tr>
+            <tr><td><span class="campo">11119 — Adicional Periculosidade</span></td><td>Também fixa. Só o valor é editável.</td></tr>
+            <tr><td>3 linhas em branco</td><td>Para lançar qualquer outra verba fixa que o servidor receba (preencha código, descrição e valor).</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>De onde vem essa informação</strong>
+          Confira o valor exato do salário e da periculosidade no <strong>contrato de trabalho do servidor</strong> ou no seu <strong>último contracheque</strong> antes do desligamento.
+        </div>
+        <div class="box box-dica">
+          <strong>Por que a periculosidade "some" em algumas contas</strong>
+          O Adicional de Periculosidade entra no <strong>total da remuneração</strong> normalmente, mas <strong>não</strong> entra na conta específica das férias e do 1/3 de férias — só o salário-base é usado ali. Isso é intencional (segue a regra de cálculo de férias) e não é erro se você perceber que o valor das férias parece menor do que se fosse calculado sobre o total.
+        </div>
+        <p>O total no rodapé da tabela ("TOTAL DA REMUNERAÇÃO") é atualizado sozinho, em tempo real, conforme você digita.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="ferias">
+        <h2 class="sec-title"><span class="num">8</span>Período aquisitivo de férias</h2>
+        <p>Esta tabela registra as férias que o servidor <strong>já tirou</strong> durante o vínculo — não as que ele ainda tem direito a receber (isso o sistema calcula sozinho a partir dos avos).</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Período aquisitivo</span></td><td>Um rótulo/identificação do período (ex.: "2025-2026"). É só para sua organização.</td></tr>
+            <tr><td><span class="campo">1º, 2º e 3º período de usufruto</span></td><td>As datas (início e fim) de até 3 períodos em que o servidor efetivamente tirou férias dentro daquele período aquisitivo.</td></tr>
+            <tr><td><span class="campo">Recebeu 1/3?</span></td><td>Marque esta caixa se, junto com o pagamento daquelas férias, o servidor também recebeu o adicional de 1/3.</td></tr>
+            <tr><td><span class="campo">Dias de férias usufruídos (total)</span></td><td>Soma de todos os dias de férias que o servidor tirou naquele período aquisitivo.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>De onde vem essa informação</strong>
+          Consulte a <strong>ficha de férias do servidor no SIGRH</strong> ou a <strong>portaria de concessão de férias</strong>, se houver. Se o servidor nunca tirou férias durante o contrato, deixe a tabela em branco — o sistema vai calcular tudo como "a receber".
+        </div>
+        <div class="box box-atencao">
+          <strong>Cuidado com a caixa "Recebeu 1/3?"</strong>
+          Marcar essa caixa errada pode fazer o sistema calcular um valor de 1/3 de férias diferente do real (pagando de novo algo que já foi pago, ou deixando de pagar algo que ainda é devido). Confirme com o contracheque daquele mês se o 1/3 realmente saiu junto com as férias antes de marcar.
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="faltas">
+        <h2 class="sec-title"><span class="num">9</span>Faltas e horas não trabalhadas</h2>
+        <p>Esta seção trata de valores que o servidor <strong>recebeu mas não trabalhou</strong> — e que, portanto, precisam ser devolvidos no acerto.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Horas não trabalhadas a devolver</span></td><td>Quantidade de horas que o servidor recebeu mas não trabalhou (fora do contexto de faltas de dia inteiro).</td><td>Registro de ponto/frequência com o RH.</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">Correção de INSS de faltas/repouso remunerado por competência</h3>
+        <p>Abaixo do campo de horas, há uma tabela onde você lança, <strong>mês a mês</strong>, os dias de falta e os dias de desconto de repouso remunerado (DSR) de cada competência. O sistema calcula sozinho, em cada linha, o valor da falta, o valor do repouso e a diferença de INSS a devolver naquele mês específico — e soma tudo automaticamente no resultado final.</p>
+        <ol class="passos">
+          <li>Escolha o <strong>mês/ano</strong> (competência) em que ocorreu a falta.</li>
+          <li>Informe os <strong>dias de falta</strong> e os <strong>dias de repouso remunerado</strong> descontados naquele mês.</li>
+          <li>As colunas de valor (falta, repouso e INSS) são calculadas sozinhas, em tempo real — você não digita nada nelas.</li>
+          <li>Use <strong>"+ ADICIONAR MÊS"</strong> para lançar mais competências, ou o botão <strong>✕</strong> ao final de uma linha para excluí-la.</li>
+        </ol>
+        <div class="box box-info">
+          <strong>De onde vem essa informação</strong>
+          Consulte o <strong>registro de frequência/ponto do servidor</strong> com o RH, mês a mês — cada falta ou desconto de repouso deve ser lançado na competência (mês) em que realmente ocorreu, não tudo somado num mês só.
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="resultado">
+        <h2 class="sec-title"><span class="num">10</span>O resultado do acerto — o que cada código significa</h2>
+        <p>Depois de calcular, uma tabela com vários códigos aparece. Esses códigos são os mesmos usados no SIGRH para identificar cada verba/desconto na folha de pagamento. Veja o que cada um representa:</p>
+        <table class="tbl">
+          <caption>Códigos que podem aparecer no resultado do acerto</caption>
+          <thead><tr><th>Código</th><th>Descrição</th><th>O que significa</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">20001 / 60001*</td><td>DIF./DEV. SALÁRIO CONTRATO TEMPORÁRIO</td><td>Diferença entre os dias já pagos e os dias de direito no mês do desligamento, sobre o salário.</td></tr>
+            <tr><td class="codigo">21119 / 61119*</td><td>DIF./DEV. ADICIONAL PERICULOSIDADE</td><td>Mesma ideia acima, mas sobre o valor da periculosidade.</td></tr>
+            <tr><td class="codigo">40910</td><td>SEGURIDADE SOCIAL</td><td>Desconto de INSS sobre a diferença de remuneração acima (só existe se houver diferença a receber).</td></tr>
+            <tr><td class="codigo">20892</td><td>DÉCIMO TERCEIRO SALÁRIO</td><td>Valor do 13º proporcional aos avos calculados para o ano do desligamento.</td></tr>
+            <tr><td class="codigo">40920</td><td>SEGURIDADE SOCIAL SOBRE 13º SALÁRIO</td><td>Desconto de INSS sobre o valor do 13º acima.</td></tr>
+            <tr><td class="codigo">20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td>Valor em dinheiro das férias já vencidas (período completo) que o servidor nunca tirou.</td></tr>
+            <tr><td class="codigo">20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td>O adicional de 1/3 sobre o valor acima.</td></tr>
+            <tr><td class="codigo">20872</td><td>FÉRIAS PROPORCIONAIS</td><td>Valor em dinheiro das férias do período ainda em andamento, que o servidor não chegou a tirar.</td></tr>
+            <tr><td class="codigo">20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td>O adicional de 1/3 sobre o valor acima.</td></tr>
+            <tr><td class="codigo">50001</td><td>DIF. FALTA(S) VENCIMENTO</td><td>Valor a devolver referente às faltas lançadas na seção 9.</td></tr>
+            <tr><td class="codigo">51261</td><td>DIF. DESCONTO REPOUSO</td><td>Valor a devolver referente ao repouso remunerado descontado.</td></tr>
+            <tr><td class="codigo">50004</td><td>DEV. HORAS NÃO TRABALHADAS</td><td>Valor a devolver das horas informadas na seção 9.</td></tr>
+            <tr><td class="codigo">30910</td><td>DIF. SEGURIDADE SOCIAL</td><td>Diferença de INSS a favor do servidor, decorrente das faltas/repouso/horas acima (o INSS já tinha sido descontado a mais em algum momento).</td></tr>
+            <tr><td class="codigo">60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td>Valor já recebido de adiantamento de 13º, descontado do acerto para não pagar duas vezes.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>* Sobre os códigos que mudam (2001/6001, 21119/61119…)</strong>
+          Alguns códigos podem começar com <strong>2</strong> ou com <strong>6</strong> dependendo do resultado daquela linha: começa com <strong>2</strong> quando é um valor a <strong>receber</strong> (diferença a favor do servidor) e com <strong>6</strong> quando é um valor a <strong>devolver</strong>. Não é erro o código "trocar" de um cálculo para outro — é assim que o sistema indica automaticamente a direção do valor.
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section id="sigrh">
+        <h2 class="sec-title"><span class="num">11</span>Aba 3 — Lançamento SIGRH v09</h2>
+        <p>Esta aba é uma <strong>cópia de trabalho separada</strong>, feita para te ajudar a preparar os números exatos que você vai digitar na versão 09 do SIGRH (o módulo de correção de folha de meses anteriores). Ela tem a mesma tabela de faltas/repouso por competência da aba 2, mas funciona <strong>de forma independente</strong>.</p>
+        <ol class="passos">
+          <li>Clique em <strong>"↺ COPIAR DA ABA ACERTO DE CONTAS"</strong> para trazer, de uma vez, tudo o que já foi lançado na aba "2. Acerto de Contas".</li>
+          <li>A partir daí, você pode <strong>editar livremente</strong> esta aba (ajustar dias, adicionar ou excluir meses) — nada disso muda os valores já calculados na aba "2. Acerto de Contas".</li>
+          <li>Use <strong>"+ ADICIONAR MÊS"</strong> e o botão <strong>✕</strong> do mesmo jeito que na aba 2.</li>
+          <li>Clique em <strong>"IMPRIMIR / SALVAR PDF (SÓ ESTA ABA)"</strong> para gerar um documento só com esta tabela e seus totais, pronto para consulta enquanto você lança no SIGRH.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Atenção ao clicar em "Copiar"</strong>
+          Esse botão <strong>sobrescreve</strong> o que já estiver preenchido nesta aba (o sistema pede confirmação antes). Se você já tiver feito ajustes manuais aqui que ainda não copiou para lugar nenhum, eles serão perdidos ao clicar em copiar de novo.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="acoes">
+        <h2 class="sec-title"><span class="num">12</span>Calcular, gerar relatório, imprimir e salvar</h2>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CALCULAR ACERTO DE CONTAS</strong></td><td>Recalcula tudo com base no que está preenchido até o momento e atualiza a tabela de resultados. Clique nele sempre que mudar algum campo.</td></tr>
+            <tr><td><strong>MOSTRAR/OCULTAR DETALHES DO CÁLCULO</strong></td><td>Exibe (ou esconde) um texto explicando, passo a passo, como cada valor foi calculado — útil para conferir contas ou explicar o resultado para alguém.</td></tr>
+            <tr><td><strong>GERAR RELATÓRIO COMPLETO</strong></td><td>Abre uma nova janela com um relatório em texto de todo o acerto, pronto para copiar ou salvar.</td></tr>
+            <tr><td><strong>IMPRIMIR / SALVAR PDF</strong></td><td>Abre o diálogo de impressão do navegador com um documento formatado do acerto — escolha "Salvar como PDF" na impressora, se quiser um arquivo.</td></tr>
+            <tr><td><strong>EXPORTAR DADOS</strong></td><td>Salva um arquivo com todos os dados preenchidos no módulo, para guardar ou compartilhar.</td></tr>
+            <tr><td><strong>LIMPAR DADOS</strong></td><td>Apaga tudo o que foi preenchido no módulo. Não tem como desfazer — use com cuidado.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 13 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">13</span>Exemplo completo, passo a passo</h2>
+        <p>Vamos usar um caso simples, com números redondos, para você comparar com o que está fazendo. Um brigadista foi <strong>admitido em 01/01/2026</strong> e <strong>exonerado em 15/07/2026</strong> — ou seja, trabalhou até o dia 15 de julho.</p>
+        <h3 class="sub-title">Campos preenchidos</h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td style="width:280px;">Admissão</td><td>01/01/2026</td></tr>
+            <tr><td>Desligamento/Exoneração</td><td>15/07/2026</td></tr>
+            <tr><td>Dias recebidos no mês do desligamento</td><td>15 (a folha já pagou exatamente os 15 dias trabalhados, sem diferença)</td></tr>
+            <tr><td>Remuneração — Salário (10001)</td><td>R$ 3.000,00</td></tr>
+            <tr><td>Remuneração — Periculosidade (11119)</td><td>R$ 300,00</td></tr>
+            <tr><td>Período aquisitivo de férias</td><td>Em branco (o servidor nunca tirou férias neste contrato)</td></tr>
+            <tr><td>Faltas / repouso / horas</td><td>Nenhuma</td></tr>
+          </tbody>
+        </table>
+        <p>Ao clicar em <strong>"CALCULAR AVOS"</strong>: de 01/01/2026 até 15/07/2026 são <strong>7 avos</strong> (6 meses completos de janeiro a junho, mais julho, que conta porque o servidor trabalhou 15 dias nele — a regra é que um mês só conta se tiver 15 dias ou mais trabalhados). Como são só 7 avos (menos que 12), tudo cai como <strong>férias proporcionais</strong> — não há férias vencidas. Os mesmos 7 avos valem para o 13º, já que o ano do desligamento é o mesmo da admissão.</p>
+        <p>Como a exoneração caiu em julho (depois de junho), o campo de <strong>adiantamento de 13º</strong> se preenche sozinho com R$ 1.650,00 (metade da remuneração total de R$ 3.300,00).</p>
+        <h3 class="sub-title">Resultado do acerto</h3>
+        <table class="tbl">
+          <thead><tr><th>Código</th><th>Descrição</th><th>Valor R$</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">20001</td><td>DIF. SALÁRIO CONTRATO TEMPORÁRIO</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">21119</td><td>DIF. ADICIONAL PERICULOSIDADE</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">40910</td><td>SEGURIDADE SOCIAL</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">20892</td><td>DÉCIMO TERCEIRO SALÁRIO</td><td class="valor">1.925,00</td></tr>
+            <tr><td class="codigo">40920</td><td>SEGURIDADE SOCIAL SOBRE 13º SALÁRIO</td><td class="valor">-148,93</td></tr>
+            <tr><td class="codigo">20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor">1.750,00</td></tr>
+            <tr><td class="codigo">20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor">583,33</td></tr>
+            <tr><td class="codigo">50001</td><td>DIF. FALTA(S) VENCIMENTO</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">51261</td><td>DIF. DESCONTO REPOUSO</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">50004</td><td>DEV. HORAS NÃO TRABALHADAS</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">30910</td><td>DIF. SEGURIDADE SOCIAL</td><td class="valor">0,00</td></tr>
+            <tr><td class="codigo">60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor">-1.650,00</td></tr>
+            <tr style="font-weight:700;background:#FBEAEA;"><td colspan="2">TOTAL DO ACERTO</td><td class="valor">2.459,40</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>Confira você mesmo</strong>
+          Some as colunas: 1.925,00 − 148,93 + 1.750,00 + 583,33 − 1.650,00 = <strong>2.459,40</strong>. Se, ao repetir estes mesmos valores no seu módulo, o total bater com isso, é sinal de que você entendeu o preenchimento corretamente.
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section id="duvidas">
+        <h2 class="sec-title"><span class="num">14</span>Erros comuns e perguntas frequentes</h2>
+
+        <div class="box box-info">
+          <strong>Não consigo clicar na aba "2. Acerto de Contas"</strong>
+          Volte para a aba "1. Dados Pessoais" e confira se <strong>Nome</strong> e <strong>Matrícula</strong> estão preenchidos — são os dois únicos campos obrigatórios para avançar.
+        </div>
+
+        <div class="box box-info">
+          <strong>Cliquei em "Calcular Avos" e os números apareceram zerados</strong>
+          Confira se as datas de <strong>Admissão</strong> e <strong>Desligamento/Exoneração</strong> estão preenchidas e se a exoneração é <strong>posterior</strong> à admissão. Se a exoneração vier antes da admissão (data errada), o cálculo não é feito.
+        </div>
+
+        <div class="box box-info">
+          <strong>Um valor apareceu 0,00 — isso é normal?</strong>
+          Sim, na maioria das vezes. Por exemplo: "Férias Indenizadas (Vencidas)" fica em 0,00 sempre que o servidor não completou nenhum período de 12 avos; "1/3 de Férias Proporcionais" pode zerar se o servidor já recebeu esse valor durante o gozo das férias (caixa "Recebeu 1/3?" marcada). Zero não é, por si só, sinal de erro.
+        </div>
+
+        <div class="box box-atencao">
+          <strong>Esqueci de marcar (ou marquei errado) a caixa "Recebeu 1/3?"</strong>
+          Isso muda o valor calculado do 1/3 de férias — pode fazer o sistema pagar de novo algo que já foi pago, ou deixar de pagar algo ainda devido. Confira o contracheque do mês em que as férias foram usufruídas antes de marcar essa caixa, e corrija se necessário (depois é só clicar em "Calcular Acerto de Contas" novamente).
+        </div>
+
+        <div class="box box-info">
+          <strong>O campo "Adiantamento de 13º" veio preenchido sozinho, sem eu digitar nada</strong>
+          É esperado: se a data de desligamento é depois de junho, o sistema sugere automaticamente 6/12 avos da remuneração como valor de adiantamento. Se o valor real recebido pelo servidor foi diferente, apague e digite o valor correto.
+        </div>
+
+        <div class="box box-atencao">
+          <strong>Cliquei em "Copiar da aba Acerto de Contas" (aba 3) e perdi o que tinha lá</strong>
+          Esse é o comportamento esperado do botão — ele sobrescreve os dados da aba 3 com os da aba 2 (por isso pede confirmação antes). Se isso aconteceu sem querer, será preciso relançar os dados manualmente na aba 3.
+        </div>
+
+        <div class="box box-info">
+          <strong>Os valores de férias parecem mais baixos do que eu esperava</strong>
+          Confira se você não está comparando com a remuneração total — lembre-se de que o <strong>Adicional de Periculosidade não entra</strong> na base de cálculo das férias e do 1/3 (veja a seção "Remuneração"). Isso é regra do sistema, não erro.
+        </div>
+
+        <div class="box box-info">
+          <strong>Apareceu um código começando com 6 em vez de 2 (ex.: 60001 em vez de 20001)</strong>
+          Normal — indica que aquele item virou uma <strong>devolução</strong> (valor a favor do governo) em vez de uma <strong>diferença a receber</strong> (valor a favor do servidor), por causa do sinal do resultado daquele cálculo específico.
+        </div>
+      </section>
+
+      <!-- 15 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">15</span>Checklist antes de salvar</h2>
+        <p>Antes de considerar o acerto pronto para seguir no processo, confira:</p>
+        <ul class="checklist">
+          <li>Nome e matrícula preenchidos corretamente (e o Processo SEI, se já existir um número).</li>
+          <li>Datas de admissão e exoneração conferidas com a portaria oficial.</li>
+          <li>Dias recebidos no mês do desligamento conferidos no contracheque, não "chutados".</li>
+          <li>Valores de salário e periculosidade conferidos no contrato/última folha.</li>
+          <li>Se houve algum mês com menos de 15 dias trabalhados por afastamento no meio do contrato, os campos de "meses sem direito a avo" foram preenchidos.</li>
+          <li>Períodos de férias já usufruídos lançados corretamente, com a caixa "Recebeu 1/3?" conferida contra o contracheque.</li>
+          <li>Faltas e repouso remunerado lançados por competência (mês a mês), não somados todos de uma vez.</li>
+          <li>Clicou em "Calcular Acerto de Contas" depois da última alteração feita.</li>
+          <li>O total final foi conferido — nenhum valor parece absurdamente alto ou baixo para a situação do servidor.</li>
+          <li>Relatório gerado e/ou impressão feita, para anexar ao processo SEI.</li>
+        </ul>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Sistema de Acerto de Brigadistas (Temporário — Grupo 54) · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>
