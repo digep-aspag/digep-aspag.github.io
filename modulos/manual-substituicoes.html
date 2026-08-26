@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Substituições</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --sub:#2F6FA5; --sub-claro:#EAF1F9; --sub-borda:#BFD4EA;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--sub); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--sub); margin:0 0 1.6rem; }
+
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--sub); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--sub); text-decoration:underline; }
+
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--sub);
+    border-bottom:2px solid var(--sub-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--sub); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--sub-claro); color:var(--sub); border:1px solid var(--sub-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--sub-claro); color:#123B5E; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+
+  dl.glossario{ margin:0; }
+  dl.glossario dt{ font-weight:600; color:var(--sub); margin-top:.9rem; font-size:.95rem; }
+  dl.glossario dt:first-child{ margin-top:0; }
+  dl.glossario dd{ margin:.15rem 0 0; font-size:.9rem; color:var(--ink); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0; padding:0; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; padding:.55rem .2rem; border-bottom:1px dashed var(--line); font-size:.93rem;
+  }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist .caixa{
+    flex-shrink:0; width:1.15rem; height:1.15rem; border:2px solid var(--sub); border-radius:4px; margin-top:.1rem;
+  }
+
+  .faq details{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:.7rem 1rem; margin-bottom:.6rem; }
+  .faq summary{ font-weight:600; cursor:pointer; font-size:.93rem; color:var(--ink); }
+  .faq summary::marker{ color:var(--sub); }
+  .faq details[open] summary{ margin-bottom:.5rem; }
+  .faq p{ margin:.3rem 0 0; font-size:.9rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--sub); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+    .faq details{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="substituicoes.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Substituições</div>
+      <div class="page-sub">Guia passo a passo para lançar substituições de cargo comissionado e calcular o 13º, as férias e o 1/3 proporcionais devidos — escrito para quem está usando o sistema pela primeira vez e não trabalha com essa terminologia no dia a dia.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#o-que-e">O que é uma "substituição"?</a></li>
+          <li><a href="#glossario">Glossário de termos usados no módulo</a></li>
+          <li><a href="#visao-geral">Visão geral do módulo</a></li>
+          <li><a href="#base-servidores">Base de servidores (preenchimento automático)</a></li>
+          <li><a href="#tabela-cargos">Tabela de valores de cargos</a></li>
+          <li><a href="#lancando">Lançando uma substituição</a></li>
+          <li><a href="#fator">Entendendo o Fator (CV, SV, SVV)</a></li>
+          <li><a href="#valores-calculados">Os valores calculados pela linha</a></li>
+          <li><a href="#publicacao">Publicação (DODF) e ações da linha</a></li>
+          <li><a href="#filtro-busca">Filtrar por mês de pagamento e buscar lançamentos</a></li>
+          <li><a href="#excel">Exportar para Excel</a></li>
+          <li><a href="#arquivamento">Arquivar lançamentos antigos</a></li>
+          <li><a href="#exemplo">Exemplo completo, do início ao fim</a></li>
+          <li><a href="#faq">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist final antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="o-que-e">
+        <h2 class="sec-title"><span class="num">1</span>O que é uma "substituição"?</h2>
+        <p>Quando o servidor que ocupa um <strong>cargo comissionado</strong> (um cargo de chefia ou direção) precisa se afastar temporariamente — por férias, licença médica, ou qualquer outro afastamento legal — alguém precisa responder por aquele cargo enquanto ele estiver fora. Esse alguém é o <strong>substituto</strong>.</p>
+        <p>Por assumir as responsabilidades do cargo temporariamente, o substituto tem direito a receber a <strong>diferença</strong> entre o que ele ganha no cargo dele e o que o titular (o "substituído") ganharia no cargo mais alto — proporcional aos dias em que durou a substituição. Além disso, se a substituição se estender por tempo suficiente, o substituto também acumula direito a uma <strong>parte do 13º salário</strong> e das <strong>férias</strong> (e seu adicional de 1/3) referentes a esse período extra de responsabilidade.</p>
+        <p>É exatamente isso que este módulo calcula: você informa quem substituiu quem, em qual cargo, e durante qual período — e o sistema calcula sozinho quanto o substituto tem direito a receber por aquela substituição.</p>
+        <div class="box box-info">
+          <strong>Quando esse lançamento é feito</strong>
+          Normalmente depois que a substituição já aconteceu e foi formalizada (publicada no Diário Oficial do DF — o "DODF"). O lançamento neste módulo serve para calcular o valor devido e, quando chegar a hora de fechar a folha, extrair os valores de 13º, férias e 1/3 para o pagamento.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário de termos usados no módulo</h2>
+        <p>Antes de entrar nos campos da tela, vale conhecer alguns termos que vão aparecer. Você pode voltar a esta seção a qualquer momento.</p>
+        <dl class="glossario">
+          <dt>Cargo comissionado</dt>
+          <dd>Cargo de chefia ou direção ocupado por indicação (não por concurso), que pode ser exonerado a qualquer momento — diferente de um cargo efetivo. Tem símbolos próprios, como <span class="campo">CNE-07</span>, <span class="campo">CC-04</span>, <span class="campo">CPE-08</span>, entre outros.</dd>
+
+          <dt>Substituto</dt>
+          <dd>Quem assume o cargo temporariamente enquanto o titular está afastado. É quem recebe o valor calculado por este módulo.</dd>
+
+          <dt>Substituído</dt>
+          <dd>O titular do cargo, que está afastado e sendo substituído.</dd>
+
+          <dt>Vencimento</dt>
+          <dd>Uma das duas partes do valor de um cargo comissionado — normalmente um valor fixo por símbolo de cargo. Alguns cargos (os que começam com "CPE" ou "CPC") não têm vencimento, só representação.</dd>
+
+          <dt>Representação</dt>
+          <dd>A outra parte do valor do cargo — geralmente a parcela mais alta, usada como base principal no cálculo da diferença da substituição.</dd>
+
+          <dt>Fator (CV, SV, SVV)</dt>
+          <dd>Indica se o substituto e o substituído têm vínculo efetivo com o serviço público (são concursados) ou não, porque isso muda a fórmula usada para calcular a diferença. Veja a seção <a href="#fator">Entendendo o Fator</a> para o detalhe completo.</dd>
+
+          <dt>Avos</dt>
+          <dd>A "fração" de direito ao 13º e às férias, acumulada mês a mês durante a substituição. Cada mês em que a substituição durou 15 dias ou mais conta como 1 avo (até no máximo 12).</dd>
+
+          <dt>1/3 de férias (terço constitucional)</dt>
+          <dd>Um adicional de um terço do valor das férias que todo trabalhador tem direito a receber — aqui, calculado sobre a parte proporcional de férias que o substituto acumulou durante a substituição.</dd>
+
+          <dt>Mês comercial</dt>
+          <dd>Para calcular o valor proporcional aos dias da substituição, o sistema sempre considera o mês como tendo 30 dias — mesmo que o mês real tenha 28, 29 ou 31. É a forma padrão de calcular na folha de pagamento.</dd>
+
+          <dt>DODF</dt>
+          <dd>Diário Oficial do Distrito Federal — onde a substituição precisa ser formalmente publicada. O módulo tem campos para anotar o número e a data dessa publicação.</dd>
+
+          <dt>Matrícula</dt>
+          <dd>Número que identifica o servidor no sistema de folha de pagamento (SIGRH). Junto com o nome, é o que o sistema usa para reconhecer automaticamente os dados de cada servidor.</dd>
+
+          <dt>Mês de pagamento (para o filtro)</dt>
+          <dd>O mês em que a substituição de fato gerou direito a 13º/férias (contando pela data de <strong>fim</strong> da substituição) — usado para separar, na hora de fechar a folha, quais lançamentos entram no pagamento daquele mês.</dd>
+
+          <dt>Arquivamento</dt>
+          <dd>Ação de mover um grupo de lançamentos já fechados para fora da tabela principal, para manter a tela rápida e organizada — sem apagar os dados, que continuam disponíveis para consulta.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">3</span>Visão geral do módulo</h2>
+        <p>A tela deste módulo tem, de cima para baixo:</p>
+        <ul>
+          <li><strong>Base de servidores</strong> — um painel recolhido, com a lista de nomes/matrículas usada para preencher os campos automaticamente.</li>
+          <li><strong>Tabela de valores de cargos</strong> — outro painel recolhido, com o valor de vencimento e representação de cada símbolo de cargo comissionado.</li>
+          <li><strong>Substituições lançadas</strong> — a tabela principal, onde você lança cada substituição em uma linha.</li>
+          <li><strong>Lançamentos arquivados</strong> — um painel recolhido, com os lotes de lançamentos já fechados anteriormente.</li>
+        </ul>
+        <div class="box box-dica">
+          <strong>Não precisa mexer nos painéis recolhidos no dia a dia</strong>
+          "Base de servidores" e "Tabela de valores de cargos" já vêm carregados. Você só precisa abri-los quando for atualizar essas listas (veja as seções 4 e 5) — para lançar uma substituição normal, vá direto para a tabela principal.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="base-servidores">
+        <h2 class="sec-title"><span class="num">4</span>Base de servidores (preenchimento automático)</h2>
+        <p>Ao digitar o <strong>nome</strong> ou a <strong>matrícula</strong> do substituto ou do substituído numa linha, o sistema procura essa pessoa numa lista interna e, se encontrar, preenche sozinho o restante: nome/matrícula, cargo, vencimento e representação.</p>
+        <p>Essa lista interna é formada juntando duas fontes, dentro do painel "Base de servidores":</p>
+        <ol class="passos">
+          <li><strong>Lista completa de servidores</strong> — todos os servidores, com ou sem cargo comissionado. Define quem existe e aparece nas sugestões de nome/matrícula.</li>
+          <li><strong>Lista de comissionados</strong> — só quem ocupa cargo comissionado no momento, com os valores de vencimento e representação de cada um.</li>
+        </ol>
+        <p>Quem está na lista completa mas não tem cargo comissionado continua aparecendo nas sugestões — só que com cargo e valores em branco, para você preencher manualmente se for o caso.</p>
+        <table class="tbl">
+          <thead><tr><th>Onde encontrar cada lista</th><th>Como atualizar</th></tr></thead>
+          <tbody>
+            <tr><td>A lista completa de servidores normalmente vem de um relatório do SIGRH ou de uma planilha de Excel com todos os servidores do órgão.</td><td>Copie as colunas do Excel (nome, matrícula, CPF, situação, cargo efetivo, nível, data, lotação) e cole na caixa "1. Lista completa de servidores", dentro do painel.</td></tr>
+            <tr><td>A lista de comissionados vem do relatório "ocupante por órgão", emitido pelo setor de gestão de pessoas.</td><td>Copie o texto desse relatório e cole na caixa "2. Lista de comissionados", dentro do painel.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>Não sabe onde conseguir esses relatórios?</strong>
+          Peça ao setor de gestão de pessoas (DIGEP) ou ao SIGRH do seu órgão. Se você não atualizar essas listas, o preenchimento automático simplesmente não vai reconhecer servidores novos — mas você sempre pode preencher os campos manualmente, mesmo sem isso.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="tabela-cargos">
+        <h2 class="sec-title"><span class="num">5</span>Tabela de valores de cargos</h2>
+        <p>Este painel guarda o valor de vencimento e representação de cada símbolo de cargo comissionado (ex.: <span class="campo">CNE-07</span>, <span class="campo">CC-04</span>). É o que alimenta o preenchimento automático quando você escolhe um cargo numa linha (mesmo sem reconhecer o nome do servidor).</p>
+        <p>Se algum valor estiver desatualizado (por exemplo, depois de um reajuste), abra "Atualizar a tabela (colar do PDF oficial de valores)", copie o texto das tabelas do documento oficial da Subsecretaria de Gestão de Pessoas e cole ali — o sistema reconhece os símbolos e valores sozinho e substitui a tabela inteira.</p>
+        <div class="box box-atencao">
+          <strong>Isso substitui a tabela inteira</strong>
+          Diferente da base de servidores (que soma as informações), atualizar a tabela de cargos <strong>troca todos os valores de uma vez</strong> — faz sentido, já que representa a tabela oficial vigente. Confira a lista de confirmação que aparece depois de processar, antes de continuar.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="lancando">
+        <h2 class="sec-title"><span class="num">6</span>Lançando uma substituição</h2>
+        <p>Cada linha da tabela principal representa uma substituição. Clique em <strong>"+ Adicionar linha"</strong> para começar uma nova.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Matrícula</span> e <span class="campo">Nome</span> (Substituto)</td><td>Identifica quem assumiu o cargo temporariamente. Digite o nome ou a matrícula — o outro campo, o cargo e os valores preenchem sozinhos, se a pessoa estiver na base de servidores.</td><td>Contracheque do servidor, SIGRH, ou pergunte ao setor de gestão de pessoas.</td></tr>
+            <tr><td><span class="campo">Matrícula</span> e <span class="campo">Nome</span> (Substituído)</td><td>Identifica o titular do cargo, que está afastado. Mesmo funcionamento do campo acima.</td><td>Ato de nomeação do titular, SIGRH, ou o próprio ato de afastamento (férias, licença) publicado no DODF.</td></tr>
+            <tr><td><span class="campo">Cargo</span> (dos dois lados)</td><td>O símbolo do cargo comissionado de cada um. Preenche sozinho junto com o nome/matrícula; você também pode digitar/trocar manualmente.</td><td>Ato de nomeação (Diário Oficial) ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Vencimento</span> e <span class="campo">Representação</span> (dos dois lados)</td><td>Os dois valores que compõem a remuneração daquele cargo. Preenchem sozinhos ao escolher o cargo, mas continuam editáveis — use isso se precisar corrigir um valor específico.</td><td>Tabela de valores de cargos (painel acima) ou o documento oficial da Subsecretaria de Gestão de Pessoas.</td></tr>
+            <tr><td><span class="campo">Início</span> e <span class="campo">Fim</span></td><td>As datas de início e fim do período em que durou a substituição.</td><td>Ato de designação da substituição, publicado no DODF.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>A pessoa não aparece na lista de sugestões?</strong>
+          Preencha os campos manualmente mesmo assim — o cálculo funciona normalmente. Se for alguém que deveria estar cadastrado, peça para atualizar a "Base de servidores" (seção 4).
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="fator">
+        <h2 class="sec-title"><span class="num">7</span>Entendendo o Fator (CV, SV, SVV)</h2>
+        <p>O <strong>Fator</strong> muda a forma como o sistema calcula a diferença a pagar, dependendo se o substituto e o substituído têm ou não vínculo efetivo com o serviço público (são concursados, com um cargo permanente além do comissionado).</p>
+        <table class="tbl">
+          <thead><tr><th>Fator</th><th>Quando se aplica</th><th>O que muda no cálculo, em termos simples</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">CV</span></td><td>Situação mais comum — usada sempre que o substituto <strong>tem</strong> vínculo efetivo (é concursado).</td><td>A diferença é calculada só pela representação: quanto o cargo do substituído vale a mais do que o cargo do substituto.</td></tr>
+            <tr><td><span class="campo">SV</span></td><td>O substituto <strong>não tem</strong> vínculo efetivo, mas o substituído tem.</td><td>Além da representação, o vencimento do substituto também entra na conta, sendo descontado — porque quem não tem vínculo efetivo já recebe esse vencimento de outra forma.</td></tr>
+            <tr><td><span class="campo">SVV</span></td><td><strong>Nenhum</strong> dos dois (nem substituto, nem substituído) tem vínculo efetivo.</td><td>A conta passa a considerar o valor total (vencimento + representação) dos dois cargos, não só a representação.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>Na maioria das vezes você não precisa escolher isso manualmente</strong>
+          Ao digitar o nome ou a matrícula do substituto e do substituído, o sistema já sabe (pela base de servidores) se cada um tem vínculo efetivo ou não, e escolhe o Fator sozinho. Você só precisa mexer manualmente se souber que a informação automática está errada, ou se a pessoa não estiver cadastrada na base (nesse caso, o sistema não arrisca escolher errado e deixa como estava).
+        </div>
+        <div class="box box-dica">
+          <strong>Não sabe se alguém tem vínculo efetivo ou não?</strong>
+          Pergunte ao setor de gestão de pessoas, ou confira no SIGRH se a pessoa tem um cargo efetivo além do comissionado. Na dúvida, é mais seguro perguntar do que adivinhar — isso muda o valor final calculado.
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section id="valores-calculados">
+        <h2 class="sec-title"><span class="num">8</span>Os valores calculados pela linha</h2>
+        <p>Depois de preencher os campos acima, as colunas seguintes preenchem sozinhas, sem precisar clicar em nenhum botão de calcular:</p>
+        <table class="tbl">
+          <thead><tr><th>Coluna</th><th>O que significa, na prática</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Dias</strong></td><td>Quantos dias durou a substituição, contando do início ao fim.</td></tr>
+            <tr><td><strong>Avos</strong></td><td>Quantos "meses cheios" (com 15 dias ou mais de substituição naquele mês) a substituição acumulou — é o que define a fração de 13º e férias devida.</td></tr>
+            <tr><td><strong>Diferença</strong></td><td>Quanto o cargo do substituído vale a mais do que o cargo do substituto, seguindo a fórmula do Fator escolhido (veja a seção 7). É o valor-base de todos os cálculos seguintes.</td></tr>
+            <tr><td><strong>Valor a receber</strong></td><td>O valor que o substituto efetivamente recebe pelo período da substituição — a Diferença, proporcional aos dias (considerando o mês como tendo 30 dias).</td></tr>
+            <tr><td><strong>13º proporcional (20607)</strong></td><td>A parte do 13º salário que o substituto acumulou por ter ficado no cargo mais alto durante a substituição.</td></tr>
+            <tr><td><strong>Férias proporcionais (21480)</strong></td><td>A mesma lógica do 13º, mas referente às férias.</td></tr>
+            <tr><td><strong>1/3 de férias (21485)</strong></td><td>O adicional de um terço sobre as férias proporcionais calculadas acima.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>Apareceu um aviso "Diferença negativa"</strong>
+          Isso acontece quando o cargo do substituto vale mais do que o cargo do substituído — normalmente sinal de que algum cargo ou valor foi preenchido errado. Confira os dois cargos e os valores de vencimento/representação antes de prosseguir. Veja também a seção <a href="#faq">Erros comuns</a>.
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="publicacao">
+        <h2 class="sec-title"><span class="num">9</span>Publicação (DODF) e ações da linha</h2>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Nº do DODF</span></td><td>O número da edição do Diário Oficial em que a substituição foi publicada.</td><td>Diário Oficial do DF (pesquisa por data ou pelo nome do servidor).</td></tr>
+            <tr><td><span class="campo">Data de publicação</span></td><td>A data daquela edição do DODF.</td><td>Mesma fonte acima.</td></tr>
+            <tr><td><span class="campo">Nº do processo</span></td><td>O número do processo SEI onde essa substituição está formalizada, se houver.</td><td>Sistema SEI-GDF, ou pergunte ao seu setor.</td></tr>
+          </tbody>
+        </table>
+        <p>Nenhum desses três campos é obrigatório para o cálculo funcionar — servem como referência para consulta futura.</p>
+        <h3 class="sub-title">Botões no final da linha</h3>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td>🖨️ (imprimir)</td><td>Gera um termo de substituição, com todos os dados daquela linha, pronto para impressão em uma única página.</td></tr>
+            <tr><td>✕ (excluir)</td><td>Apaga aquela linha específica. Pede confirmação antes.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 10 -->
+      <section id="filtro-busca">
+        <h2 class="sec-title"><span class="num">10</span>Filtrar por mês de pagamento e buscar lançamentos</h2>
+        <p>Na barra acima da tabela, dois recursos ajudam a encontrar e organizar os lançamentos:</p>
+        <h3 class="sub-title">Filtrar p/ pagamento</h3>
+        <p>Escolha um mês/ano nesse campo para ver <strong>só</strong> as substituições que terminaram naquele mês <strong>e</strong> que realmente acumularam avos (ou seja, que têm 13º/férias a pagar naquele fechamento). O rodapé da tabela passa a mostrar os totais só daquele lote — já separados em 13º, férias e 1/3 — prontos para o pagamento. Clique em "✕ Limpar" para voltar a ver tudo.</p>
+        <h3 class="sub-title">Caixa de busca</h3>
+        <p>Digite qualquer parte de um nome, matrícula, cargo, número do DODF ou do processo para encontrar rapidamente uma linha específica, mesmo com a tabela cheia. Funciona junto com o filtro de mês — se os dois estiverem ativos, só aparece quem bate nos dois ao mesmo tempo.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="excel">
+        <h2 class="sec-title"><span class="num">11</span>Exportar para Excel</h2>
+        <p>O botão <strong>"📊 Exportar Excel"</strong> baixa uma planilha com todas as substituições visíveis na tela no momento — ou seja, já considerando qualquer filtro de mês ou busca que estiver ativo. A planilha sai pronta para impressão em página deitada (paisagem), com os valores já formatados em reais.</p>
+        <div class="box box-dica">
+          <strong>Quer exportar só o lote de um mês específico?</strong>
+          Aplique o filtro "Filtrar p/ pagamento" (seção 10) antes de clicar em exportar — a planilha vai trazer só aquelas linhas.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="arquivamento">
+        <h2 class="sec-title"><span class="num">12</span>Arquivar lançamentos antigos</h2>
+        <p>Com o tempo, a tabela principal acumula muitos lançamentos e pode ficar lenta para navegar. O botão <strong>"📦 Arquivar lote atual"</strong> resolve isso: move tudo o que está na tabela para um pacote separado, identificado pela data e hora do arquivamento, e a tabela principal volta a ficar vazia, pronta para os próximos lançamentos.</p>
+        <p>Os pacotes arquivados ficam listados no painel <strong>"Lançamentos arquivados"</strong>, cada um com três ações:</p>
+        <table class="tbl">
+          <thead><tr><th>Ação</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td>👁️ Abrir</td><td>Mostra os lançamentos daquele pacote, só para consulta (não é possível editar ali).</td></tr>
+            <tr><td>↩️ Restaurar para ativos</td><td>Traz aquelas linhas de volta para a tabela principal, somando com o que já estiver lá. O pacote arquivado continua existindo — nada é perdido.</td></tr>
+            <tr><td>🗑️ Excluir</td><td>Apaga o conteúdo daquele pacote definitivamente. Pede confirmação duas vezes, porque, diferente de "Restaurar", <strong>não tem como desfazer</strong>.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>Antes de excluir um pacote, exporte para Excel</strong>
+          Use o botão "📊 Exportar Excel" de dentro do pacote aberto para guardar uma cópia, caso precise consultar esses dados no futuro — a exclusão é definitiva.
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">13</span>Exemplo completo, do início ao fim</h2>
+        <p>Vamos lançar um caso fictício simples: um substituto (com vínculo efetivo) que assumiu o cargo de um titular durante um mês inteiro. Os valores de cargo abaixo são fictícios e redondos, só para facilitar a conferência — não use estes números num lançamento real.</p>
+        <div class="card-mock">
+          <div class="rot">Fator</div>
+          <strong>CV</strong> <em>(preenchido sozinho, porque o substituto tem vínculo efetivo)</em>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Substituto</div>
+          Matrícula: <strong>11111111</strong> &nbsp;·&nbsp; Nome: <strong>CARLOS ALBERTO SOUZA</strong><br>
+          Cargo: <strong>CC-04</strong> (fictício) &nbsp;·&nbsp; Vencimento: <strong>R$ 0,00</strong> &nbsp;·&nbsp; Representação: <strong>R$ 1.000,00</strong>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Substituído</div>
+          Matrícula: <strong>22222222</strong> &nbsp;·&nbsp; Nome: <strong>MARIA JOSÉ LIMA</strong><br>
+          Cargo: <strong>CNE-05</strong> (fictício) &nbsp;·&nbsp; Vencimento: <strong>R$ 0,00</strong> &nbsp;·&nbsp; Representação: <strong>R$ 3.000,00</strong>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Período</div>
+          Início: <strong>01/03/2026</strong> &nbsp;·&nbsp; Fim: <strong>30/03/2026</strong> <em>(mês inteiro, 30 dias)</em>
+        </div>
+        <p>Assim que você preenche o período, os valores da linha aparecem sozinhos:</p>
+        <table class="tbl">
+          <thead><tr><th>Coluna</th><th>Resultado</th><th>Por quê</th></tr></thead>
+          <tbody>
+            <tr><td>Dias</td><td>30</td><td>De 01/03 a 30/03.</td></tr>
+            <tr><td>Avos</td><td>1</td><td>Março inteiro dentro do período, com 30 dias (≥ 15) — conta como 1 mês cheio.</td></tr>
+            <tr><td>Diferença</td><td>R$ 2.000,00</td><td>Representação do substituído (R$ 3.000) menos representação do substituto (R$ 1.000) — regra do Fator CV.</td></tr>
+            <tr><td>Valor a receber</td><td>R$ 2.000,00</td><td>Diferença × (30 dias ÷ 30) = R$ 2.000 × 1.</td></tr>
+            <tr><td>13º proporcional (20607)</td><td>R$ 166,67</td><td>(R$ 2.000 ÷ 12) × 1 avo.</td></tr>
+            <tr><td>Férias proporcionais (21480)</td><td>R$ 166,67</td><td>Mesma fórmula do 13º.</td></tr>
+            <tr><td>1/3 de férias (21485)</td><td>R$ 55,56</td><td>R$ 166,67 ÷ 3.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>Use este exemplo como referência</strong>
+          Se você preencher os mesmos números fictícios acima num lançamento de teste, deve chegar exatamente nesses valores. Se não bater, revise os campos com calma antes de seguir para um caso real.
+        </div>
+        <p>Para fechar o lançamento, você ainda preencheria o <strong>Nº do DODF</strong> e a <strong>Data de publicação</strong> com os dados reais da publicação dessa substituição, e o <strong>Nº do processo</strong> SEI, se houver.</p>
+      </section>
+
+      <!-- 14 -->
+      <section id="faq" class="faq">
+        <h2 class="sec-title"><span class="num">14</span>Erros comuns e perguntas frequentes</h2>
+
+        <details>
+          <summary>O Fator mudou sozinho quando digitei o substituto — isso está certo?</summary>
+          <p>Sim, é esperado. O sistema verifica, na base de servidores, se o substituto (e o substituído) têm vínculo efetivo, e ajusta o Fator automaticamente (veja a seção <a href="#fator">Entendendo o Fator</a>). Se você souber que essa informação está errada para um caso específico, pode trocar manualmente no seletor da linha.</p>
+        </details>
+
+        <details>
+          <summary>Não sei se o substituto tem vínculo efetivo ou não — o que faço?</summary>
+          <p>Se a pessoa estiver cadastrada corretamente na "Base de servidores", o sistema já identifica isso sozinho. Se não estiver, ou se você tiver dúvida, confirme com o setor de gestão de pessoas antes de escolher o Fator manualmente — isso muda o valor final calculado.</p>
+        </details>
+
+        <details>
+          <summary>A "Diferença" apareceu negativa (aviso vermelho) — é erro?</summary>
+          <p>Não necessariamente um erro do sistema, mas quase sempre um sinal de que algo foi preenchido errado — normalmente o cargo do substituto valendo mais do que o cargo do substituído, o que não faz sentido numa substituição típica. Confira os cargos e os valores de vencimento/representação dos dois lados.</p>
+        </details>
+
+        <details>
+          <summary>Os "Avos" apareceram 0 mesmo com as datas preenchidas — é normal?</summary>
+          <p>Sim, se a substituição durou poucos dias. A regra é: cada mês do calendário precisa ter 15 dias ou mais de substituição para contar como 1 avo. Uma substituição de, por exemplo, 10 dias corridos não acumula nenhum avo — o substituto ainda recebe o "Valor a receber" proporcional aos dias, mas não gera 13º/férias.</p>
+        </details>
+
+        <details>
+          <summary>Uma substituição não aparece quando eu uso o "Filtrar p/ pagamento" — por quê?</summary>
+          <p>Esse filtro só mostra linhas que (1) terminam no mês escolhido <strong>e</strong> (2) têm avos maior que zero. Se a substituição terminou em outro mês, ou não acumulou nenhum avo, ela fica de fora do filtro — mas continua existindo normalmente na tabela, é só limpar o filtro para vê-la de novo.</p>
+        </details>
+
+        <details>
+          <summary>Preenchi o nome, mas a matrícula e o cargo não vieram sozinhos</summary>
+          <p>Provavelmente essa pessoa ainda não está cadastrada na "Base de servidores" (nem na lista completa, nem na de comissionados). Preencha os campos manualmente — o cálculo funciona normalmente de qualquer jeito. Se quiser que passe a preencher sozinho nas próximas vezes, peça para atualizar aquelas listas (seção 4).</p>
+        </details>
+
+        <details>
+          <summary>Arquivei um lote por engano — como desfazer?</summary>
+          <p>Abra o painel "Lançamentos arquivados", encontre o pacote que acabou de criar (vai aparecer no topo, com a data/hora de agora) e clique em "↩️ Restaurar para ativos" — as linhas voltam para a tabela principal.</p>
+        </details>
+
+        <details>
+          <summary>Excluí um pacote arquivado por engano</summary>
+          <p>Diferente do arquivamento, excluir um pacote <strong>não tem como desfazer</strong>. Se você tinha exportado aquele pacote para Excel antes de excluir, ainda tem os dados nessa planilha — caso contrário, infelizmente os dados foram perdidos.</p>
+        </details>
+      </section>
+
+      <!-- 15 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">15</span>Checklist final antes de salvar</h2>
+        <p>Antes de considerar um lançamento pronto, confira rapidamente:</p>
+        <ul class="checklist">
+          <li><span class="caixa"></span> Nome, matrícula e cargo do substituto e do substituído preenchidos e conferidos</li>
+          <li><span class="caixa"></span> Vencimento e representação corretos dos dois lados (especialmente se algum foi digitado manualmente)</li>
+          <li><span class="caixa"></span> Fator (CV/SV/SVV) confere com a realidade dos dois servidores</li>
+          <li><span class="caixa"></span> Datas de início e fim do período corretas</li>
+          <li><span class="caixa"></span> Nenhum aviso de "Diferença negativa" inesperado</li>
+          <li><span class="caixa"></span> Nº do DODF e data de publicação preenchidos, se a substituição já foi publicada</li>
+          <li><span class="caixa"></span> Nº do processo SEI preenchido, se houver</li>
+          <li><span class="caixa"></span> Conferiu os valores de 13º, férias e 1/3 antes de considerar pronto para pagamento</li>
+        </ul>
+        <div class="box box-dica">
+          <strong>Ficou com alguma dúvida no meio do caminho?</strong>
+          Volte à seção <a href="#faq">Erros comuns e perguntas frequentes</a> ou ao <a href="#glossario">Glossário</a> no início deste manual.
+        </div>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Sistema de Acerto — Substituições · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>
