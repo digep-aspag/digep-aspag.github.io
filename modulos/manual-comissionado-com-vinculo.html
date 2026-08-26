@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Comissionado com Vínculo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --cv:#556B2F; --cv-claro:#EEF2E2; --cv-borda:#B9CB94;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--cv); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--cv); margin:0 0 1.6rem; }
+
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--cv); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--cv); text-decoration:underline; }
+
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--cv);
+    border-bottom:2px solid var(--cv-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--cv); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--cv-claro); color:var(--cv); border:1px solid var(--cv-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box strong{ display:block; margin-bottom:.2rem; }
+
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--cv-claro); color:#3C4D22; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+
+  dl.glossario{ margin:0; }
+  dl.glossario dt{ font-weight:600; color:var(--cv); margin-top:.9rem; font-size:.95rem; }
+  dl.glossario dt:first-child{ margin-top:0; }
+  dl.glossario dd{ margin:.15rem 0 0; font-size:.9rem; color:var(--ink); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0; padding:0; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; padding:.55rem .2rem; border-bottom:1px dashed var(--line); font-size:.93rem;
+  }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist .caixa{
+    flex-shrink:0; width:1.15rem; height:1.15rem; border:2px solid var(--cv); border-radius:4px; margin-top:.1rem;
+  }
+
+  .faq details{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:.7rem 1rem; margin-bottom:.6rem; }
+  .faq summary{ font-weight:600; cursor:pointer; font-size:.93rem; color:var(--ink); }
+  .faq summary::marker{ color:var(--cv); }
+  .faq details[open] summary{ margin-bottom:.5rem; }
+  .faq p{ margin:.3rem 0 0; font-size:.9rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--cv); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+    .faq details{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="comissionado-com-vinculo.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Comissionado com Vínculo</div>
+      <div class="page-sub">Guia passo a passo para calcular o acerto de contas de servidores que ocuparam cargo comissionado tendo também vínculo efetivo com o serviço público — escrito para quem está usando o sistema pela primeira vez.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#o-que-e">O que é um "acerto de contas"?</a></li>
+          <li><a href="#glossario">Glossário de termos usados no módulo</a></li>
+          <li><a href="#visao-geral">Visão geral do módulo</a></li>
+          <li><a href="#dados-pessoais">Dados Pessoais</a></li>
+          <li><a href="#dados-cargo">Dados do cargo</a></li>
+          <li><a href="#ferias">Períodos de usufruto de férias</a></li>
+          <li><a href="#calculando">Calculando o acerto</a></li>
+          <li><a href="#resultados">Entendendo os resultados</a></li>
+          <li><a href="#dezembro">Exoneração em dezembro</a></li>
+          <li><a href="#mais-de-um-cargo">Mais de um cargo comissionado</a></li>
+          <li><a href="#linhas-manuais">Linhas em branco para lançamento manual</a></li>
+          <li><a href="#resumo">Resumo Geral, impressão e exportação</a></li>
+          <li><a href="#salvar">Salvando no Portal e reabrindo pelo Histórico</a></li>
+          <li><a href="#exemplo">Exemplo completo, do início ao fim</a></li>
+          <li><a href="#faq">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist final antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="o-que-e">
+        <h2 class="sec-title"><span class="num">1</span>O que é um "acerto de contas"?</h2>
+        <p>Quando um servidor <strong>deixa de ocupar um cargo comissionado</strong> — porque foi exonerado, porque assumiu outro cargo, ou por qualquer outro motivo — é preciso fechar a conta desse período: conferir se ele recebeu tudo o que tinha direito e se não recebeu, a mais, algo que precisa devolver.</p>
+        <p>É exatamente isso que este módulo calcula. Ao longo do tempo em que o servidor ocupou o cargo, algumas coisas podem ter ficado "em aberto": por exemplo, ele pode ter direito a <strong>dias de férias que nunca conseguiu tirar</strong> (e por isso tem que receber esse valor em dinheiro), ou pode ter recebido um <strong>adiantamento de 13º salário</strong> no meio do ano e sido exonerado antes de completar o ano inteiro (e por isso precisa devolver parte desse adiantamento).</p>
+        <p>O sistema soma tudo o que falta <strong>pagar</strong> e subtrai tudo o que precisa ser <strong>devolvido</strong>, chegando a um <strong>valor final único</strong> — que pode ser positivo (o servidor ainda tem algo a receber) ou negativo (o servidor precisa devolver algo à administração). Esse valor final é o "acerto de contas".</p>
+        <div class="box box-info">
+          <strong>Quando esse cálculo é feito</strong>
+          Normalmente logo após a publicação do ato de exoneração do servidor no cargo comissionado — é um dos últimos passos antes de encerrar a folha de pagamento daquele cargo para aquela pessoa.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário de termos usados no módulo</h2>
+        <p>Antes de entrar nos campos da tela, vale conhecer alguns termos que vão aparecer. Você pode voltar a esta seção a qualquer momento — ela também está linkada de dentro de cada explicação de campo.</p>
+        <dl class="glossario">
+          <dt>Cargo comissionado</dt>
+          <dd>Um cargo de confiança (chefia, direção, assessoramento) que não é efetivo — a pessoa é nomeada e pode ser exonerada a qualquer momento, sem processo seletivo.</dd>
+
+          <dt>"Com vínculo" (deste módulo)</dt>
+          <dd>Significa que o servidor, além de ocupar o cargo comissionado, também é servidor efetivo (concursado) em outro cargo — ou seja, ele tem um "vínculo" permanente com o serviço público, diferente de alguém que só ocupa o cargo comissionado sem nenhum outro vínculo.</dd>
+
+          <dt>Símbolo (verba)</dt>
+          <dd>O código que identifica o valor mensal pago por aquele cargo comissionado (ex.: CC-05, CNE-01). Cada símbolo corresponde a um valor fixo em reais, definido por decreto.</dd>
+
+          <dt>Período aquisitivo (PA)</dt>
+          <dd>O período de 12 meses trabalhados que dá ao servidor o direito a 30 dias de férias. Ao completar um período aquisitivo inteiro, dizemos que as férias daquele período estão "vencidas" (prontas para serem tiradas).</dd>
+
+          <dt>Férias vencidas</dt>
+          <dd>Férias de um período aquisitivo já completo (12 meses), que o servidor ainda não tirou.</dd>
+
+          <dt>Férias proporcionais</dt>
+          <dd>Férias referentes ao período aquisitivo que ainda está em andamento na data da exoneração (incompleto, menos de 12 meses) — o servidor recebe apenas a parte proporcional ao tempo já trabalhado nesse período.</dd>
+
+          <dt>Ávos (ou avos)</dt>
+          <dd>A "fração" de direito acumulada mês a mês. Por exemplo, se o servidor trabalhou 7 dos 12 meses de um período, ele acumulou "7 avos" daquele direito (seja de férias, seja de 13º).</dd>
+
+          <dt>Ávos de 13º</dt>
+          <dd>Quantos meses (de janeiro a dezembro do ano da exoneração) o servidor trabalhou o suficiente para ter direito a uma fração do 13º salário daquele ano. Cada mês em que ele trabalhou mais de 14 dias conta como 1 avo — o máximo é 12 avos (13º inteiro).</dd>
+
+          <dt>1/3 de férias (terço constitucional)</dt>
+          <dd>Um adicional de um terço do valor das férias que todo trabalhador tem direito a receber, seja quando tira férias, seja quando recebe as férias em dinheiro (indenizadas).</dd>
+
+          <dt>Indenização de férias</dt>
+          <dd>Quando o servidor não chega a tirar os dias de férias a que tinha direito (porque foi exonerado antes), esses dias são pagos em dinheiro, em vez de serem tirados como folga.</dd>
+
+          <dt>Adiantamento (de 13º)</dt>
+          <dd>Um valor antecipado do 13º salário, normalmente pago em julho, antes do 13º "fechar" no fim do ano. Se o servidor sai do cargo antes de completar o ano, esse adiantamento quase sempre precisa ser devolvido (ou parte dele).</dd>
+
+          <dt>Devolução</dt>
+          <dd>Um valor que o servidor recebeu (ou recebeu a mais) e que agora precisa devolver à administração. No sistema, valores de devolução aparecem em <span style="color:#C1443B;font-weight:600">vermelho</span>, com sinal negativo.</dd>
+
+          <dt>Mês comercial</dt>
+          <dd>Para calcular dias trabalhados em um mês, o sistema sempre considera o mês como tendo 30 dias — mesmo que o mês real tenha 28, 29 ou 31 dias. É a forma padrão de calcular na folha de pagamento.</dd>
+
+          <dt>Imposto de Renda Retido na Fonte (IRRF)</dt>
+          <dd>O imposto de renda descontado diretamente no pagamento, antes do valor chegar ao servidor. Rendas baixas não pagam imposto (ficam isentas); quanto maior o valor, maior a alíquota (percentual) de imposto.</dd>
+
+          <dt>Dependente (para fins de IR)</dt>
+          <dd>Cônjuge, filhos ou outras pessoas que o servidor declara como dependentes no imposto de renda. Cada dependente reduz um pouco o valor do imposto calculado.</dd>
+
+          <dt>Rubrica / código de rubrica</dt>
+          <dd>Cada "linha" de valor no resultado (ex.: 20014, 21593) tem um código próprio — é assim que a folha de pagamento identifica o tipo de valor, seja para pagar, seja para descontar.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">3</span>Visão geral do módulo</h2>
+        <p>A tela deste módulo é organizada em abas, no topo: <strong>Dados Pessoais</strong>, uma aba para <strong>cada cargo</strong> (Cargo 1, Cargo 2...) e <strong>Resumo</strong>. Você preenche os Dados Pessoais uma única vez, depois entra na aba de cada cargo para lançar as informações daquele cargo específico e calcular o acerto, e por fim confere tudo junto na aba Resumo.</p>
+        <div class="box box-dica">
+          <strong>Cada cargo é calculado separadamente</strong>
+          Se o servidor ocupou mais de um cargo comissionado (por exemplo, foi exonerado de um e nomeado em outro, sem sair do serviço público), cada cargo tem sua própria aba, com seus próprios cálculos, totalmente independentes um do outro. A aba Resumo depois soma tudo.
+        </div>
+        <p>Você vai ver, no topo da página do módulo, um texto pequeno dizendo algo como <em>"Cálculos conforme LC 840/2011"</em> — é apenas o nome da lei do DF que estabelece essas regras; o sistema já aplica tudo automaticamente, você não precisa conhecer a lei para usar o módulo.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="dados-pessoais">
+        <h2 class="sec-title"><span class="num">4</span>Dados Pessoais</h2>
+        <p>É a primeira aba que aparece ao abrir o módulo. Preencha antes de ir para as abas de cargo.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Nome</span></td><td>Nome completo do servidor.</td><td>Documento de identificação ou cadastro no SIGRH.</td></tr>
+            <tr><td><span class="campo">Matrícula</span></td><td>Número da matrícula funcional.</td><td>Contracheque do servidor ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Data de Nascimento</span></td><td>Data de nascimento do servidor.</td><td>Documento de identificação ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Qtd. de Cargos</span></td><td>Quantos cargos comissionados diferentes serão lançados neste acerto. Na maioria dos casos é <strong>1</strong>; só aumente se o servidor realmente ocupou mais de um cargo comissionado que precisa entrar neste mesmo acerto.</td><td>Confira nos atos de nomeação/exoneração publicados, ou pergunte ao setor responsável se tiver dúvida.</td></tr>
+            <tr><td><span class="campo">Processo SEI</span> <em>(opcional)</em></td><td>Número do processo eletrônico onde este acerto está sendo formalizado. Não é obrigatório — você pode continuar sem preencher.</td><td>Consulte no sistema SEI-GDF pelo nome ou matrícula do servidor, ou pergunte ao seu setor.</td></tr>
+          </tbody>
+        </table>
+        <p>Logo abaixo há um botão <strong>"Mostrar regras de cálculo"</strong> — ele abre um resumo técnico das regras que o sistema usa (útil para conferência rápida), mas não é necessário lê-lo para conseguir usar o módulo; todo o passo a passo já está neste manual.</p>
+      </section>
+
+      <!-- 5 -->
+      <section id="dados-cargo">
+        <h2 class="sec-title"><span class="num">5</span>Dados do cargo</h2>
+        <p>Clique na aba do cargo (ex.: <strong>Cargo 1</strong>) para abrir o formulário daquele cargo específico.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Onde encontrar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Símbolo (verba)</span></td><td>Digite o código do símbolo (ex.: CC-05). Se o código existir na lista do sistema, o campo <strong>Valor da verba</strong> é preenchido sozinho e aparece uma marca verde de confirmação (✔) com o valor e a data de referência da tabela.</td><td>Ato de nomeação/exoneração (Diário Oficial do DF) ou cadastro funcional no SIGRH. Se não souber o código, pergunte ao RH/DIGEP.</td></tr>
+            <tr><td><span class="campo">Valor da verba (mensal)</span></td><td>Preenchido automaticamente ao digitar um símbolo reconhecido. Se o símbolo não constar na lista do sistema (aparece um aviso amarelo), digite o valor manualmente.</td><td>Mesmo local do Símbolo, ou decreto que fixa o valor do cargo.</td></tr>
+            <tr><td><span class="campo">Admissão no cargo</span></td><td>Data em que o servidor foi nomeado/empossado neste cargo comissionado.</td><td>Ato de nomeação (Diário Oficial) ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Exoneração do cargo</span></td><td>Data em que o servidor foi exonerado deste cargo.</td><td>Ato de exoneração (Diário Oficial) ou SIGRH.</td></tr>
+            <tr><td><span class="campo">Dias trabalhados no mês da exoneração</span></td><td>Quantos dias, dentro do mês em que ele saiu, ele efetivamente trabalhou (contando o mês como tendo 30 dias — veja <a href="#glossario">mês comercial</a> no glossário). Se esse número for menor do que o esperado, o sistema calcula um valor a mais para pagar; se for maior, calcula uma devolução.</td><td>Conte os dias corridos entre o dia 1º daquele mês (ou a data de admissão, se ele entrou no mesmo mês) e a data de exoneração.</td></tr>
+            <tr><td><span class="campo">Dependentes (IR)</span></td><td>Quantos dependentes o servidor declara para fins de imposto de renda. Cada dependente reduz um pouco o imposto calculado.</td><td>Ficha financeira do servidor no SIGRH, ou pergunte diretamente a ele.</td></tr>
+            <tr><td><span class="campo">Adiantamento recebido (13º)</span></td><td>Valor que o servidor já recebeu como antecipação do 13º salário <strong>deste cargo</strong> ao longo do ano (normalmente pago em julho). Se ele não recebeu nada, deixe <span class="campo">0,00</span>.</td><td>Contracheque do servidor (rubrica de adiantamento de 13º) ou histórico de pagamentos no SIGRH.</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">Botão "Calcular 60% automaticamente"</h3>
+        <p>Alguns órgãos pagam o adiantamento de 13º como 60% do valor da verba. Este botão calcula esse valor sozinho e já preenche o campo "Adiantamento recebido" — use apenas se você já confirmou que o servidor realmente recebeu esse adiantamento de 60%.</p>
+        <div class="box box-atencao">
+          <strong>O botão pode aparecer desabilitado (cinza, sem clicar)</strong>
+          Isso acontece em dois casos: (1) quando há mais de um cargo lançado e este <strong>não é o último</strong> — veja a seção <a href="#mais-de-um-cargo">Mais de um cargo comissionado</a>; ou (2) quando a caixa <strong>"Exoneração em dezembro"</strong> está marcada — veja a seção <a href="#dezembro">Exoneração em dezembro</a>. Nesses casos, preencha o adiantamento manualmente, se houver.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="ferias">
+        <h2 class="sec-title"><span class="num">6</span>Períodos de usufruto de férias</h2>
+        <p>Logo abaixo dos dados do cargo, há uma tabela para lançar as férias que o servidor <strong>já tirou</strong> durante o tempo em que ocupou o cargo. Isso é diferente do direito a férias — aqui você registra o que ele <strong>de fato usou</strong>, para o sistema calcular a diferença entre o que ele tinha direito e o que efetivamente tirou.</p>
+        <ol class="passos">
+          <li>Em <strong>Período Aquisitivo</strong>, digite um texto livre para identificar o período (ex.: "2023-2024") — é só para sua referência, não entra no cálculo.</li>
+          <li>Em cada bloco de usufruto (1º, 2º, 3º), preencha as datas de início e fim de cada vez que o servidor tirou férias dentro daquele período aquisitivo. Uma linha aceita até três "pedaços" de férias.</li>
+          <li>Marque a caixa <strong>"Recebeu 1/3?"</strong> se o servidor já recebeu o adicional de 1/3 correspondente a essas férias. Se você não marcar, o sistema vai entender que esse 1/3 ainda está em aberto e vai calculá-lo como um valor a pagar.</li>
+          <li>A coluna <strong>Dias Total</strong> é preenchida sozinha, somando os dias de todos os usufrutos daquela linha (limite de 30 dias por linha).</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Não sabe as datas exatas de férias?</strong>
+          Consulte as portarias de concessão de férias do servidor (publicadas no Diário Oficial do DF) ou a aba de férias/afastamentos no cadastro dele no SIGRH.
+        </div>
+        <p>Se o servidor <strong>nunca tirou férias</strong> durante o cargo, deixe todas as linhas em branco — o sistema vai entender que ele tem direito a receber (em dinheiro) todos os dias de férias acumulados.</p>
+      </section>
+
+      <!-- 7 -->
+      <section id="calculando">
+        <h2 class="sec-title"><span class="num">7</span>Calculando o acerto</h2>
+        <p>Depois de preencher os dados do cargo e as férias, use os botões abaixo da tabela de férias:</p>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Calcular Ávos</strong></td><td>Mostra, em texto, quantos avos de férias e de 13º o servidor acumulou — útil para conferir antes de fechar o cálculo completo. Não gera o resultado final por si só.</td></tr>
+            <tr><td><strong>Gerar Relatório</strong></td><td>Abre uma página de texto simples com o resumo de tudo o que foi calculado para este cargo — útil para copiar/colar ou imprimir avulso.</td></tr>
+            <tr><td><strong>Exportar JSON</strong></td><td>Baixa um arquivo técnico com os dados deste cargo. Normalmente não é necessário para o dia a dia — serve como cópia de segurança dos dados brutos.</td></tr>
+            <tr><td><strong>Calcular Acerto</strong> <em>(botão maior, em destaque)</em></td><td>O botão principal. Calcula tudo — dias trabalhados, 13º, férias, 1/3, imposto de renda, adiantamento — e preenche a tabela de Resultados, logo abaixo. <strong>Você precisa clicar neste botão em CADA cargo</strong>, mesmo que já tenha calculado outro.</td></tr>
+            <tr><td><strong>Limpar</strong> <em>(botão maior, em destaque)</em></td><td>Apaga todos os dados preenchidos <strong>deste cargo</strong> (não afeta os outros cargos nem os Dados Pessoais). Use com cuidado — pede confirmação antes de apagar.</td></tr>
+          </tbody>
+        </table>
+        <p>Depois de clicar em <strong>Calcular Acerto</strong>, um botão <strong>"Mostrar detalhes"</strong> fica disponível acima da tabela de resultados — clique nele para ver a conta explicada passo a passo (quantos dias, quantos avos, qual fórmula foi usada), útil para conferir se o resultado faz sentido antes de prosseguir.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="resultados">
+        <h2 class="sec-title"><span class="num">8</span>Entendendo os resultados</h2>
+        <p>Depois de calcular, a tabela de Resultados mostra uma linha para cada tipo de valor. Valores em <span style="color:#2F8F5B;font-weight:600">verde</span> são valores a favor do servidor (a pagar); valores em <span style="color:#C1443B;font-weight:600">vermelho</span> são valores que o servidor precisa devolver.</p>
+        <table class="tbl">
+          <caption>Códigos que aparecem na tabela de Resultados</caption>
+          <thead><tr><th>Código</th><th>Nome na tela</th><th>O que significa na prática</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">20014</td><td>DIAS TRABALHADOS - Representação</td><td>Ajuste dos dias efetivamente trabalhados no mês da exoneração. Positivo = falta pagar; se ficar negativo, o código muda para <span class="codigo">60014</span> e é uma devolução.</td></tr>
+            <tr><td class="codigo">40950</td><td>IMPOSTO DE RENDA</td><td>Imposto retido sobre o valor de dias trabalhados (20014). Se o valor for baixo, o imposto sai R$ 0,00 — é normal, significa que está dentro da faixa isenta.</td></tr>
+            <tr><td class="codigo">21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td>Valor de 13º salário proporcional aos meses trabalhados no ano da exoneração (veja <a href="#glossario">ávos de 13º</a>).</td></tr>
+            <tr><td class="codigo">40951</td><td>IMPOSTO DE RENDA 13º</td><td>Imposto retido sobre o 13º calculado acima, calculado separadamente do imposto sobre dias trabalhados.</td></tr>
+            <tr><td class="codigo">20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td>Neste sistema, este código <strong>sempre aparece zerado</strong> — o valor correspondente já vem somado dentro do código 20872 (Férias Proporcionais), abaixo. Não é erro.</td></tr>
+            <tr><td class="codigo">20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td>Adicional de 1/3 referente a períodos de férias já completos (vencidos). Só aparece com valor se esse 1/3 ainda não tiver sido pago em nenhum momento anterior.</td></tr>
+            <tr><td class="codigo">20872</td><td>FÉRIAS PROPORCIONAIS</td><td>Diferença entre o total de dias de férias a que o servidor tinha direito e os dias que ele realmente tirou (lançados na seção de usufruto). Positivo = falta pagar; se negativo, o código muda para <span class="codigo">60872</span> e é uma devolução (ele tirou mais dias do que tinha direito).</td></tr>
+            <tr><td class="codigo">20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td>Mesma lógica do 1/3 de férias vencidas, mas referente ao período de férias em andamento na data da exoneração.</td></tr>
+            <tr><td class="codigo">60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td>Devolução do adiantamento de 13º informado no campo correspondente. <strong>Sempre aparece negativo</strong> quando há um valor preenchido — é uma regra fixa do sistema, não um erro.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>Por que alguns valores saem R$ 0,00?</strong>
+          É normal e não significa que algo foi esquecido. Acontece, por exemplo, quando o servidor não completou nenhum período de férias inteiro (20875/20857 ficam zerados), quando a renda calculada é baixa demais para pagar imposto (40950/40951 zerados), ou quando ele não informou nenhum adiantamento (60891 zerado).
+        </div>
+        <p>No final da tabela existem <strong>6 linhas em branco</strong> — veja a seção <a href="#linhas-manuais">Linhas em branco para lançamento manual</a>.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="dezembro">
+        <h2 class="sec-title"><span class="num">9</span>Exoneração em dezembro</h2>
+        <p>Se a data de <strong>Exoneração do cargo</strong> cair em qualquer dia de dezembro, aparece automaticamente um aviso amarelo com uma pergunta: <em>os 12 avos do 13º deste ano já foram pagos integralmente ao servidor?</em></p>
+        <ol class="passos">
+          <li>Confira essa informação no contracheque/histórico de pagamentos do servidor no SIGRH.</li>
+          <li>Se a resposta for <strong>sim</strong> (o 13º inteiro já foi pago ao longo do ano), marque a caixa. A partir daí, o campo "Adiantamento recebido" é zerado automaticamente, e nenhum valor de 13º ou de adiantamento entra neste acerto (códigos 21593 e 60891 ficam em R$ 0,00).</li>
+          <li>Se a resposta for <strong>não</strong>, deixe a caixa desmarcada — o sistema calcula o 13º normalmente.</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Marcou por engano?</strong>
+          É só desmarcar a caixa — o cálculo do 13º e do adiantamento voltam ao normal. Se você mudar a data de exoneração para fora de dezembro, a caixa é desmarcada sozinha e o aviso desaparece.
+        </div>
+        <p>O campo de adiantamento continua editável mesmo com a caixa marcada (por exemplo, para anotar algo manualmente), mas o valor digitado nele <strong>não entra no cálculo</strong> enquanto a caixa estiver marcada.</p>
+      </section>
+
+      <!-- 10 -->
+      <section id="mais-de-um-cargo">
+        <h2 class="sec-title"><span class="num">10</span>Mais de um cargo comissionado</h2>
+        <p>Se o servidor ocupou mais de um cargo comissionado que precisa entrar neste mesmo acerto, aumente o campo <strong>Qtd. de Cargos</strong> em Dados Pessoais — novas abas de cargo aparecem automaticamente.</p>
+        <div class="box box-atencao">
+          <strong>O cálculo de 60% e do 13º só valem no ÚLTIMO cargo</strong>
+          Quando há mais de 1 cargo lançado, o botão "Calcular 60% automaticamente" só fica habilitado no <strong>último cargo</strong> (o de maior número, ex.: Cargo 2 se a quantidade for 2). Da mesma forma, o 13º salário do ano só é calculado no último cargo — a lógica é que o 13º de um ano inteiro não deve ser contado duas vezes se o servidor passou por mais de um cargo comissionado no mesmo ano.
+        </div>
+        <p>Cada cargo continua sendo calculado de forma independente para todos os outros valores (férias, dias trabalhados, imposto de renda sobre dias trabalhados) — só o 13º e o adiantamento é que ficam concentrados no último cargo.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="linhas-manuais">
+        <h2 class="sec-title"><span class="num">11</span>Linhas em branco para lançamento manual</h2>
+        <p>Ao final da tabela de Resultados existem <strong>6 linhas em branco</strong>, editáveis diretamente na tela (clique em cima da célula para digitar). Use-as apenas se houver algum valor <strong>que o sistema não calcula automaticamente</strong> e que precisa entrar neste acerto.</p>
+        <ol class="passos">
+          <li>Clique na célula de código e digite o código da rubrica.</li>
+          <li>Clique na célula de descrição e digite o nome do valor.</li>
+          <li>Clique na célula de valor e digite o número — use um sinal de menos na frente (ex.: <span class="campo">-150,00</span>) se for uma devolução.</li>
+        </ol>
+        <div class="box box-info">
+          <strong>Essas linhas entram no total do cargo, mas não no Resumo Geral</strong>
+          Elas somam normalmente no total deste cargo, no relatório e na exportação — mas <strong>não</strong> entram na soma da aba Resumo Geral, que soma apenas os códigos oficiais fixos do sistema.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="resumo">
+        <h2 class="sec-title"><span class="num">12</span>Resumo Geral, impressão e exportação</h2>
+        <p>A aba <strong>Resumo</strong> reúne o total de todos os cargos já calculados.</p>
+        <ol class="passos">
+          <li>Depois de clicar em "Calcular Acerto" em todos os cargos necessários, vá até a aba <strong>Resumo</strong>.</li>
+          <li>Clique em <strong>"Atualizar Resumo"</strong> — a tabela é preenchida com a soma de cada código, considerando todos os cargos já calculados.</li>
+          <li>O <strong>TOTAL LÍQUIDO</strong>, ao final, é o valor final do acerto: se positivo, o servidor tem valor a receber; se negativo, tem valor a devolver.</li>
+        </ol>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Exportar JSON</strong></td><td>Baixa um arquivo técnico com todos os dados do Resumo — cópia de segurança, normalmente não usada no dia a dia.</td></tr>
+            <tr><td><strong>🖨️ Imprimir / Gerar PDF</strong></td><td>Gera um relatório limpo, pronto para impressão ou para salvar como PDF, com uma página para cada cargo (mostrando férias tiradas e resultado detalhado) e uma última página com o Resumo Geral.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 13 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">13</span>Salvando no Portal e reabrindo pelo Histórico</h2>
+        <ol class="passos">
+          <li>Depois de atualizar o Resumo, clique em <strong>"Salvar no Portal"</strong>, na aba Resumo.</li>
+          <li>É obrigatório ter pelo menos a <strong>Matrícula</strong> preenchida — se faltar, aparece um aviso pedindo para completar.</li>
+          <li>Uma mensagem confirma se o acerto foi salvo com sucesso, logo abaixo do botão.</li>
+          <li>Para reabrir um acerto salvo depois, vá em <strong>Histórico de acertos</strong>, na barra lateral, e clique para editar. Um aviso amarelo no topo da página confirma que você está editando um registro já salvo.</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Recalcule antes de salvar de novo</strong>
+          Ao editar um acerto salvo, o sistema preenche os campos automaticamente, mas <strong>não recalcula sozinho</strong>. Clique em "Calcular Acerto" em cada cargo e depois em "Atualizar Resumo" antes de clicar em "Salvar no Portal" de novo — assim você garante que está salvando os valores mais atuais.
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">14</span>Exemplo completo, do início ao fim</h2>
+        <p>Vamos calcular um caso fictício simples: um servidor com <strong>1 único cargo</strong>, exonerado no meio do ano.</p>
+        <div class="card-mock">
+          <div class="rot">Dados Pessoais</div>
+          Nome: <strong>FULANO DE TAL</strong> &nbsp;·&nbsp; Matrícula: <strong>999999-9</strong> &nbsp;·&nbsp; Nascimento: <strong>15/03/1985</strong><br>
+          Qtd. de Cargos: <strong>1 cargo</strong> &nbsp;·&nbsp; Processo SEI: <em>(deixado em branco)</em>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Cargo 1</div>
+          Símbolo: <strong>CC-05</strong> → valor da verba preenchido sozinho: <strong>R$ 1.930,00</strong><br>
+          Admissão no cargo: <strong>01/01/2025</strong> &nbsp;·&nbsp; Exoneração do cargo: <strong>15/07/2025</strong><br>
+          Dias trabalhados no mês da exoneração: <strong>10</strong> &nbsp;·&nbsp; Dependentes (IR): <strong>0</strong><br>
+          Adiantamento recebido (13º): <strong>R$ 700,00</strong>
+        </div>
+        <div class="card-mock">
+          <div class="rot">Períodos de usufruto</div>
+          Nenhuma linha preenchida — o servidor não tirou férias neste cargo.
+        </div>
+        <p>Ao clicar em <strong>Calcular Acerto</strong>, o resultado deste exemplo fica assim:</p>
+        <table class="tbl">
+          <thead><tr><th>Código</th><th>Descrição</th><th>Valor R$</th><th>Por quê</th></tr></thead>
+          <tbody>
+            <tr><td class="codigo">20014</td><td>DIAS TRABALHADOS</td><td>321,67</td><td>Ele trabalhou só 10 dos ~15 dias esperados no mês comercial de julho até o dia 15 — faltam 5 dias a pagar (5 × R$ 64,33/dia).</td></tr>
+            <tr><td class="codigo">40950</td><td>IMPOSTO DE RENDA</td><td>0,00</td><td>Valor abaixo da faixa de isenção — não incide imposto.</td></tr>
+            <tr><td class="codigo">21593</td><td>13º SALÁRIO</td><td>1.125,83</td><td>Ele trabalhou de janeiro a julho (mais de 14 dias em cada mês) = 7 avos de 13º.</td></tr>
+            <tr><td class="codigo">40951</td><td>IMPOSTO DE RENDA 13º</td><td>0,00</td><td>Também abaixo da faixa de isenção.</td></tr>
+            <tr><td class="codigo">20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td>0,00</td><td>Sempre zerado nesta contagem (veja a seção 8).</td></tr>
+            <tr><td class="codigo">20857</td><td>1/3 DE FÉRIAS VENCIDAS</td><td>0,00</td><td>Ele não completou nenhum período de 12 meses (só 7 meses) — não há férias vencidas.</td></tr>
+            <tr><td class="codigo">20872</td><td>FÉRIAS PROPORCIONAIS</td><td>1.125,83</td><td>Tinha direito a 17,5 dias (7 avos) e não tirou nenhum — recebe tudo em dinheiro.</td></tr>
+            <tr><td class="codigo">20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td>375,28</td><td>Terço constitucional sobre os 7 avos de férias proporcionais, nunca pago.</td></tr>
+            <tr><td class="codigo">60891</td><td>ADIANTAMENTO DE 13º</td><td>-700,00</td><td>Devolução do adiantamento informado — sempre negativo.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>TOTAL LÍQUIDO deste exemplo: R$ 2.248,61</strong>
+          Somando tudo (321,67 + 1.125,83 + 1.125,83 + 375,28 − 700,00), o resultado é positivo — neste caso fictício, o servidor tem R$ 2.248,61 a receber no acerto de contas.
+        </div>
+        <p>Use este exemplo como referência: se você preencher os mesmos números em um cargo de teste, deve chegar exatamente nesses valores. Se não bater, revise os campos com calma antes de seguir para um caso real.</p>
+      </section>
+
+      <!-- 15 -->
+      <section id="faq" class="faq">
+        <h2 class="sec-title"><span class="num">15</span>Erros comuns e perguntas frequentes</h2>
+
+        <details>
+          <summary>O botão "Calcular 60% automaticamente" está desabilitado, por quê?</summary>
+          <p>Dois motivos possíveis: (1) há mais de um cargo lançado e este não é o último — veja a seção <a href="#mais-de-um-cargo">Mais de um cargo comissionado</a>; ou (2) a caixa "Exoneração em dezembro" está marcada — veja a seção <a href="#dezembro">Exoneração em dezembro</a>. Em ambos os casos, preencha o adiantamento manualmente, se houver algum valor a lançar.</p>
+        </details>
+
+        <details>
+          <summary>Um valor apareceu R$ 0,00 no resultado — é normal?</summary>
+          <p>Sim, na maioria das vezes. Acontece quando: não há período de férias vencido (20875/20857), a renda calculada é baixa demais para pagar imposto (40950/40951), não foi informado adiantamento (60891), ou o cargo não é o último (quando há mais de um cargo, 21593/60891 ficam zerados nos cargos anteriores). Veja a seção <a href="#resultados">Entendendo os resultados</a> para o detalhe de cada código.</p>
+        </details>
+
+        <details>
+          <summary>Esqueci de marcar "Recebeu 1/3?" numa linha de férias — o que acontece?</summary>
+          <p>O sistema vai entender que o 1/3 daquele período ainda não foi pago e vai calculá-lo como valor a pagar. Se na realidade o servidor já recebeu esse 1/3 e você esqueceu de marcar a caixa, o sistema vai calcular um pagamento em duplicidade — confira sempre essa marcação antes de calcular.</p>
+        </details>
+
+        <details>
+          <summary>Apareceu um aviso "DEVOLUÇÃO: informados X dias, máximo Y dias" — isso é erro?</summary>
+          <p>Não é erro, é um aviso informativo. Significa que o número que você digitou em "Dias trabalhados no mês da exoneração" é maior do que o máximo possível naquele mês (considerando o mês comercial de 30 dias) — por isso o sistema calcula uma devolução da diferença. Confira se o número digitado está correto.</p>
+        </details>
+
+        <details>
+          <summary>Marquei "Exoneração em dezembro" sem querer — como desfazer?</summary>
+          <p>Desmarque a caixa manualmente. O campo de adiantamento volta a ser considerado no cálculo normalmente. Se você mudar a data de exoneração para fora de dezembro, a caixa é desmarcada sozinha.</p>
+        </details>
+
+        <details>
+          <summary>Cliquei em "Calcular Acerto" mas os detalhes não aparecem — por quê?</summary>
+          <p>Os detalhes ficam escondidos por padrão, mesmo depois de calcular. Clique no botão <strong>"Mostrar detalhes"</strong>, logo acima da tabela de Resultados, para exibi-los.</p>
+        </details>
+
+        <details>
+          <summary>Preenchi tudo, mas o Resumo Geral aparece zerado</summary>
+          <p>Vá até a aba Resumo e clique em <strong>"Atualizar Resumo"</strong> — ele só soma os cargos depois desse clique, não é automático. Confira também se você clicou em "Calcular Acerto" em cada aba de cargo individualmente.</p>
+        </details>
+
+        <details>
+          <summary>As 6 linhas em branco da tabela de Resultados — preciso preencher?</summary>
+          <p>Não. Elas só existem para casos excepcionais, quando há algum valor que o sistema não calcula automaticamente e que precisa entrar no acerto. Se não houver nenhum caso assim, deixe todas em branco.</p>
+        </details>
+
+        <details>
+          <summary>Salvei no Portal, mas não sei se criei um registro novo ou atualizei um existente</summary>
+          <p>Se você chegou a esta tela pela aba <strong>Histórico de acertos</strong> (clicando para editar um registro já salvo), o sistema mostra um aviso amarelo no topo confirmando isso, e "Salvar no Portal" atualiza aquele mesmo registro. Se você começou do zero (sem vir do Histórico), cada clique em "Salvar no Portal" cria um <strong>registro novo</strong>.</p>
+        </details>
+      </section>
+
+      <!-- 16 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">16</span>Checklist final antes de salvar</h2>
+        <p>Antes de clicar em "Salvar no Portal", confira rapidamente:</p>
+        <ul class="checklist">
+          <li><span class="caixa"></span> Nome, matrícula e (se tiver) processo SEI preenchidos em Dados Pessoais</li>
+          <li><span class="caixa"></span> A quantidade de cargos (Qtd. de Cargos) está correta</li>
+          <li><span class="caixa"></span> Símbolo e Valor da verba conferidos em cada cargo</li>
+          <li><span class="caixa"></span> Datas de Admissão e Exoneração corretas em cada cargo</li>
+          <li><span class="caixa"></span> Períodos de usufruto de férias completos, com "Recebeu 1/3?" marcado onde já foi pago</li>
+          <li><span class="caixa"></span> Clicou em "Calcular Acerto" em <strong>cada</strong> cargo, não só no último</li>
+          <li><span class="caixa"></span> Conferiu os "Detalhes" do cálculo em pelo menos um cargo</li>
+          <li><span class="caixa"></span> Foi até a aba Resumo e clicou em "Atualizar Resumo"</li>
+          <li><span class="caixa"></span> O TOTAL LÍQUIDO faz sentido (verde/positivo = servidor recebe; vermelho/negativo = servidor devolve)</li>
+          <li><span class="caixa"></span> Clicou em "Salvar no Portal" e viu a mensagem de sucesso</li>
+        </ul>
+        <div class="box box-dica">
+          <strong>Ficou com alguma dúvida no meio do caminho?</strong>
+          Volte à seção <a href="#faq">Erros comuns e perguntas frequentes</a> ou ao <a href="#glossario">Glossário</a> no início deste manual.
+        </div>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Sistema de Acerto — Cargos Comissionados (com vínculo) · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>
