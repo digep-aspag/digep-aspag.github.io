@@ -213,6 +213,11 @@ em{font-style:italic}
 .manual-row td[contenteditable]:focus{background:#fff3cd;box-shadow:inset 0 0 0 1px #ffc107}
 .manual-row .manual-codigo:empty::before{content:'código';color:#adb5bd;font-style:italic}
 .manual-row .manual-descricao:empty::before{content:'descrição (opcional)';color:#adb5bd;font-style:italic}
+.btn-remover-linha-manual{
+  background:transparent;border:1px solid #dee2e6;color:#c1443b;width:1.6rem;height:1.6rem;
+  border-radius:5px;font-size:1rem;line-height:1;cursor:pointer;
+}
+.btn-remover-linha-manual:hover{background:#c1443b;color:#fff;border-color:#c1443b}
 
 /* Observações de campo: ficam ocultas e só aparecem quando o usuário
    clica/foca em algum campo do respectivo grupo (:focus-within). */
@@ -1374,28 +1379,77 @@ function uppercaseContentEditableCaret(el) {
   }
 }
 
-function bindManualRows(ctx) {
-  $$('.manual-row', ctx).forEach(tr => {
-    const codigoCell = $('.manual-codigo', tr);
-    const descricaoCell = $('.manual-descricao', tr);
-    const valorCell = $('.manual-valor', tr);
+/* HTML de uma linha manual em branco (4ª célula = botão de apagar). */
+function criarLinhaManualHtml() {
+  return `
+            <tr class="manual-row">
+              <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0,00</td>
+              <td class="text-center"><button type="button" class="btn-remover-linha-manual" title="Apagar esta linha">×</button></td>
+            </tr>`;
+}
 
-    /* Código e Descrição sempre em CAIXA ALTA, atualizados em tempo real */
-    codigoCell.addEventListener('input', () => uppercaseContentEditableCaret(codigoCell));
-    codigoCell.addEventListener('blur', () => {
-      uppercaseContentEditableCaret(codigoCell);
-      aplicarSinalPorCodigoManual(tr);
-    });
-    descricaoCell.addEventListener('input', () => uppercaseContentEditableCaret(descricaoCell));
-    descricaoCell.addEventListener('blur', () => uppercaseContentEditableCaret(descricaoCell));
+/* Vincula os eventos de UMA linha manual (código/descrição em caixa alta,
+   sinal automático pelo prefixo do código, e o botão de apagar com
+   confirmação). Usada tanto ao montar o cargo quanto ao adicionar uma
+   linha nova — nunca reaplica listener em linha já vinculada. */
+function bindOneManualRow(tr) {
+  if (tr.dataset.bound === '1') return;
+  tr.dataset.bound = '1';
 
-    valorCell.addEventListener('blur', () => {
-      aplicarSinalPorCodigoManual(tr);
-    });
-    valorCell.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
-    });
+  const codigoCell = $('.manual-codigo', tr);
+  const descricaoCell = $('.manual-descricao', tr);
+  const valorCell = $('.manual-valor', tr);
+  const btnRemover = $('.btn-remover-linha-manual', tr);
+
+  /* Código e Descrição sempre em CAIXA ALTA, atualizados em tempo real */
+  codigoCell.addEventListener('input', () => uppercaseContentEditableCaret(codigoCell));
+  codigoCell.addEventListener('blur', () => {
+    uppercaseContentEditableCaret(codigoCell);
+    aplicarSinalPorCodigoManual(tr);
   });
+  descricaoCell.addEventListener('input', () => uppercaseContentEditableCaret(descricaoCell));
+  descricaoCell.addEventListener('blur', () => uppercaseContentEditableCaret(descricaoCell));
+
+  valorCell.addEventListener('blur', () => {
+    aplicarSinalPorCodigoManual(tr);
+  });
+  valorCell.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
+  });
+
+  btnRemover?.addEventListener('click', () => {
+    const codigo = (codigoCell.textContent || '').trim();
+    const descricao = (descricaoCell.textContent || '').trim();
+    const resumoLinha = (codigo || descricao) ? ` (${[codigo, descricao].filter(Boolean).join(' — ')})` : '';
+    const ok = confirm(`Tem certeza que deseja apagar esta linha${resumoLinha}?\n\nEssa ação não pode ser desfeita.`);
+    if (!ok) return;
+    const resultsBody = tr.closest('.results-body');
+    tr.remove();
+    if (resultsBody) atualizarTotalResultados(resultsBody);
+  });
+}
+
+function bindManualRows(ctx) {
+  $$('.manual-row', ctx).forEach(tr => bindOneManualRow(tr));
+
+  const btnAdd = $('.btn-add-linha-manual', ctx);
+  if (btnAdd && !btnAdd.dataset.bound) {
+    btnAdd.dataset.bound = '1';
+    btnAdd.addEventListener('click', () => {
+      const resultsBody = $('.results-body', ctx);
+      if (!resultsBody) return;
+      const totalRow = $('.total-row', resultsBody);
+      const div = document.createElement('tbody'); // truque simples p/ parsear HTML de <tr>
+      div.innerHTML = criarLinhaManualHtml();
+      const novaLinha = div.querySelector('tr');
+      if (totalRow) resultsBody.insertBefore(novaLinha, totalRow);
+      else resultsBody.appendChild(novaLinha);
+      bindOneManualRow(novaLinha);
+      $('.manual-codigo', novaLinha)?.focus();
+    });
+  }
 }
 
 /* Regra de sinal obrigatório nas linhas manuais: se o código digitado
@@ -1668,33 +1722,31 @@ function cargoTemplate(idx) {
     <div class="field-hint-group">
       <div class="table-responsive mt-2">
         <table class="table table-bordered results-table">
-          <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th></tr></thead>
+          <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th><th style="width:40px"></th></tr></thead>
           <tbody class="results-body">
-            <tr><td>20015</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td></tr>
-            <tr><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td></tr>
-            <tr class="row-inss-dias"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td></tr>
-            <tr class="row-ir-remuneracao"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td></tr>
-            <tr><td>20521</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
-            <tr class="row-inss-13"><td>40912</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
-            <tr class="row-ir-13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td></tr>
-            <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
-            <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
-            <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
-            <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
-            <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
-            <tr class="row-aa-devolucao"><td>20926</td><td>DEVOLUÇÃO DE AUXÍLIO ALIMENTAÇÃO</td><td class="valor-positivo">0,00</td></tr>
-            <tr class="row-at-devolucao"><td>20912</td><td>DEVOLUÇÃO DE AUXÍLIO TRANSPORTE</td><td class="valor-positivo">0,00</td></tr>
-            <tr class="row-at-custeio"><td>30515</td><td>CUSTEIO DE AUXÍLIO TRANSPORTE A RECEBER</td><td class="valor-positivo">0,00</td></tr>
-            ${[1,2,3,4,5,6].map(() => `
-            <tr class="manual-row">
-              <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
-              <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
-              <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0,00</td>
-            </tr>`).join('')}
+            <tr><td>20015</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr class="row-inss-dias"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td><td></td></tr>
+            <tr class="row-ir-remuneracao"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td><td></td></tr>
+            <tr><td>20521</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr class="row-inss-13"><td>40912</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td><td></td></tr>
+            <tr class="row-ir-13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td><td></td></tr>
+            <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td><td></td></tr>
+            <tr class="row-aa-devolucao"><td>20926</td><td>DEVOLUÇÃO DE AUXÍLIO ALIMENTAÇÃO</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr class="row-at-devolucao"><td>20912</td><td>DEVOLUÇÃO DE AUXÍLIO TRANSPORTE</td><td class="valor-positivo">0,00</td><td></td></tr>
+            <tr class="row-at-custeio"><td>30515</td><td>CUSTEIO DE AUXÍLIO TRANSPORTE A RECEBER</td><td class="valor-positivo">0,00</td><td></td></tr>
+            ${[1,2,3,4,5,6].map(() => criarLinhaManualHtml()).join('')}
           </tbody>
         </table>
       </div>
-      <div class="text-muted mt-1 field-hint" style="font-size:.8rem">As 6 linhas em branco acima são editáveis — clique para inserir código, descrição e valor manualmente (use "-" na frente do valor para devolução). Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais).</div>
+      <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary btn-add-linha-manual">+ Adicionar linha</button>
+        <div class="text-muted field-hint" style="font-size:.8rem">As linhas em branco são editáveis — clique para inserir código, descrição e valor manualmente (use "-" na frente do valor para devolução). Use o "×" para apagar uma linha (pede confirmação). Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais).</div>
+      </div>
     </div>
   </div></div>`;
 }
@@ -2931,12 +2983,44 @@ window.addEventListener('afterprint', limparImpressao);
     return null;
   }
 
+  // Se o acerto salvo tinha mais linhas manuais do que as padrão (o
+  // usuário clicou em "+ Adicionar linha" antes de salvar), as abas
+  // recém-abertas só vêm com as linhas padrão — sem isso, os dados das
+  // linhas extras salvas não encontrariam onde ser restaurados e seriam
+  // perdidos silenciosamente. Por isso, antes de restaurar, olhamos as
+  // chaves salvas (padrão "pos:pane-cN::td.manual-codigo::ÍNDICE") para
+  // descobrir quantas linhas cada cargo tinha, e clicamos em
+  // "+ Adicionar linha" o quanto for preciso para igualar.
+  function garantirLinhasManuaisSuficientes(entradas) {
+    const maxIdxPorPane = {};
+    Object.keys(entradas).forEach((chave) => {
+      const m = chave.match(/^pos:(pane-c\d+)::td\.manual-codigo::(\d+)$/);
+      if (!m) return;
+      const pane = m[1];
+      const idx = parseInt(m[2], 10);
+      if (!(pane in maxIdxPorPane) || idx > maxIdxPorPane[pane]) maxIdxPorPane[pane] = idx;
+    });
+    Object.keys(maxIdxPorPane).forEach((paneId) => {
+      const necessario = maxIdxPorPane[paneId] + 1;
+      const pane = document.getElementById(paneId);
+      if (!pane) return;
+      const btnAdd = pane.querySelector('.btn-add-linha-manual');
+      let atual = pane.querySelectorAll('.manual-row').length;
+      while (atual < necessario && btnAdd) {
+        btnAdd.click();
+        atual++;
+      }
+    });
+  }
+
   function coletarEntradas() {
     const entradas = {};
-    document.querySelectorAll('input, select, textarea').forEach((el) => {
+    document.querySelectorAll('input, select, textarea, [contenteditable="true"]').forEach((el) => {
       const chave = chaveElemento(el);
       if (el.type === 'checkbox' || el.type === 'radio') {
         entradas[chave] = el.checked;
+      } else if (el.isContentEditable) {
+        entradas[chave] = el.textContent;
       } else {
         entradas[chave] = el.value;
       }
@@ -2951,11 +3035,14 @@ window.addEventListener('afterprint', limparImpressao);
       if (!el) return;
       if (el.type === 'checkbox' || el.type === 'radio') {
         el.checked = entradas[chave];
+      } else if (el.isContentEditable) {
+        el.textContent = entradas[chave];
       } else {
         el.value = entradas[chave];
       }
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
+      if (el.isContentEditable) el.dispatchEvent(new Event('blur', { bubbles: true }));
     });
   }
 
@@ -2971,6 +3058,7 @@ window.addEventListener('afterprint', limparImpressao);
         // é aberta (carregamento preguiçoso). Por isso, antes de preencher, forçamos a
         // abertura de todas as abas de cargo, e só então restauramos os valores.
         document.querySelectorAll('.nav-link[data-target^="#pane-c"]').forEach((btn) => btn.click());
+        garantirLinhasManuaisSuficientes(registro.dados.entradas);
         restaurarEntradas(registro.dados.entradas);
         document.querySelector('.nav-link[data-target="#pane-pessoais"]')?.click();
         banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule (e clique em "Atualizar Resumo") antes de clicar em "Salvar no Portal" para atualizar este mesmo registro.';
