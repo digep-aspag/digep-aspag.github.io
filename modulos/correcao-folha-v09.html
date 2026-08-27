@@ -30,6 +30,7 @@
     .rub-codigo-input{width:100%;text-align:center;font-variant-numeric:tabular-nums}
     .rub-valor-input{width:100%;text-align:right;font-variant-numeric:tabular-nums}
     .rub-descricao-input{width:100%}
+    .cod-rubrica{display:block;font-weight:400;font-size:10px;color:#888;font-family:monospace;margin-top:2px;}
 
     .button-group{display:flex;flex-wrap:wrap;gap:15px;margin-top:20px}
     button{padding:12px 25px;border:none;border-radius:5px;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s ease}
@@ -180,9 +181,11 @@
           <th>Competência</th>
           <th>Dias de Falta</th>
           <th>Dias de Repouso</th>
-          <th>Valor da Falta (R$)</th>
-          <th>Valor do Repouso (R$)</th>
-          <th>INSS a devolver (R$)</th>
+          <th>Horas Não Trabalhadas</th>
+          <th>Valor da Falta (R$)<br><span class="cod-rubrica" style="color:#eee;">Cód. 50001</span></th>
+          <th>Valor do Repouso (R$)<br><span class="cod-rubrica" style="color:#eee;">Cód. 51261</span></th>
+          <th>Valor das Horas (R$)<br><span class="cod-rubrica" style="color:#eee;">Cód. 50004</span></th>
+          <th>INSS a devolver (R$)<br><span class="cod-rubrica" style="color:#eee;">Cód. 30910</span></th>
         </tr>
       </thead>
       <tbody id="print-competencias-body"></tbody>
@@ -191,8 +194,10 @@
           <td>TOTAL</td>
           <td id="print-total-dias-falta"></td>
           <td id="print-total-dias-repouso"></td>
+          <td id="print-total-horas"></td>
           <td id="print-total-valor-falta"></td>
           <td id="print-total-valor-repouso"></td>
+          <td id="print-total-valor-horas"></td>
           <td id="print-total-inss"></td>
         </tr>
       </tfoot>
@@ -277,24 +282,28 @@
             <th style="font-size:12px;">Competência</th>
             <th style="font-size:12px;">Dias de Falta</th>
             <th style="font-size:12px;">Dias de Repouso Remunerado</th>
-            <th style="font-size:12px;">Valor da Falta (R$)</th>
-            <th style="font-size:12px;">Valor do Repouso (R$)</th>
-            <th style="font-size:12px;">INSS a devolver (R$)</th>
+            <th style="font-size:12px;">Horas Não Trabalhadas</th>
+            <th style="font-size:12px;">Valor da Falta (R$)<span class="cod-rubrica">Cód. 50001</span></th>
+            <th style="font-size:12px;">Valor do Repouso (R$)<span class="cod-rubrica">Cód. 51261</span></th>
+            <th style="font-size:12px;">Valor das Horas (R$)<span class="cod-rubrica">Cód. 50004</span></th>
+            <th style="font-size:12px;">INSS a devolver (R$)<span class="cod-rubrica">Cód. 30910</span></th>
             <th style="font-size:12px;"></th>
           </tr>
         </thead>
         <tbody id="cf-body">
-          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
-          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
-          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-horas" placeholder="0" min="0" step="0.5" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-horas" placeholder="0" min="0" step="0.5" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
+          <tr class="cf-linha"><td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="number" class="cf-horas" placeholder="0" min="0" step="0.5" style="width:100%;font-size:12px;padding:4px 6px;"></td><td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td><td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td></tr>
         </tbody>
         <tfoot>
           <tr style="font-weight:bold;background:#f8f9fa;">
             <td style="font-size:12px;">TOTAL</td>
             <td id="cf-total-dias-falta" style="font-size:12px;"></td>
             <td id="cf-total-dias-repouso" style="font-size:12px;"></td>
+            <td id="cf-total-horas" style="font-size:12px;"></td>
             <td id="cf-total-valor-falta" style="font-size:12px;text-align:right;"></td>
             <td id="cf-total-valor-repouso" style="font-size:12px;text-align:right;"></td>
+            <td id="cf-total-valor-horas" style="font-size:12px;text-align:right;"></td>
             <td id="cf-total-inss" style="font-size:12px;text-align:right;"></td>
             <td></td>
           </tr>
@@ -336,6 +345,8 @@
     cfTotalDiasRepouso: $("#cf-total-dias-repouso"),
     cfTotalValorFalta: $("#cf-total-valor-falta"),
     cfTotalValorRepouso: $("#cf-total-valor-repouso"),
+    cfTotalHoras: $("#cf-total-horas"),
+    cfTotalValorHoras: $("#cf-total-valor-horas"),
     cfTotalInss: $("#cf-total-inss"),
     printDataEmissao: $("#print-data-emissao"),
     printDadosPessoais: $("#print-dados-pessoais"),
@@ -344,6 +355,8 @@
     printTotalDiasRepouso: $("#print-total-dias-repouso"),
     printTotalValorFalta: $("#print-total-valor-falta"),
     printTotalValorRepouso: $("#print-total-valor-repouso"),
+    printTotalHoras: $("#print-total-horas"),
+    printTotalValorHoras: $("#print-total-valor-horas"),
     printTotalInss: $("#print-total-inss"),
     printRodape: $("#print-rodape")
   };
@@ -451,8 +464,10 @@
     <td><input type="month" class="cf-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="number" class="cf-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="number" class="cf-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+    <td><input type="number" class="cf-horas" placeholder="0" min="0" step="0.5" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="text" class="cf-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td><input type="text" class="cf-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+    <td><input type="text" class="cf-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td><input type="text" class="cf-preview-inss" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td style="text-align:center;"><button type="button" class="btn-remover-linha" title="Remover linha">×</button></td>
   `;
@@ -484,42 +499,53 @@
 
   const atualizarPreview = () => {
     const rem = atualizarTotalRubricas();
-    let totalDiasFalta = 0, totalDiasRepouso = 0, totalValorFalta = 0, totalValorRepouso = 0, totalInss = 0;
+    let totalDiasFalta = 0, totalDiasRepouso = 0, totalValorFalta = 0, totalValorRepouso = 0,
+        totalHoras = 0, totalValorHoras = 0, totalInss = 0;
 
     $$(".cf-linha").forEach(tr => {
       const previewFalta = tr.querySelector(".cf-preview-falta");
       const previewRepouso = tr.querySelector(".cf-preview-repouso");
+      const previewHoras = tr.querySelector(".cf-preview-horas");
       const previewInss = tr.querySelector(".cf-preview-inss");
-      if (!previewFalta || !previewRepouso || !previewInss) return;
+      if (!previewFalta || !previewRepouso || !previewHoras || !previewInss) return;
 
       const diasFalta = parseFloat(tr.querySelector(".cf-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".cf-dias-repouso")?.value) || 0;
+      const horas = parseFloat(tr.querySelector(".cf-horas")?.value) || 0;
       const diasTotal = diasFalta + diasRepouso;
 
       if (rem <= 0) {
         previewFalta.value = "0,00";
         previewRepouso.value = "0,00";
+        previewHoras.value = "0,00";
         previewInss.value = "0,00";
         return;
       }
 
       const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
       const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
+      const valorHoras = Number(((rem / 200) * horas).toFixed(2));
       previewFalta.value = formatarValorTabela(valorFalta);
       previewRepouso.value = formatarValorTabela(valorRepouso);
+      previewHoras.value = formatarValorTabela(valorHoras);
 
       totalDiasFalta += diasFalta;
       totalDiasRepouso += diasRepouso;
       totalValorFalta += valorFalta;
       totalValorRepouso += valorRepouso;
+      totalHoras += horas;
+      totalValorHoras += valorHoras;
 
-      if (diasTotal <= 0) {
+      if (diasTotal <= 0 && horas <= 0) {
         previewInss.value = "0,00";
         return;
       }
 
-      const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
-      const baseReduzidaMes = Math.max(0, Number((rem - valorDevolucaoMes).toFixed(2)));
+      // Redução total da base do mês = dias de falta/repouso (÷30) + horas não trabalhadas (÷200).
+      // O INSS a devolver (Cód. 30910) já sai combinado: dias + horas.
+      const valorReducaoDias = Number(((rem / 30) * diasTotal).toFixed(2));
+      const valorReducaoTotal = Number((valorReducaoDias + valorHoras).toFixed(2));
+      const baseReduzidaMes = Math.max(0, Number((rem - valorReducaoTotal).toFixed(2)));
       const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(rem);
       const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
       const diferencaMes = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
@@ -531,6 +557,8 @@
     el.cfTotalDiasRepouso.textContent = totalDiasRepouso;
     el.cfTotalValorFalta.textContent = formatarValorTabela(totalValorFalta);
     el.cfTotalValorRepouso.textContent = formatarValorTabela(totalValorRepouso);
+    el.cfTotalHoras.textContent = totalHoras;
+    el.cfTotalValorHoras.textContent = formatarValorTabela(totalValorHoras);
     el.cfTotalInss.textContent = formatarValorTabela(totalInss);
   };
 
@@ -546,24 +574,27 @@
       const mes = tr.querySelector(".cf-mes")?.value || "";
       const diasFalta = parseFloat(tr.querySelector(".cf-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".cf-dias-repouso")?.value) || 0;
-      if (!mes || (diasFalta <= 0 && diasRepouso <= 0)) return null;
+      const horas = parseFloat(tr.querySelector(".cf-horas")?.value) || 0;
+      if (!mes || (diasFalta <= 0 && diasRepouso <= 0 && horas <= 0)) return null;
 
       const [ano, mesNum] = mes.split("-");
       const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : mes;
       const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
       const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
+      const valorHoras = Number(((rem / 200) * horas).toFixed(2));
       const diasTotal = diasFalta + diasRepouso;
 
       let inss = 0;
-      if (rem > 0 && diasTotal > 0) {
-        const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
-        const baseReduzidaMes = Math.max(0, Number((rem - valorDevolucaoMes).toFixed(2)));
+      if (rem > 0 && (diasTotal > 0 || horas > 0)) {
+        const valorReducaoDias = Number(((rem / 30) * diasTotal).toFixed(2));
+        const valorReducaoTotal = Number((valorReducaoDias + valorHoras).toFixed(2));
+        const baseReduzidaMes = Math.max(0, Number((rem - valorReducaoTotal).toFixed(2)));
         const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(rem);
         const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
         inss = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
       }
 
-      return { mes: mesFormatado, diasFalta, diasRepouso, valorFalta, valorRepouso, inss };
+      return { mes: mesFormatado, diasFalta, diasRepouso, valorFalta, valorRepouso, horas, valorHoras, inss };
     }).filter(Boolean);
 
     if (linhas.length === 0) {
@@ -591,8 +622,10 @@
         <td>${l.mes}</td>
         <td>${l.diasFalta}</td>
         <td>${l.diasRepouso}</td>
+        <td>${l.horas}</td>
         <td>${formatarValorTabela(l.valorFalta)}</td>
         <td>${formatarValorTabela(l.valorRepouso)}</td>
+        <td>${formatarValorTabela(l.valorHoras)}</td>
         <td>${formatarValorTabela(l.inss)}</td>
       </tr>
     `).join("");
@@ -602,13 +635,17 @@
       diasRepouso: acc.diasRepouso + l.diasRepouso,
       valorFalta: acc.valorFalta + l.valorFalta,
       valorRepouso: acc.valorRepouso + l.valorRepouso,
+      horas: acc.horas + l.horas,
+      valorHoras: acc.valorHoras + l.valorHoras,
       inss: acc.inss + l.inss
-    }), { diasFalta: 0, diasRepouso: 0, valorFalta: 0, valorRepouso: 0, inss: 0 });
+    }), { diasFalta: 0, diasRepouso: 0, valorFalta: 0, valorRepouso: 0, horas: 0, valorHoras: 0, inss: 0 });
 
     el.printTotalDiasFalta.textContent = totais.diasFalta;
     el.printTotalDiasRepouso.textContent = totais.diasRepouso;
     el.printTotalValorFalta.textContent = formatarValorTabela(totais.valorFalta);
     el.printTotalValorRepouso.textContent = formatarValorTabela(totais.valorRepouso);
+    el.printTotalHoras.textContent = totais.horas;
+    el.printTotalValorHoras.textContent = formatarValorTabela(totais.valorHoras);
     el.printTotalInss.textContent = formatarValorTabela(totais.inss);
 
     el.printRodape.textContent = `${hojeBR} — Correção de Folha (Versão 09) — Portal de Acertos IBRAM-DF`;
@@ -643,6 +680,7 @@
       t.classList?.contains("rub-valor") ||
       t.classList?.contains("cf-dias-falta") ||
       t.classList?.contains("cf-dias-repouso") ||
+      t.classList?.contains("cf-horas") ||
       t.classList?.contains("cf-mes")
     ) {
       clearTimeout(debounceTimer);
@@ -722,13 +760,16 @@ function coletarLinhasResultado() {
     const mes = tr.querySelector('.cf-mes')?.value || '';
     const diasFalta = tr.querySelector('.cf-dias-falta')?.value || '';
     const diasRepouso = tr.querySelector('.cf-dias-repouso')?.value || '';
-    if (!mes && !diasFalta && !diasRepouso) return;
+    const horas = tr.querySelector('.cf-horas')?.value || '';
+    if (!mes && !diasFalta && !diasRepouso && !horas) return;
     linhas.push({
       mes,
       diasFalta,
       diasRepouso,
       valorFalta: tr.querySelector('.cf-preview-falta')?.value || '0,00',
       valorRepouso: tr.querySelector('.cf-preview-repouso')?.value || '0,00',
+      horas,
+      valorHoras: tr.querySelector('.cf-preview-horas')?.value || '0,00',
       inss: tr.querySelector('.cf-preview-inss')?.value || '0,00'
     });
   });
