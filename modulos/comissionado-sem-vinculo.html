@@ -2949,13 +2949,16 @@ window.addEventListener('afterprint', limparImpressao);
   //
   // IMPORTANTE: classes de estado/validação (is-valid, is-invalid) são
   // adicionadas e removidas dinamicamente conforme o usuário interage
-  // com o campo (ex.: símbolo de verba validado). Se essas classes
-  // entrassem no seletor da chave, um campo salvo com "is-valid" (por
-  // ter sido validado antes de salvar) nunca seria encontrado ao
-  // restaurar em uma página recém-carregada, onde nenhum campo tem
-  // essa classe ainda — quebrando o preenchimento automático. Por
-  // isso elas são excluídas do seletor.
-  const CLASSES_VOLATEIS = ['is-valid', 'is-invalid'];
+  // com o campo (ex.: símbolo de verba validado). O mesmo vale para
+  // valor-positivo/valor-negativo nas células de valor manual, que
+  // trocam de classe conforme o sinal do número digitado. Se essas
+  // classes entrassem no seletor da chave, um campo salvo com
+  // "valor-negativo" (por estar negativo no momento de salvar) nunca
+  // seria encontrado ao restaurar em uma página recém-carregada, onde
+  // toda linha em branco começa como "valor-positivo" — quebrando o
+  // preenchimento automático do valor (mesmo problema já visto com
+  // is-valid/is-invalid). Por isso todas elas são excluídas do seletor.
+  const CLASSES_VOLATEIS = ['is-valid', 'is-invalid', 'valor-positivo', 'valor-negativo'];
   function chaveElemento(el) {
     if (el.id) return 'id:' + el.id;
     const container = el.closest('[id]') || document.body;
