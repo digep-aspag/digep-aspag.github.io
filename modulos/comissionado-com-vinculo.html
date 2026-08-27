@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sistema de Acerto — Cargos Comissionados</title>
+<title>Sistema de Acerto — Cargos Comissionados (COM vínculo)</title>
 <style>
 /* ============================================================
    RESET / BASE
@@ -141,7 +141,8 @@ em{font-style:italic}
 ============================================================ */
 .table{width:100%;border-collapse:collapse}
 .table th,.table td{padding:.5rem;vertical-align:top;border-bottom:1px solid #dee2e6}
-.results-table td:last-child,.results-table th:last-child,
+.results-table td:nth-child(3),.results-table th:nth-child(3){text-align:right}
+.results-table tr.total-row td:nth-child(2){text-align:right}
 #resumo-table td:last-child,#resumo-table th:last-child{text-align:right}
 .table-bordered th,.table-bordered td{border:1px solid #dee2e6}
 .table-success th{background:#d1e7dd}
@@ -297,7 +298,7 @@ em{font-style:italic}
 <div id="banner-edicao" style="display:none;background:#FBF3E3;border:1px solid #E9CE9C;color:#5B4A28;padding:0.7rem 1rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.2rem;font-family:'IBM Plex Sans',sans-serif;"></div>
 <div class="container app-container my-4">
   <header class="mb-3">
-    <h1 class="app-title">Sistema de Acerto — Cargos Comissionados</h1>
+    <h1 class="app-title">Sistema de Acerto — Cargos Comissionados (COM vínculo)</h1>
     <div class="app-subtitle">Cálculos conforme LC 840/2011 • Avos com quinzena (≥15 dias) • Cada cargo calculado de forma independente</div>
     <div class="rule"></div>
   </header>
@@ -1860,14 +1861,26 @@ function atualizarLembretesServidor() {
 ================================================================ */
 $('#btn-atualizar-resumo').addEventListener('click', () => {
   const totals = Object.fromEntries(CODIGOS_RESUMO.map(c => [c, 0]));
+  const totaisManuais = new Map(); // código digitado manualmente -> {descricao, valor}
   for (let i = 1; i <= TOTAL_CARGOS; i++) {
     const pane = $(cargoPanesSel[i - 1]);
     if (!pane || pane.dataset.ready !== '1') continue;
     CODIGOS_RESUMO.forEach(c => { totals[c] += lerValorDeCodigoNaAba(pane, c); });
+
+    $$('.manual-row', pane).forEach(tr => {
+      const codigo = ($('.manual-codigo', tr)?.textContent || '').trim();
+      if (!codigo) return;
+      const descricao = ($('.manual-descricao', tr)?.textContent || '').trim();
+      const valorNum = parseFloat(($('.manual-valor', tr)?.textContent || '').trim()) || 0;
+      if (!totaisManuais.has(codigo)) totaisManuais.set(codigo, { descricao: descricao || '(sem descrição)', valor: 0 });
+      const info = totaisManuais.get(codigo);
+      info.valor += valorNum;
+      if (descricao && info.descricao === '(sem descrição)') info.descricao = descricao;
+    });
   }
 
   const tbody = $('#resumo-table tbody');
-  $$('tr', tbody).forEach(tr => {
+  $$('tr[data-code]', tbody).forEach(tr => {
     const oc = tr.getAttribute('data-code');
     const tot = totals[oc] || 0;
     tr.cells[0].textContent = ajustarCodigo(oc, tot);
@@ -1875,8 +1888,26 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
     tr.cells[2].className = tot < 0 ? 'valor-negativo' : 'valor-positivo';
   });
 
+  // Remove linhas manuais de uma atualização anterior, para não duplicar, e
+  // adiciona uma linha por código manual encontrado nos cargos já calculados.
+  $$('.manual-resumo-row', tbody).forEach(tr => tr.remove());
+  totaisManuais.forEach((info, codigo) => {
+    const tr = document.createElement('tr');
+    tr.className = 'manual-resumo-row';
+    const c1 = document.createElement('td');
+    c1.textContent = codigo;
+    const c2 = document.createElement('td');
+    c2.textContent = info.descricao + ' (lançamento manual)';
+    const c3 = document.createElement('td');
+    c3.textContent = (info.valor < 0 ? '-' : '') + Math.abs(info.valor).toFixed(2);
+    c3.className = info.valor < 0 ? 'valor-negativo' : 'valor-positivo';
+    tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3);
+    tbody.appendChild(tr);
+  });
+
   let tg = 0;
   Object.values(totals).forEach(v => tg += v);
+  totaisManuais.forEach(info => { tg += info.valor; });
   $('#resumo-total').innerHTML =
     `TOTAL LÍQUIDO (todos os cargos): ` +
     `<span class="${tg < 0 ? 'valor-negativo' : 'valor-positivo'}">` +
@@ -1986,7 +2017,7 @@ function construirPaginaImpressaoCargo(pane, idx, dataAtual) {
   const div = document.createElement('div');
   div.className = 'print-page';
   div.innerHTML = `
-    <h2>Sistema de Acerto — Cargos Comissionados</h2>
+    <h2>Sistema de Acerto — Cargos Comissionados (COM vínculo)</h2>
     <div class="print-sub">Simulação do Acerto de Contas • Emitido em ${dataAtual}</div>
     <div class="print-meta"><strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;&nbsp; <strong>Processo SEI:</strong> ${serverData.processoSei || '—'}</div>
     <div class="print-meta"><strong>Nome:</strong> ${serverData.nome || '—'}</div>
@@ -2025,7 +2056,7 @@ function construirPaginaImpressaoResumo(dataAtual) {
   const div = document.createElement('div');
   div.className = 'print-page';
   div.innerHTML = `
-    <h2>Sistema de Acerto — Cargos Comissionados</h2>
+    <h2>Sistema de Acerto — Cargos Comissionados (COM vínculo)</h2>
     <div class="print-meta"><strong>Servidor:</strong> ${serverData.nome || '—'} &nbsp;•&nbsp; <strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;•&nbsp; <strong>Processo SEI:</strong> ${serverData.processoSei || '—'} &nbsp;•&nbsp; <strong>Data:</strong> ${dataAtual}</div>
     <hr>
     <h3>RESUMO GERAL (TODOS OS CARGOS)</h3>
