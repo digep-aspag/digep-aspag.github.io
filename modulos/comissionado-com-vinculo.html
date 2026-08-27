@@ -380,15 +380,15 @@ em{font-style:italic}
           <table class="table table-bordered align-middle" id="resumo-table">
             <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:280px">TOTAL R$</th></tr></thead>
             <tbody>
-              <tr data-code="20014"><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="40950"><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="21593"><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="40951"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="20875"><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="20857"><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="20872"><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="20883"><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
-              <tr data-code="60891"><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td></tr>
+              <tr data-code="20014"><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="40950"><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="21593"><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="40951"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20875"><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20857"><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20872"><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="20883"><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="60891"><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
             </tbody>
           </table>
         </div>
@@ -500,6 +500,18 @@ const calcularDiferencaDias = (d1, d2) => {
 };
 
 const clamp2 = el => { const v = parseFloat(el.value); if (!isNaN(v)) el.value = v.toFixed(2); };
+
+/* Lê de volta, como número, um valor já exibido no formato brasileiro
+   (ex.: "-2.170,00" ou "2.170,00"). Precisa remover o ponto de milhar ANTES
+   de trocar a vírgula por ponto decimal — senão "2.170,00" seria lido como
+   "2.170" (2,17), perdendo o valor real. */
+function parseMoedaBR(texto) {
+  if (texto == null) return 0;
+  let raw = String(texto).trim().replace(/[^\d,.\-]/g, '');
+  if (raw.includes(',')) raw = raw.replace(/\./g, '').replace(',', '.');
+  const v = parseFloat(raw);
+  return isNaN(v) ? 0 : v;
+}
 
 /* Pares de código "irregulares", que não seguem o padrão genérico de troca
    de prefixo 2↔6 (ex.: códigos de Imposto de Renda, cujo par negativo muda
@@ -859,7 +871,7 @@ function setResultRowValueCtx(ctx, baseCode, value) {
 
   const v = parseFloat(value) || 0;
   row.cells[0].textContent = ajustarCodigo(codigoPos, v);
-  row.cells[2].textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
+  row.cells[2].textContent = formatarMoedaBR(v);
   row.cells[2].className = v < 0 ? 'valor-negativo' : 'valor-positivo';
 }
 
@@ -868,7 +880,7 @@ function linhaManualHTML() {
   <tr class="manual-row">
     <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
     <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
-    <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0.00</td>
+    <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0,00</td>
     <td class="text-center"><button type="button" class="btn-remover-linha" title="Remover esta linha">✕</button></td>
   </tr>`;
 }
@@ -879,7 +891,7 @@ function atualizarTotalResultados(resultsBody) {
     if (tr.classList.contains('total-row')) return;
     const v = tr.cells?.[2];
     if (!v) return;
-    const abs = parseFloat(v.textContent.trim().replace('-', '')) || 0;
+    const abs = Math.abs(parseMoedaBR(v.textContent));
     total += (v.classList.contains('valor-negativo') ? -1 : 1) * abs;
   });
 
@@ -898,7 +910,7 @@ function atualizarTotalResultados(resultsBody) {
     trow.appendChild(c3);
     resultsBody.appendChild(trow);
   }
-  trow.cells[1].textContent = (total < 0 ? '-' : '') + Math.abs(total).toFixed(2);
+  trow.cells[1].textContent = formatarMoedaBR(total);
   trow.cells[1].className = total >= 0 ? 'valor-positivo' : 'valor-negativo';
   return total;
 }
@@ -911,12 +923,10 @@ function aplicarRegraSinalManual(tr) {
   const valorCell = $('.manual-valor', tr);
   if (!codigoCell || !valorCell) return;
   const primeiroDigito = (codigoCell.textContent || '').trim().charAt(0);
-  let raw = valorCell.textContent.replace(/[^\d,.\-]/g, '').replace(',', '.');
-  let v = parseFloat(raw);
-  if (isNaN(v)) v = 0;
+  let v = parseMoedaBR(valorCell.textContent);
   if (['4', '5', '6'].includes(primeiroDigito)) v = -Math.abs(v);
   else if (['1', '2', '3'].includes(primeiroDigito)) v = Math.abs(v);
-  valorCell.textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
+  valorCell.textContent = formatarMoedaBR(v);
   valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
   const resultsBody = tr.closest('.results-body');
   if (resultsBody) atualizarTotalResultados(resultsBody);
@@ -975,7 +985,7 @@ function lerValorDeCodigoNaAba(ctx, code) {
     if (c === codigoPos || c === codigoNeg) {
       const td = tr.cells[2];
       if (!td) continue;
-      const abs = parseFloat(td.textContent.trim().replace('-', '')) || 0;
+      const abs = Math.abs(parseMoedaBR(td.textContent));
       return td.classList.contains('valor-negativo') ? -abs : abs;
     }
   }
@@ -995,7 +1005,7 @@ function coletarSnapshotCargo(ctx, idx) {
   $$('tr', $('.results-body', ctx)).forEach(tr => {
     const td = tr.cells?.[2];
     if (!td) return;
-    const abs = parseFloat(td.textContent.trim().replace('-', '').replace('R$', '').trim()) || 0;
+    const abs = Math.abs(parseMoedaBR(td.textContent));
     total += (td.classList.contains('valor-negativo') ? -1 : 1) * abs;
   });
 
@@ -1067,7 +1077,7 @@ function cargoTemplate(idx) {
   const opts = Object.keys(TABELA_VERBAS).map(s => `<option value="${s}">`).join('');
   return `
   <div class="card shadow-sm mb-3"><div class="card-body">
-    <div class="lembrete-servidor text-muted mb-2" style="font-size:.8rem"></div>
+    <div class="lembrete-servidor alert alert-info py-1 px-2 mb-2" style="font-size:.78rem;display:inline-block"></div>
     <h4 class="card-title mb-3">Cargo ${idx} <small class="text-muted fs-6 fw-normal">(independente)</small></h4>
     <div class="row g-3 align-items-end">
       <div class="col-lg-7">
@@ -1156,15 +1166,15 @@ function cargoTemplate(idx) {
       <table class="table table-bordered results-table">
         <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th><th style="width:40px"></th></tr></thead>
         <tbody class="results-body">
-          <tr><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td><td></td></tr>
-          <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td><td></td></tr>
+          <tr><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0,00</td><td></td></tr>
+          <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0,00</td><td></td></tr>
           ${[1,2,3,4,5,6].map(() => linhaManualHTML()).join('')}
         </tbody>
       </table>
@@ -1810,7 +1820,7 @@ function atualizarCabecalhoResumo() {
 
 function atualizarLembretesServidor() {
   $$('.lembrete-servidor').forEach(el => {
-    el.textContent = `${serverData.nome || 'Nome não preenchido'} · Matrícula: ${serverData.matricula || '—'}`;
+    el.innerHTML = `<strong>${serverData.nome || 'Nome não preenchido'}</strong> · Matrícula: ${serverData.matricula || '—'}`;
   });
 }
 
@@ -1871,7 +1881,7 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
       const codigo = ($('.manual-codigo', tr)?.textContent || '').trim();
       if (!codigo) return;
       const descricao = ($('.manual-descricao', tr)?.textContent || '').trim();
-      const valorNum = parseFloat(($('.manual-valor', tr)?.textContent || '').trim()) || 0;
+      const valorNum = parseMoedaBR($('.manual-valor', tr)?.textContent);
       if (!totaisManuais.has(codigo)) totaisManuais.set(codigo, { descricao: descricao || '(sem descrição)', valor: 0 });
       const info = totaisManuais.get(codigo);
       info.valor += valorNum;
@@ -1884,7 +1894,7 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
     const oc = tr.getAttribute('data-code');
     const tot = totals[oc] || 0;
     tr.cells[0].textContent = ajustarCodigo(oc, tot);
-    tr.cells[2].textContent = (tot < 0 ? '-' : '') + Math.abs(tot).toFixed(2);
+    tr.cells[2].textContent = formatarMoedaBR(tot);
     tr.cells[2].className = tot < 0 ? 'valor-negativo' : 'valor-positivo';
   });
 
@@ -1899,7 +1909,7 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
     const c2 = document.createElement('td');
     c2.textContent = info.descricao + ' (lançamento manual)';
     const c3 = document.createElement('td');
-    c3.textContent = (info.valor < 0 ? '-' : '') + Math.abs(info.valor).toFixed(2);
+    c3.textContent = formatarMoedaBR(info.valor);
     c3.className = info.valor < 0 ? 'valor-negativo' : 'valor-positivo';
     tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3);
     tbody.appendChild(tr);
@@ -1911,7 +1921,7 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
   $('#resumo-total').innerHTML =
     `TOTAL LÍQUIDO (todos os cargos): ` +
     `<span class="${tg < 0 ? 'valor-negativo' : 'valor-positivo'}">` +
-    `${(tg < 0 ? '-' : '') + Math.abs(tg).toFixed(2)}</span>`;
+    `${formatarMoedaBR(tg)}</span>`;
 });
 
 $('#btn-exportar-resumo').addEventListener('click', () => {
@@ -1982,7 +1992,7 @@ function construirTabelaResultadosHTML(pane, filtrarZerados) {
   let total = 0;
   const linhasValidas = linhas.filter(tr => {
     const codigo = tr.cells[0]?.textContent.trim();
-    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    const valorNum = parseMoedaBR(tr.cells[2]?.textContent);
     total += valorNum;
     if (!filtrarZerados) return true;
     return codigo && Math.abs(valorNum) > 0.001;
@@ -1996,7 +2006,7 @@ function construirTabelaResultadosHTML(pane, filtrarZerados) {
   linhasValidas.forEach(tr => {
     const codigo = tr.cells[0]?.textContent.trim();
     const desc = tr.cells[1]?.textContent.trim();
-    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    const valorNum = parseMoedaBR(tr.cells[2]?.textContent);
     const cls = valorNum < 0 ? 'valor-negativo' : 'valor-positivo';
     html += `<tr><td>${codigo}</td><td>${desc}</td><td class="${cls}">${formatarMoedaBR(valorNum)}</td></tr>`;
   });
@@ -2045,7 +2055,7 @@ function construirPaginaImpressaoResumo(dataAtual) {
   $$('tr', tbody).forEach(tr => {
     const codigo = tr.cells[0]?.textContent.trim();
     const desc = tr.cells[1]?.textContent.trim();
-    const valorNum = parseFloat(tr.cells[2]?.textContent.trim()) || 0;
+    const valorNum = parseMoedaBR(tr.cells[2]?.textContent);
     total += valorNum;
     const cls = valorNum < 0 ? 'valor-negativo' : 'valor-positivo';
     html += `<tr><td>${codigo}</td><td>${desc}</td><td class="${cls}">${formatarMoedaBR(valorNum)}</td></tr>`;
