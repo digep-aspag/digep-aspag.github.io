@@ -98,6 +98,11 @@ em{font-style:italic}
 .card.shadow-sm{box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
 .card-body{padding:1rem 1.25rem}
 .card-title{margin:0 0 .5rem;font-size:1.25rem;font-weight:500}
+.lembrete-servidor{
+  display:inline-block; font-size:.78rem; color:#6c757d; background:#F6F4EF;
+  border:1px dashed #d8b4fe; border-radius:5px; padding:.25rem .6rem;
+}
+.lembrete-servidor .lembrete-nome, .lembrete-servidor .lembrete-matricula{ font-weight:600; color:#3B0764; }
 
 /* ============================================================
    ALERTAS
@@ -427,8 +432,8 @@ em{font-style:italic}
               <tr data-code="20017"><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td></tr>
               <tr data-code="INSS_DIAS"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td></tr>
               <tr data-code="IR_REMUNERACAO"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td></tr>
-              <tr data-code="21593"><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
-              <tr data-code="INSS_13"><td>40920</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+              <tr data-code="20521"><td>20521</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
+              <tr data-code="INSS_13"><td>40912</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
               <tr data-code="IR_13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td></tr>
               <tr data-code="20875"><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
               <tr data-code="20857"><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
@@ -464,7 +469,7 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const serverData = { nome: '', matricula: '', processoSei: '' };
 const TOTAL_CARGOS = 10;
 const cargoPanesSel = Array.from({ length: TOTAL_CARGOS }, (_, i) => `#pane-c${i + 1}`);
-const CODIGOS_RESUMO = ['20015', '20017', '21593', '20875', '20857', '20872', '20883', '60891', '20926', '20912', '30515'];
+const CODIGOS_RESUMO = ['20015', '20017', '20521', '20875', '20857', '20872', '20883', '60891', '20926', '20912', '30515'];
 let qtdCargos = TOTAL_CARGOS; // quantidade de cargos que serão de fato lançados (padrão: todos visíveis)
 
 /* Tabela oficial GDF/SEPLAG (Unidade de Administração de Carreiras e Empregos
@@ -645,13 +650,15 @@ function calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlim = 0, di
 }
 
 /* INSS sobre o 13º salário apurado no acerto (mesma tabela/percentuais da
-   remuneração). Só há desconto quando há valor de 13º a receber (>0). Código
-   fixo 40920. */
+   remuneração). Só há desconto quando há valor de 13º a receber (>0).
+   Código dinâmico: 40912 quando o valor é negativo (desconto normal),
+   30912 quando é positivo (ex.: alguma devolução de INSS retido a mais). */
 function calcularInssSobre13Ctx(valor13) {
   const v13 = Number(valor13) || 0;
-  if (v13 <= 0) return { codigo: '40920', valor: 0, detalhe: null };
+  if (v13 <= 0) return { codigo: '40912', valor: 0, detalhe: null };
   const seg = calcularSeguridadeSocialRGPS(v13);
-  return { codigo: '40920', valor: Number((-seg.total).toFixed(2)), detalhe: { baseCalculo: v13, seguridade: seg } };
+  const valor = Number((-seg.total).toFixed(2));
+  return { codigo: valor >= 0 ? '30912' : '40912', valor, detalhe: { baseCalculo: v13, seguridade: seg } };
 }
 
 /* ================================================================
@@ -775,7 +782,7 @@ function calcularIRRemuneracaoCtx(valorVerba, rdias, numDependentes = 0, baseSeg
 /* IMPOSTO DE RENDA SOBRE O 13º SALÁRIO (código fixo 40951) — tributação
    exclusiva na fonte sobre o valor de 13º apurado no acerto (valor13),
    usando a mesma tabela mensal e a mesma redução 2026. Dedução legal =
-   INSS já apurado sobre o 13º (código 40920). */
+   INSS já apurado sobre o 13º (código 40912/30912). */
 function calcularIR13Ctx(valor13, inss13Valor, numDependentes = 0) {
   const v13 = Number(valor13) || 0;
   if (v13 <= 0) return { codigo: '40951', valor: 0, detalhe: null };
@@ -1340,7 +1347,7 @@ function atualizarTotalResultados(resultsBody) {
     resultsBody.appendChild(trow);
   }
   trow.cells[1].textContent = (total < 0 ? '-' : '') + formatarMoeda(total);
-  trow.cells[1].className = total >= 0 ? 'valor-positivo' : 'valor-negativo';
+  trow.cells[1].className = 'text-end ' + (total >= 0 ? 'valor-positivo' : 'valor-negativo');
   return total;
 }
 
@@ -1375,21 +1382,41 @@ function bindManualRows(ctx) {
 
     /* Código e Descrição sempre em CAIXA ALTA, atualizados em tempo real */
     codigoCell.addEventListener('input', () => uppercaseContentEditableCaret(codigoCell));
-    codigoCell.addEventListener('blur', () => uppercaseContentEditableCaret(codigoCell));
+    codigoCell.addEventListener('blur', () => {
+      uppercaseContentEditableCaret(codigoCell);
+      aplicarSinalPorCodigoManual(tr);
+    });
     descricaoCell.addEventListener('input', () => uppercaseContentEditableCaret(descricaoCell));
     descricaoCell.addEventListener('blur', () => uppercaseContentEditableCaret(descricaoCell));
 
     valorCell.addEventListener('blur', () => {
-      const v = parseValorCelula(valorCell.textContent);
-      valorCell.textContent = (v < 0 ? '-' : '') + formatarMoeda(v);
-      valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
-      const resultsBody = tr.closest('.results-body');
-      if (resultsBody) atualizarTotalResultados(resultsBody);
+      aplicarSinalPorCodigoManual(tr);
     });
     valorCell.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
     });
   });
+}
+
+/* Regra de sinal obrigatório nas linhas manuais: se o código digitado
+   começar com "6", o valor tem que ser NEGATIVO (devolução/desconto);
+   se começar com "2", o valor tem que ser POSITIVO (a receber). Outros
+   prefixos de código não forçam sinal — respeita o que foi digitado. */
+function aplicarSinalPorCodigoManual(tr) {
+  const codigoCell = $('.manual-codigo', tr);
+  const valorCell = $('.manual-valor', tr);
+  if (!codigoCell || !valorCell) return;
+
+  const codigo = (codigoCell.textContent || '').trim();
+  let v = parseValorCelula(valorCell.textContent);
+
+  if (codigo.startsWith('6')) v = -Math.abs(v);
+  else if (codigo.startsWith('2')) v = Math.abs(v);
+
+  valorCell.textContent = (v < 0 ? '-' : '') + formatarMoeda(v);
+  valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
+  const resultsBody = tr.closest('.results-body');
+  if (resultsBody) atualizarTotalResultados(resultsBody);
 }
 
 function lerValorPorClasseNaAba(ctx, className) {
@@ -1504,6 +1531,7 @@ function cargoTemplate(idx) {
   return `
   <div class="card shadow-sm mb-3"><div class="card-body">
     <h4 class="card-title mb-3">Cargo ${idx} <small class="text-muted fs-6 fw-normal">(independente)</small></h4>
+    <div class="lembrete-servidor mb-3"><span class="lembrete-nome">—</span> <span class="text-muted">·</span> Matrícula <span class="lembrete-matricula">—</span></div>
     <div class="row g-3 align-items-end">
       <div class="col-lg-6">
         <label class="form-label">Símbolo (verba)</label>
@@ -1560,7 +1588,7 @@ function cargoTemplate(idx) {
       <div class="form-check">
         <input type="checkbox" class="form-check-input check-exoneracao-dezembro" id="chk-dez-${idx}">
         <label class="form-check-label" for="chk-dez-${idx}">
-          <span class="text-danger">⚠</span> <strong>Exoneração em dezembro:</strong> confira se os 12 avos do 13º já foram pagos integralmente ao servidor. Se sim, marque esta caixa — o campo "Adiantamento recebido" será <strong>zerado automaticamente</strong> e <strong>nenhum valor de 13º nem de adiantamento de 13º</strong> será calculado, pago ou devolvido neste acerto (códigos 21593 e 60891 ficam zerados). O campo de adiantamento continua <strong>editável manualmente</strong> depois, se precisar registrar algo, mas o valor digitado nele não entrará no cálculo enquanto esta caixa estiver marcada.
+          <span class="text-danger">⚠</span> <strong>Exoneração em dezembro:</strong> confira se os 12 avos do 13º já foram pagos integralmente ao servidor. Se sim, marque esta caixa — o campo "Adiantamento recebido" será <strong>zerado automaticamente</strong> e <strong>nenhum valor de 13º nem de adiantamento de 13º</strong> será calculado, pago ou devolvido neste acerto (códigos 20521 e 60891 ficam zerados). O campo de adiantamento continua <strong>editável manualmente</strong> depois, se precisar registrar algo, mas o valor digitado nele não entrará no cálculo enquanto esta caixa estiver marcada.
         </label>
       </div>
     </div>
@@ -1646,8 +1674,8 @@ function cargoTemplate(idx) {
             <tr><td>20017</td><td>DIAS TRABALHADOS - Vencimento</td><td class="valor-positivo">0,00</td></tr>
             <tr class="row-inss-dias"><td>40910</td><td>INSS/RGPS SOBRE DIFERENÇA DE DIAS TRABALHADOS</td><td class="valor-negativo">0,00</td></tr>
             <tr class="row-ir-remuneracao"><td>40950</td><td>IMPOSTO DE RENDA REMUNRAÇÃO</td><td class="valor-negativo">0,00</td></tr>
-            <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
-            <tr class="row-inss-13"><td>40920</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
+            <tr><td>20521</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0,00</td></tr>
+            <tr class="row-inss-13"><td>40912</td><td>INSS/RGPS SOBRE 13º SALÁRIO</td><td class="valor-negativo">0,00</td></tr>
             <tr class="row-ir-13"><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-negativo">0,00</td></tr>
             <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
             <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0,00</td></tr>
@@ -1843,7 +1871,7 @@ function posInitCargoPane(ctx, idx) {
        • o campo "Adiantamento recebido" é zerado automaticamente
          (mas continua editável manualmente depois — só não entra
          no cálculo enquanto a caixa estiver marcada);
-       • nenhum valor de 13º (21593) nem de adiantamento de 13º
+       • nenhum valor de 13º (20521) nem de adiantamento de 13º
          (60891) é calculado, pago ou devolvido neste acerto.
   ═══════════════════════════════════════════════════════ */
   function atualizarVisibilidadeCheckDezembro() {
@@ -2006,7 +2034,7 @@ function posInitCargoPane(ctx, idx) {
       setResultRowValueCtx(ctx, '20017', rdiasVenc.valor);
       setInssRowCtx(ctx, '.row-inss-dias', baseSeg);
       setInssRowCtx(ctx, '.row-ir-remuneracao', irRemuneracao);
-      setResultRowValueCtx(ctx, '21593', valor13);
+      setResultRowValueCtx(ctx, '20521', valor13);
       setInssRowCtx(ctx, '.row-inss-13', inss13);
       setInssRowCtx(ctx, '.row-ir-13', ir13);
       setResultRowValueCtx(ctx, '20875', fc.valorFeriasVencidas);
@@ -2105,11 +2133,11 @@ function posInitCargoPane(ctx, idx) {
       html += `<strong>INSS/RGPS sobre o 13º do acerto:</strong> `;
       if (valor13 > 0) {
         html += `R$ ${valor13.toFixed(2)} × tabela RGPS = `;
-        html += `<span class="valor-negativo">- R$ ${Math.abs(inss13.valor).toFixed(2)}</span> (código 40920)<br>`;
+        html += `<span class="${inss13.valor >= 0 ? 'valor-positivo' : 'valor-negativo'}">${inss13.valor < 0 ? '- ' : ''}R$ ${Math.abs(inss13.valor).toFixed(2)}</span> (código ${inss13.codigo})<br>`;
       } else if (exoneracaoDezembroConfirmada) {
-        html += `sem incidência (código 40920, R$ 0,00) → <strong>exoneração em dezembro confirmada</strong>: os 12 avos já foram pagos integralmente ao longo do ano, então não há 13º nem adiantamento a apurar neste acerto (códigos 21593 e 60891 zerados)<br>`;
+        html += `sem incidência (código 40912, R$ 0,00) → <strong>exoneração em dezembro confirmada</strong>: os 12 avos já foram pagos integralmente ao longo do ano, então não há 13º nem adiantamento a apurar neste acerto (códigos 20521 e 60891 zerados)<br>`;
       } else {
-        html += `sem 13º apurado neste cargo → sem incidência (código 40920, R$ 0,00)<br>`;
+        html += `sem 13º apurado neste cargo → sem incidência (código 40912, R$ 0,00)<br>`;
       }
 
       /* Adiantamento */
@@ -2297,7 +2325,7 @@ function posInitCargoPane(ctx, idx) {
 
     // Reseta explicitamente as linhas de INSS/RGPS (códigos não seguem o padrão 2xxxx/6xxxx)
     setInssRowCtx(ctx, '.row-inss-dias', { codigo: '40910', valor: 0 });
-    setInssRowCtx(ctx, '.row-inss-13', { codigo: '40920', valor: 0 });
+    setInssRowCtx(ctx, '.row-inss-13', { codigo: '40912', valor: 0 });
 
     // Esconde caixas de erro e detalhes
     elements.feriasErrorBox.classList.add('d-none');
@@ -2415,7 +2443,21 @@ Tabs.setOnShown(target => {
   posInitCargoPane(pane, idx);
   aplicarRegra60Ultimo();
   aplicarRegraAuxiliosUltimo();
+  atualizarLembretesServidor();
 });
+
+/* Lembrete de Nome/Matrícula no topo de cada cargo — evita ter que voltar
+   na aba Dados Pessoais só para conferir quem é o servidor do acerto.
+   Atualiza ao vivo conforme o usuário digita, e também toda vez que um
+   novo cargo é aberto pela primeira vez. */
+function atualizarLembretesServidor() {
+  const nome = ($('#srv-nome')?.value || '').trim();
+  const matricula = ($('#srv-matricula')?.value || '').trim();
+  $$('.lembrete-nome').forEach(el => { el.textContent = nome || '—'; });
+  $$('.lembrete-matricula').forEach(el => { el.textContent = matricula || '—'; });
+}
+$('#srv-nome')?.addEventListener('input', atualizarLembretesServidor);
+$('#srv-matricula')?.addEventListener('input', atualizarLembretesServidor);
 
 /* ================================================================
    QUANTIDADE DE CARGOS A LANÇAR
@@ -2590,7 +2632,7 @@ $('#btn-atualizar-resumo').addEventListener('click', () => {
       return;
     }
     if (oc === 'INSS_13') {
-      tr.cells[0].textContent = '40920';
+      tr.cells[0].textContent = totalInss13 > 0 ? '30912' : '40912';
       tr.cells[2].textContent = (totalInss13 < 0 ? '-' : '') + formatarMoeda(totalInss13);
       tr.cells[2].className = totalInss13 < 0 ? 'valor-negativo' : 'valor-positivo';
       return;
