@@ -172,6 +172,12 @@ em{font-style:italic}
 .manual-row td[contenteditable]:focus{background:#fff3cd;box-shadow:inset 0 0 0 1px #ffc107}
 .manual-row .manual-codigo:empty::before{content:'código';color:#adb5bd;font-style:italic}
 .manual-row .manual-descricao:empty::before{content:'descrição (opcional)';color:#adb5bd;font-style:italic}
+.text-center{text-align:center}
+.btn-remover-linha{
+  background:transparent;border:1px solid #dc3545;color:#dc3545;border-radius:.3rem;
+  width:1.6rem;height:1.6rem;line-height:1;cursor:pointer;font-size:.85rem;
+}
+.btn-remover-linha:hover{background:#dc3545;color:#fff}
 
 /* ============================================================
    IMPRESSÃO / GERAÇÃO DE PDF (via Ctrl+P do navegador)
@@ -856,6 +862,16 @@ function setResultRowValueCtx(ctx, baseCode, value) {
   row.cells[2].className = v < 0 ? 'valor-negativo' : 'valor-positivo';
 }
 
+function linhaManualHTML() {
+  return `
+  <tr class="manual-row">
+    <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
+    <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
+    <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0.00</td>
+    <td class="text-center"><button type="button" class="btn-remover-linha" title="Remover esta linha">✕</button></td>
+  </tr>`;
+}
+
 function atualizarTotalResultados(resultsBody) {
   let total = 0;
   $$('tr', resultsBody).forEach(tr => {
@@ -875,8 +891,10 @@ function atualizarTotalResultados(resultsBody) {
     c1.className = 'text-end';
     c1.textContent = 'TOTAL';
     const c2 = document.createElement('td');
+    const c3 = document.createElement('td');
     trow.appendChild(c1);
     trow.appendChild(c2);
+    trow.appendChild(c3);
     resultsBody.appendChild(trow);
   }
   trow.cells[1].textContent = (total < 0 ? '-' : '') + Math.abs(total).toFixed(2);
@@ -884,21 +902,66 @@ function atualizarTotalResultados(resultsBody) {
   return total;
 }
 
+/* Regra fixa: o sinal do valor de uma linha manual segue o primeiro dígito
+   do código lançado — 1/2/3 força positivo, 4/5/6 força negativo. Códigos
+   fora dessa faixa (ou em branco) não forçam sinal algum. */
+function aplicarRegraSinalManual(tr) {
+  const codigoCell = $('.manual-codigo', tr);
+  const valorCell = $('.manual-valor', tr);
+  if (!codigoCell || !valorCell) return;
+  const primeiroDigito = (codigoCell.textContent || '').trim().charAt(0);
+  let raw = valorCell.textContent.replace(/[^\d,.\-]/g, '').replace(',', '.');
+  let v = parseFloat(raw);
+  if (isNaN(v)) v = 0;
+  if (['4', '5', '6'].includes(primeiroDigito)) v = -Math.abs(v);
+  else if (['1', '2', '3'].includes(primeiroDigito)) v = Math.abs(v);
+  valorCell.textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
+  valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
+  const resultsBody = tr.closest('.results-body');
+  if (resultsBody) atualizarTotalResultados(resultsBody);
+}
+
+function bindUmaLinhaManual(tr) {
+  const codigoCell = $('.manual-codigo', tr);
+  const valorCell = $('.manual-valor', tr);
+  const btnRemover = $('.btn-remover-linha', tr);
+
+  valorCell.addEventListener('blur', () => aplicarRegraSinalManual(tr));
+  valorCell.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
+  });
+  codigoCell.addEventListener('blur', () => aplicarRegraSinalManual(tr));
+
+  btnRemover?.addEventListener('click', () => {
+    const codigo = (codigoCell.textContent || '').trim();
+    const descricao = ($('.manual-descricao', tr)?.textContent || '').trim();
+    const temConteudo = codigo || descricao || valorCell.textContent.trim() !== '0.00';
+    const mensagem = temConteudo
+      ? `Remover esta linha (código "${codigo || '—'}", descrição "${descricao || '—'}")? Esta ação não pode ser desfeita.`
+      : 'Remover esta linha em branco?';
+    if (!confirm(mensagem)) return;
+    const resultsBody = tr.closest('.results-body');
+    tr.remove();
+    if (resultsBody) atualizarTotalResultados(resultsBody);
+  });
+}
+
+function adicionarLinhaManual(resultsBody) {
+  const div = document.createElement('tbody');
+  div.innerHTML = linhaManualHTML();
+  const novaLinha = div.firstElementChild;
+  const totalRow = $('tr.total-row', resultsBody);
+  if (totalRow) resultsBody.insertBefore(novaLinha, totalRow);
+  else resultsBody.appendChild(novaLinha);
+  bindUmaLinhaManual(novaLinha);
+  return novaLinha;
+}
+
 function bindManualRows(ctx) {
-  $$('.manual-row', ctx).forEach(tr => {
-    const valorCell = $('.manual-valor', tr);
-    valorCell.addEventListener('blur', () => {
-      let raw = valorCell.textContent.replace(/[^\d,.\-]/g, '').replace(',', '.');
-      let v = parseFloat(raw);
-      if (isNaN(v)) v = 0;
-      valorCell.textContent = (v < 0 ? '-' : '') + Math.abs(v).toFixed(2);
-      valorCell.className = 'manual-valor ' + (v < 0 ? 'valor-negativo' : 'valor-positivo');
-      const resultsBody = tr.closest('.results-body');
-      if (resultsBody) atualizarTotalResultados(resultsBody);
-    });
-    valorCell.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); valorCell.blur(); }
-    });
+  $$('.manual-row', ctx).forEach(tr => bindUmaLinhaManual(tr));
+  $('.btn-add-linha-manual', ctx)?.addEventListener('click', () => {
+    const resultsBody = $('.results-body', ctx);
+    if (resultsBody) adicionarLinhaManual(resultsBody);
   });
 }
 
@@ -1003,6 +1066,7 @@ function cargoTemplate(idx) {
   const opts = Object.keys(TABELA_VERBAS).map(s => `<option value="${s}">`).join('');
   return `
   <div class="card shadow-sm mb-3"><div class="card-body">
+    <div class="lembrete-servidor text-muted mb-2" style="font-size:.8rem"></div>
     <h4 class="card-title mb-3">Cargo ${idx} <small class="text-muted fs-6 fw-normal">(independente)</small></h4>
     <div class="row g-3 align-items-end">
       <div class="col-lg-7">
@@ -1089,27 +1153,23 @@ function cargoTemplate(idx) {
     <div class="rubricas-dias-trabalhados detalhes-rubricas d-none" data-hascontent="0"><strong>Dias Trabalhados:</strong><div class="detalhes-rubricas-texto mt-1"></div></div>
     <div class="table-responsive mt-2">
       <table class="table table-bordered results-table">
-        <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th></tr></thead>
+        <thead class="table-success"><tr><th style="width:120px">CÓDIGO</th><th>DESCRIÇÃO</th><th style="width:180px">VALOR R$</th><th style="width:40px"></th></tr></thead>
         <tbody class="results-body">
-          <tr><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td></tr>
-          <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td></tr>
-          ${[1,2,3,4,5,6].map(() => `
-          <tr class="manual-row">
-            <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
-            <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
-            <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0.00</td>
-          </tr>`).join('')}
+          <tr><td>20014</td><td>DIAS TRABALHADOS - Representação</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>40950</td><td>IMPOSTO DE RENDA</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>21593</td><td>13º SALÁRIO DE CARGO EM COMISSÃO</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>40951</td><td>IMPOSTO DE RENDA 13º</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>20875</td><td>FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>20857</td><td>1/3 DE FÉRIAS INDENIZADAS (VENCIDAS)</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>20872</td><td>FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>20883</td><td>1/3 DE FÉRIAS PROPORCIONAIS</td><td class="valor-positivo">0.00</td><td></td></tr>
+          <tr><td>60891</td><td>ADIANTAMENTO DE 13º SALÁRIO</td><td class="valor-negativo">0.00</td><td></td></tr>
+          ${[1,2,3,4,5,6].map(() => linhaManualHTML()).join('')}
         </tbody>
       </table>
     </div>
-    <div class="text-muted mt-1" style="font-size:.8rem">As 6 linhas em branco acima são editáveis — clique para inserir código, descrição e valor manualmente (use "-" na frente do valor para devolução). Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais).</div>
+    <button class="btn btn-outline-secondary btn-sm btn-add-linha-manual">+ Adicionar linha</button>
+    <div class="text-muted mt-1" style="font-size:.8rem">As linhas em branco acima são editáveis — clique para inserir código, descrição e valor manualmente. <strong>O sinal do valor segue o código automaticamente:</strong> códigos começando com 1, 2 ou 3 ficam positivos; começando com 4, 5 ou 6 ficam negativos. Elas entram automaticamente no TOTAL, no relatório e na exportação, mas <strong>não</strong> entram no Resumo Geral (que soma apenas os códigos oficiais). Use o "✕" para remover uma linha.</div>
   </div></div>`;
 }
 
@@ -1670,6 +1730,7 @@ Tabs.setOnShown(target => {
   pane.dataset.ready = '1';
   posInitCargoPane(pane, idx);
   aplicarRegra60Ultimo();
+  atualizarLembretesServidor();
 });
 
 /* ================================================================
@@ -1746,6 +1807,12 @@ function atualizarCabecalhoResumo() {
     `<strong>Processo SEI:</strong> ${serverData.processoSei || '—'}`;
 }
 
+function atualizarLembretesServidor() {
+  $$('.lembrete-servidor').forEach(el => {
+    el.textContent = `${serverData.nome || 'Nome não preenchido'} · Matrícula: ${serverData.matricula || '—'}`;
+  });
+}
+
 (function bindPessoais() {
   const nome = $('#srv-nome');
   const mat = $('#srv-matricula');
@@ -1759,6 +1826,7 @@ function atualizarCabecalhoResumo() {
     serverData.nascimento = nasc.value || '';
     serverData.processoSei = (sei?.value || '').trim();
     atualizarCabecalhoResumo();
+    atualizarLembretesServidor();
   };
 
   nome.addEventListener('input', () => { toUp(nome); sync(); });
@@ -2058,7 +2126,7 @@ window.addEventListener('afterprint', limparImpressao);
     // Classes de estado/validação são transitórias (aparecem/somem conforme o
     // usuário digita) — não podem fazer parte da chave, senão um campo recém
     // criado (sem a classe ainda) não é encontrado na hora de restaurar.
-    const CLASSES_DINAMICAS = ['is-valid', 'is-invalid'];
+    const CLASSES_DINAMICAS = ['is-valid', 'is-invalid', 'valor-positivo', 'valor-negativo'];
     const cls = Array.from(el.classList).filter(c => !CLASSES_DINAMICAS.includes(c)).join('.');
     const seletor = el.tagName.toLowerCase() + (cls ? '.' + cls : '');
     const lista = Array.from(container.querySelectorAll(seletor));
@@ -2080,15 +2148,17 @@ window.addEventListener('afterprint', limparImpressao);
       let lista = container.querySelectorAll(seletor);
       if (!lista[idx]) {
         // Compatibilidade com chaves salvas ANTES desta correção, que podiam
-        // incluir is-valid/is-invalid dentro do seletor — remove essas classes
-        // do seletor e tenta de novo.
-        const seletorLimpo = seletor.split('.').filter(p => p !== 'is-valid' && p !== 'is-invalid').join('.');
+        // incluir is-valid/is-invalid/valor-positivo/valor-negativo dentro do
+        // seletor — remove essas classes do seletor e tenta de novo.
+        const seletorLimpo = seletor.split('.').filter(p => !['is-valid', 'is-invalid', 'valor-positivo', 'valor-negativo'].includes(p)).join('.');
         if (seletorLimpo !== seletor) lista = container.querySelectorAll(seletorLimpo);
       }
       return lista[idx] || null;
     }
     return null;
   }
+
+  const SELETOR_CELULAS_MANUAIS = '.manual-codigo, .manual-descricao, .manual-valor';
 
   function coletarEntradas() {
     const entradas = {};
@@ -2100,6 +2170,12 @@ window.addEventListener('afterprint', limparImpressao);
         entradas[chave] = el.value;
       }
     });
+    // Células editáveis das linhas manuais (código/descrição/valor) não são
+    // <input>/<select>/<textarea> — são <td contenteditable>, por isso
+    // precisam ser coletadas à parte, usando o texto delas.
+    document.querySelectorAll(SELETOR_CELULAS_MANUAIS).forEach((el) => {
+      entradas[chaveElemento(el)] = el.textContent;
+    });
     return entradas;
   }
 
@@ -2110,11 +2186,39 @@ window.addEventListener('afterprint', limparImpressao);
       if (!el) return;
       if (el.type === 'checkbox' || el.type === 'radio') {
         el.checked = entradas[chave];
+      } else if (el.isContentEditable) {
+        el.textContent = entradas[chave];
       } else {
         el.value = entradas[chave];
       }
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
+      if (el.isContentEditable) el.dispatchEvent(new Event('blur'));
+    });
+  }
+
+  /* As linhas manuais criadas com o botão "+ Adicionar linha" só existem
+     depois de clicadas — se o registro salvo tiver mais linhas do que as 6
+     iniciais de cada cargo, é preciso criar as linhas que faltam ANTES de
+     restaurar, senão os dados dessas linhas extras são perdidos. */
+  function garantirLinhasManuaisSuficientes(entradas) {
+    const maxIdxPorPane = {};
+    Object.keys(entradas).forEach((chave) => {
+      const m = chave.match(/^pos:(pane-c\d+)::td\.manual-codigo::(\d+)$/);
+      if (!m) return;
+      const pane = m[1], idx = parseInt(m[2], 10);
+      if (!(pane in maxIdxPorPane) || idx > maxIdxPorPane[pane]) maxIdxPorPane[pane] = idx;
+    });
+    Object.keys(maxIdxPorPane).forEach((paneId) => {
+      const pane = document.getElementById(paneId);
+      const resultsBody = pane ? pane.querySelector('.results-body') : null;
+      if (!resultsBody) return;
+      const linhasNecessarias = maxIdxPorPane[paneId] + 1;
+      let linhasAtuais = resultsBody.querySelectorAll('.manual-row').length;
+      while (linhasAtuais < linhasNecessarias) {
+        adicionarLinhaManual(resultsBody);
+        linhasAtuais++;
+      }
     });
   }
 
@@ -2130,6 +2234,7 @@ window.addEventListener('afterprint', limparImpressao);
         // é aberta (carregamento preguiçoso). Por isso, antes de preencher, forçamos a
         // abertura de todas as abas de cargo, e só então restauramos os valores.
         document.querySelectorAll('.nav-link[data-target^="#pane-c"]').forEach((btn) => btn.click());
+        garantirLinhasManuaisSuficientes(registro.dados.entradas);
         restaurarEntradas(registro.dados.entradas);
         document.querySelector('.nav-link[data-target="#pane-pessoais"]')?.click();
         banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule (e clique em "Atualizar Resumo") antes de clicar em "Salvar no Portal" para atualizar este mesmo registro.';
