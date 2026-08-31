@@ -479,7 +479,7 @@
   </section>
 
   <footer class="legend">
-    <p><b>Como os valores são calculados</b> — <b>Fator CV</b>: diferença = representação do substituído − representação do substituto. <b>Fator SV</b>: diferença = representação do substituído − (representação do substituto + vencimento do substituto). <b>Fator SVV</b>: diferença = (representação + vencimento do substituído) − (representação + vencimento do substituto). <b>Avos</b> são calculados automaticamente contando, em cada mês do período, se houve 15 dias ou mais de substituição naquele mês. <b>13º e férias proporcionais</b> = (diferença ÷ 12) × avos; <b>1/3 de férias</b> = férias proporcionais ÷ 3; <b>valor a receber no período</b> = diferença × (dias ÷ 30). Ao digitar o nome ou a matrícula do substituto/substituído, o sistema busca na base de servidores e preenche cargo e valores automaticamente — revise sempre antes de formalizar.</p>
+    <p><b>Como os valores são calculados</b> — <b>Fator CV</b>: diferença = representação do substituído − representação do substituto. <b>Fator SV</b>: diferença = representação do substituído − (representação do substituto + vencimento do substituto). <b>Fator SVV</b>: diferença = (representação + vencimento do substituído) − (representação + vencimento do substituto). <b>Avos do 13º (20607)</b>: contados por MÊS DE CALENDÁRIO — só conta avo no(s) mês(es) em que a substituição teve 15 dias ou mais dentro daquele mês (ex.: 25/09 a 10/10 não gera avo de 13º, pois nenhum dos dois meses chega a 15 dias). <b>Avos de férias proporcionais (21480) e 1/3 (21485)</b>: contados DATA A DATA (não por mês de calendário) — meses cheios a partir do início mais a fração final, que conta como avo se tiver 15 dias ou mais, independente de cruzar virada de mês (ex.: 25/09 a 10/10 = 16 dias corridos ≥ 15, gera 1 avo de férias mesmo sem gerar avo de 13º). A coluna "Avos" mostra um único número quando os dois coincidem, ou "13º/Férias" (ex.: "0/1") com um aviso destacado quando divergem — passe o mouse sobre o campo para ver o detalhamento. <b>13º/férias proporcionais</b> = (diferença ÷ 12) × avos correspondente; <b>1/3 de férias</b> = férias proporcionais ÷ 3; <b>valor a receber no período</b> = diferença × (dias ÷ 30). Ao digitar o nome ou a matrícula do substituto/substituído, o sistema busca na base de servidores e preenche cargo e valores automaticamente — revise sempre antes de formalizar.</p>
   </footer>
 
 </div>
@@ -1386,12 +1386,18 @@ function findCargo(nome){
 
 /* ---------------- Cálculos ---------------- */
 function calcDiasAvos(inicioStr, fimStr){
-  if(!inicioStr || !fimStr) return {dias:0, avos:0};
+  if(!inicioStr || !fimStr) return {dias:0, avosDecimo:0, avosFerias:0};
   const d1 = new Date(inicioStr+"T00:00:00");
   const d2 = new Date(fimStr+"T00:00:00");
-  if(isNaN(d1) || isNaN(d2) || d2 < d1) return {dias:0, avos:0};
+  if(isNaN(d1) || isNaN(d2) || d2 < d1) return {dias:0, avosDecimo:0, avosFerias:0};
   const dias = Math.round((d2-d1)/86400000) + 1;
-  let avos = 0;
+
+  // Avos do 13º proporcional (20607): conta, em CADA MÊS DO CALENDÁRIO abrangido
+  // pelo período, se houve 15 dias ou mais de substituição naquele mês. Isso reflete
+  // a regra de que o 13º só é pago se, dentro do próprio mês de competência, a
+  // substituição durou 15 dias ou mais (ex.: 25/09 a 10/10 não gera avo em nenhum
+  // dos dois meses, pois nenhum deles chega a 15 dias).
+  let avosDecimo = 0;
   let cursor = new Date(d1.getFullYear(), d1.getMonth(), 1);
   const last = new Date(d2.getFullYear(), d2.getMonth(), 1);
   while(cursor <= last){
@@ -1401,10 +1407,32 @@ function calcDiasAvos(inicioStr, fimStr){
     const segStart = d1 > monthStart ? d1 : monthStart;
     const segEnd = d2 < monthEnd ? d2 : monthEnd;
     const diasNoMes = Math.round((segEnd-segStart)/86400000) + 1;
-    if(diasNoMes >= 15) avos++;
+    if(diasNoMes >= 15) avosDecimo++;
     cursor = new Date(y, m+1, 1);
   }
-  return {dias, avos: Math.min(avos,12)};
+
+  // Avos de férias proporcionais (21480) e 1/3 (21485): contagem DATA A DATA
+  // (não por mês de calendário). Conta-se quantos meses "cheios" (data a data, a
+  // partir do início) cabem dentro do período; a fração restante conta como mais
+  // um avo se tiver 15 dias ou mais — independentemente de cruzar virada de mês.
+  // Ex.: 25/09 a 10/10/2026 = 16 dias corridos, menos de 1 mês cheio, mas a fração
+  // tem 16 dias (≥15), logo gera 1 avo de férias, mesmo sem gerar avo de 13º.
+  let avosFerias = 0;
+  let cursorF = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  while(true){
+    const proxMes = new Date(cursorF.getFullYear(), cursorF.getMonth()+1, cursorF.getDate());
+    const fimMesCheio = new Date(proxMes.getTime() - 86400000);
+    if(fimMesCheio <= d2){
+      avosFerias++;
+      cursorF = proxMes;
+    } else {
+      break;
+    }
+  }
+  const diasRestantes = Math.round((d2-cursorF)/86400000) + 1;
+  if(diasRestantes >= 15) avosFerias++;
+
+  return {dias, avosDecimo: Math.min(avosDecimo,12), avosFerias: Math.min(avosFerias,12)};
 }
 
 function calcRow(r){
@@ -1412,7 +1440,7 @@ function calcRow(r){
   const subVenc = parseFloat(r.subVenc) || 0;
   const tioRepres = parseFloat(r.tioRepres) || 0;
   const tioVenc = parseFloat(r.tioVenc) || 0;
-  const {dias, avos} = calcDiasAvos(r.inicio, r.fim);
+  const {dias, avosDecimo, avosFerias} = calcDiasAvos(r.inicio, r.fim);
 
   let integral;
   if(r.fator === "SV"){
@@ -1426,11 +1454,11 @@ function calcRow(r){
     integral = tioRepres - subRepres;
   }
   const aReceber = integral * (dias/30);
-  const decimoTerceiro = (integral/12) * avos;
-  const feriasProp = (integral/12) * avos;
+  const decimoTerceiro = (integral/12) * avosDecimo;
+  const feriasProp = (integral/12) * avosFerias;
   const tercoFerias = feriasProp/3;
 
-  return {dias, avos, integral, aReceber, decimoTerceiro, feriasProp, tercoFerias};
+  return {dias, avosDecimo, avosFerias, integral, aReceber, decimoTerceiro, feriasProp, tercoFerias};
 }
 
 function fmtMoney(v){
@@ -1582,8 +1610,14 @@ function buildRowEl(row){
 
   const inDias = makeInput({value:'', cls:'num', readOnly:true});
   tr.appendChild(td(inDias));
+
+  const tdAvos = document.createElement('td');
   const inAvos = makeInput({value:'', cls:'num', readOnly:true});
-  tr.appendChild(td(inAvos));
+  tdAvos.appendChild(inAvos);
+  const avosBadge = document.createElement('span');
+  avosBadge.className = 'warn-badge'; avosBadge.style.display = 'none'; avosBadge.textContent = '13º ≠ Férias';
+  tdAvos.appendChild(avosBadge);
+  tr.appendChild(tdAvos);
 
   const tdIntegral = document.createElement('td');
   const inIntegral = makeInput({value:'', cls:'num', readOnly:true});
@@ -1629,14 +1663,14 @@ function buildRowEl(row){
   tdAcoes.appendChild(acoesWrap);
   tr.appendChild(tdAcoes);
 
-  rowElsById.set(r.id, {tr, tdNum, inDias, inAvos, inIntegral, inAReceber, inDecimo, inFerias, inTerco, warnBadge});
+  rowElsById.set(r.id, {tr, tdNum, inDias, inAvos, avosBadge, inIntegral, inAReceber, inDecimo, inFerias, inTerco, warnBadge});
   updateCalcCells(r);
   return tr;
 }
 
 function matchesFiltroMes(r, c){
   if(!filtroMes) return true;
-  if(!c || c.avos <= 0) return false;
+  if(!c || (c.avosDecimo <= 0 && c.avosFerias <= 0)) return false;
   if(!r.fim) return false;
   return r.fim.slice(0,7) === filtroMes;
 }
@@ -1661,7 +1695,15 @@ function updateCalcCells(row){
   const el = rowElsById.get(r.id);
   if(!el) return;
   el.inDias.value = c.dias;
-  el.inAvos.value = c.avos;
+  if(c.avosDecimo === c.avosFerias){
+    el.inAvos.value = c.avosDecimo;
+    el.inAvos.title = '';
+    el.avosBadge.style.display = 'none';
+  } else {
+    el.inAvos.value = `${c.avosDecimo}/${c.avosFerias}`;
+    el.inAvos.title = `13º (20607): ${c.avosDecimo} avo(s) · Férias (21480/21485): ${c.avosFerias} avo(s)`;
+    el.avosBadge.style.display = 'block';
+  }
   el.inIntegral.value = fmtMoney(c.integral);
   el.warnBadge.style.display = c.integral < 0 ? 'block' : 'none';
   el.inAReceber.value = fmtMoney(c.aReceber);
@@ -1773,7 +1815,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
     "Nº","Fator",
     "Matrícula Substituto","Nome Substituto","Cargo Substituto","Vencimento Substituto (R$)","Representação Substituto (R$)",
     "Matrícula Substituído","Nome Substituído","Cargo Substituído","Vencimento Substituído (R$)","Representação Substituído (R$)",
-    "Início","Fim","Dias","Avos",
+    "Início","Fim","Dias","Avos 13º","Avos Férias",
     "Diferença (R$)","Valor a Receber (R$)","13º Proporcional (20607) (R$)","Férias Proporcionais (21480) (R$)","1/3 de Férias (21485) (R$)",
     "Nº do DODF","Data de Publicação","Nº do Processo"
   ];
@@ -1784,7 +1826,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
       i+1, r.fator,
       r.subMat, r.subNome, r.subCargo, round2(parseFloat(r.subVenc)||0), round2(parseFloat(r.subRepres)||0),
       r.tioMat, r.tioNome, r.tioCargo, round2(parseFloat(r.tioVenc)||0), round2(parseFloat(r.tioRepres)||0),
-      fmtDate(r.inicio), fmtDate(r.fim), c.dias, c.avos,
+      fmtDate(r.inicio), fmtDate(r.fim), c.dias, c.avosDecimo, c.avosFerias,
       round2(c.integral), round2(c.aReceber), round2(c.decimoTerceiro), round2(c.feriasProp), round2(c.tercoFerias),
       r.dodfNum, fmtDate(r.dodfData), r.processo
     ]);
@@ -1793,7 +1835,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
   const ws = XLSX.utils.aoa_to_sheet(data);
 
   // formato de moeda (R$) nas colunas monetárias
-  const moneyCols = [5,6,10,11,16,17,18,19,20]; // índices 0-based das colunas acima
+  const moneyCols = [5,6,10,11,17,18,19,20,21]; // índices 0-based das colunas acima
   const range = XLSX.utils.decode_range(ws['!ref']);
   for(let R = 1; R <= range.e.r; R++){
     moneyCols.forEach(C=>{
@@ -1895,7 +1937,8 @@ function printRow(row){
         <div class="doc-field"><label>Início</label><div>${fmtDate(r.inicio)}</div></div>
         <div class="doc-field"><label>Fim</label><div>${fmtDate(r.fim)}</div></div>
         <div class="doc-field"><label>Dias</label><div>${c.dias}</div></div>
-        <div class="doc-field"><label>Avos (13º/férias)</label><div>${c.avos}</div></div>
+        <div class="doc-field"><label>Avos 13º (20607)</label><div>${c.avosDecimo}</div></div>
+        <div class="doc-field"><label>Avos férias/1‑3 (21480/21485)</label><div>${c.avosFerias}</div></div>
         <div class="doc-field full"><label>Fator</label><div>${fatorLabel(r.fator)}</div></div>
       </div>
     </div>
