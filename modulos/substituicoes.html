@@ -304,7 +304,7 @@
 
   <section class="panel collapsed" id="panel-servidores">
     <div class="panel-head" onclick="togglePanel('panel-servidores')">
-      <h2>Base de servidores <span class="hint">— nome, matrícula, cargo e valores, usada para preencher a linha automaticamente</span></h2>
+      <h2>Base de servidores <span class="hint">— nome, matrícula, código, cargo e valores, usada para preencher a linha automaticamente</span></h2>
       <span class="chevron">▾</span>
     </div>
     <div class="panel-body">
@@ -343,7 +343,7 @@
       <div class="servidores-scroll">
         <table class="servidores">
           <thead>
-            <tr><th style="width:14%">Matrícula</th><th style="width:32%">Nome</th><th style="width:12%">Cargo</th><th style="width:15%">Vencimento</th><th style="width:15%">Representação</th><th style="width:8%"></th></tr>
+            <tr><th style="width:11%">Matrícula</th><th style="width:32%">Nome</th><th style="width:10%">Código</th><th style="width:10%">Cargo</th><th style="width:13%">Vencimento</th><th style="width:13%">Representação</th><th style="width:7%"></th></tr>
           </thead>
           <tbody id="servidores-body"></tbody>
         </table>
@@ -410,8 +410,8 @@
           <thead>
             <tr class="group">
               <th></th><th></th>
-              <th colspan="5">Substituto</th>
-              <th colspan="5">Substituído</th>
+              <th colspan="6">Substituto</th>
+              <th colspan="6">Substituído</th>
               <th colspan="4">Período</th>
               <th colspan="5">Valores da substituição</th>
               <th colspan="3">Publicação (DODF)</th>
@@ -422,11 +422,13 @@
               <th>Fator</th>
               <th>Matrícula</th>
               <th>Nome</th>
+              <th>Código</th>
               <th>Cargo</th>
               <th>Vencimento</th>
               <th>Representação</th>
               <th>Matrícula</th>
               <th>Nome</th>
+              <th>Código</th>
               <th>Cargo</th>
               <th>Vencimento</th>
               <th>Representação</th>
@@ -555,8 +557,8 @@ function blankRow(){
   return {
     id: gerarIdLinha(),
     fator:"CV",
-    subMat:"", subNome:"", subCargo:"", subVenc:0, subRepres:0,
-    tioMat:"", tioNome:"", tioCargo:"", tioVenc:0, tioRepres:0,
+    subMat:"", subNome:"", subCodigo:"", subCargo:"", subVenc:0, subRepres:0,
+    tioMat:"", tioNome:"", tioCodigo:"", tioCargo:"", tioVenc:0, tioRepres:0,
     inicio:"", fim:"",
     dodfNum:"", dodfData:"", processo:""
   };
@@ -579,7 +581,7 @@ function mergeServidores(){
     if(!key) return;
     porMatricula[key] = {
       matricula: s.matricula, nome: s.nome,
-      cargo: '', venc: 0, repres: 0,
+      codigo: '', cargo: '', venc: 0, repres: 0,
       situacao: s.situacao || '', cargoEfetivo: s.cargoEfetivo || '', lotacao: s.lotacao || '',
       sitFunc: s.sitFunc || ''
     };
@@ -588,13 +590,14 @@ function mergeServidores(){
     const key = normalizeMatricula(c.matricula);
     if(!key) return;
     if(porMatricula[key]){
+      porMatricula[key].codigo = c.codigo || '';
       porMatricula[key].cargo = c.cargo;
       porMatricula[key].venc = c.venc;
       porMatricula[key].repres = c.repres;
     } else {
       // está na lista de comissionados mas não apareceu na lista completa (listas fora de sincronia)
       porMatricula[key] = {
-        matricula: c.matricula, nome: c.nome, cargo: c.cargo, venc: c.venc, repres: c.repres,
+        matricula: c.matricula, nome: c.nome, codigo: c.codigo || '', cargo: c.cargo, venc: c.venc, repres: c.repres,
         situacao: '', cargoEfetivo: '', lotacao: '', sitFunc: ''
       };
     }
@@ -730,6 +733,7 @@ function parseServidoresText(text){
       current = {
         matricula: m[7],
         nome: resto,
+        codigo: m[1],
         cargo: m[3],
         // O relatório "ocupante por órgão" imprime as colunas vencimento/representação
         // trocadas em relação à tabela oficial de valores (confirmado cruzando com o
@@ -831,10 +835,10 @@ function migrateRow(r){
     return {
       id: r.id || gerarIdLinha(),
       fator: r.fator || "CV",
-      subMat: r.subMat||"", subNome: r.subNome||"", subCargo: r.subCargo||"",
+      subMat: r.subMat||"", subNome: r.subNome||"", subCodigo: r.subCodigo||"", subCargo: r.subCargo||"",
       subVenc: subCargoRef ? subCargoRef.venc : 0,
       subRepres: parseFloat(r.subValor)||0,
-      tioMat: r.tioMat||"", tioNome: r.tioNome||"", tioCargo: r.tioCargo||"",
+      tioMat: r.tioMat||"", tioNome: r.tioNome||"", tioCodigo: r.tioCodigo||"", tioCargo: r.tioCargo||"",
       tioVenc: tioCargoRef ? tioCargoRef.venc : 0,
       tioRepres: parseFloat(r.tioValor)||0,
       inicio: r.inicio||"", fim: r.fim||"",
@@ -843,6 +847,8 @@ function migrateRow(r){
   }
   if(!['CV','SV','SVV'].includes(r.fator)) r.fator = 'CV';
   if(!r.id) r.id = gerarIdLinha();
+  if(r.subCodigo === undefined) r.subCodigo = "";
+  if(r.tioCodigo === undefined) r.tioCodigo = "";
   return r;
 }
 
@@ -1148,7 +1154,7 @@ function renderServidores(){
       upsertSourceByMatricula(servidoresBase, novaMat, {matricula: novaMat, nome: servidores[i].nome, situacao: s.situacao||'', cargoEfetivo: s.cargoEfetivo||'', lotacao: s.lotacao||''});
       removeFromSourceByMatricula(servidoresBase, chaveAtual);
       if(servidores[i].cargo){
-        upsertSourceByMatricula(comissionados, novaMat, {matricula: novaMat, nome: servidores[i].nome, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
+        upsertSourceByMatricula(comissionados, novaMat, {matricula: novaMat, nome: servidores[i].nome, codigo: servidores[i].codigo, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
         removeFromSourceByMatricula(comissionados, chaveAtual);
       }
       chaveAtual = novaMat;
@@ -1190,12 +1196,20 @@ function renderServidores(){
       nomeWrap.appendChild(sub);
     }
 
+    const inCodigo = document.createElement('input');
+    inCodigo.value = s.codigo || '';
+    inCodigo.oninput = ()=>{
+      servidores[i].codigo = inCodigo.value;
+      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, codigo: inCodigo.value, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
+      scheduleSave();
+    };
+
     const inCargo = document.createElement('input');
     inCargo.setAttribute('list','cargo-datalist');
     inCargo.value = s.cargo;
     inCargo.oninput = ()=>{
       servidores[i].cargo = inCargo.value;
-      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, cargo: inCargo.value, venc: servidores[i].venc, repres: servidores[i].repres});
+      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, codigo: servidores[i].codigo, cargo: inCargo.value, venc: servidores[i].venc, repres: servidores[i].repres});
       scheduleSave();
     };
 
@@ -1203,7 +1217,7 @@ function renderServidores(){
     inVenc.type = 'number'; inVenc.step = '0.01'; inVenc.value = s.venc;
     inVenc.oninput = ()=>{
       servidores[i].venc = parseFloat(inVenc.value)||0;
-      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
+      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, codigo: servidores[i].codigo, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
       scheduleSave();
     };
 
@@ -1211,7 +1225,7 @@ function renderServidores(){
     inRepres.type = 'number'; inRepres.step = '0.01'; inRepres.value = s.repres;
     inRepres.oninput = ()=>{
       servidores[i].repres = parseFloat(inRepres.value)||0;
-      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
+      upsertSourceByMatricula(comissionados, chaveAtual, {nome: servidores[i].nome, codigo: servidores[i].codigo, cargo: servidores[i].cargo, venc: servidores[i].venc, repres: servidores[i].repres});
       scheduleSave();
     };
 
@@ -1221,20 +1235,21 @@ function renderServidores(){
 
     const tdMat = document.createElement('td'); tdMat.appendChild(inMat); tr.appendChild(tdMat);
     const tdNome = document.createElement('td'); tdNome.appendChild(nomeWrap); tr.appendChild(tdNome);
+    const tdCodigo = document.createElement('td'); tdCodigo.appendChild(inCodigo); tr.appendChild(tdCodigo);
     const tdCargo = document.createElement('td'); tdCargo.appendChild(inCargo); tr.appendChild(tdCargo);
     const tdVenc = document.createElement('td'); tdVenc.appendChild(inVenc); tr.appendChild(tdVenc);
     const tdRepres = document.createElement('td'); tdRepres.appendChild(inRepres); tr.appendChild(tdRepres);
     const tdAcao = document.createElement('td'); tdAcao.appendChild(btnDel); tr.appendChild(tdAcao);
 
     body.appendChild(tr);
-    servidorEls.push({inMat, inNome, inCargo, inVenc, inRepres});
+    servidorEls.push({inMat, inNome, inCodigo, inCargo, inVenc, inRepres});
   });
 
   refreshServidorDatalist();
 }
 
 function addServidor(){
-  const novo = {matricula:"", nome:"NOVO SERVIDOR", cargo:"", venc:0, repres:0, situacao:"", cargoEfetivo:"", lotacao:""};
+  const novo = {matricula:"", nome:"NOVO SERVIDOR", codigo:"", cargo:"", venc:0, repres:0, situacao:"", cargoEfetivo:"", lotacao:""};
   servidores.push(novo);
   servidoresBase.push({matricula:"", nome:"NOVO SERVIDOR", situacao:"", cargoEfetivo:"", lotacao:""});
   renderServidores();
@@ -1533,8 +1548,8 @@ function buildRowEl(row){
     r.subMat = inSubMat.value;
     const s = findServidorByMatricula(inSubMat.value);
     if(s){
-      r.subNome = s.nome; r.subCargo = s.cargo; r.subVenc = s.venc; r.subRepres = s.repres;
-      inSubNome.value = s.nome; inSubCargo.value = s.cargo; inSubVenc.value = s.venc; inSubRepres.value = s.repres;
+      r.subNome = s.nome; r.subCodigo = s.codigo||''; r.subCargo = s.cargo; r.subVenc = s.venc; r.subRepres = s.repres;
+      inSubNome.value = s.nome; inSubCodigo.value = s.codigo||''; inSubCargo.value = s.cargo; inSubVenc.value = s.venc; inSubRepres.value = s.repres;
       aplicarFatorAutomatico(r, selFator);
     }
     updateCalcCells(r); scheduleSave();
@@ -1545,13 +1560,16 @@ function buildRowEl(row){
     r.subNome = inSubNome.value;
     const s = findServidorByNome(inSubNome.value);
     if(s){
-      r.subMat = s.matricula; r.subCargo = s.cargo; r.subVenc = s.venc; r.subRepres = s.repres;
-      inSubMat.value = s.matricula; inSubCargo.value = s.cargo; inSubVenc.value = s.venc; inSubRepres.value = s.repres;
+      r.subMat = s.matricula; r.subCodigo = s.codigo||''; r.subCargo = s.cargo; r.subVenc = s.venc; r.subRepres = s.repres;
+      inSubMat.value = s.matricula; inSubCodigo.value = s.codigo||''; inSubCargo.value = s.cargo; inSubVenc.value = s.venc; inSubRepres.value = s.repres;
       aplicarFatorAutomatico(r, selFator);
     }
     updateCalcCells(r); scheduleSave();
   }});
   tr.appendChild(td(inSubNome));
+
+  const inSubCodigo = makeInput({value:r.subCodigo, oninput:()=>{r.subCodigo = inSubCodigo.value; scheduleSave();}});
+  tr.appendChild(td(inSubCodigo));
 
   const inSubCargo = makeInput({value:r.subCargo, list:'cargo-datalist', oninput:()=>{
     r.subCargo = inSubCargo.value;
@@ -1570,8 +1588,8 @@ function buildRowEl(row){
     r.tioMat = inTioMat.value;
     const s = findServidorByMatricula(inTioMat.value);
     if(s){
-      r.tioNome = s.nome; r.tioCargo = s.cargo; r.tioVenc = s.venc; r.tioRepres = s.repres;
-      inTioNome.value = s.nome; inTioCargo.value = s.cargo; inTioVenc.value = s.venc; inTioRepres.value = s.repres;
+      r.tioNome = s.nome; r.tioCodigo = s.codigo||''; r.tioCargo = s.cargo; r.tioVenc = s.venc; r.tioRepres = s.repres;
+      inTioNome.value = s.nome; inTioCodigo.value = s.codigo||''; inTioCargo.value = s.cargo; inTioVenc.value = s.venc; inTioRepres.value = s.repres;
       aplicarFatorAutomatico(r, selFator);
     }
     updateCalcCells(r); scheduleSave();
@@ -1582,13 +1600,16 @@ function buildRowEl(row){
     r.tioNome = inTioNome.value;
     const s = findServidorByNome(inTioNome.value);
     if(s){
-      r.tioMat = s.matricula; r.tioCargo = s.cargo; r.tioVenc = s.venc; r.tioRepres = s.repres;
-      inTioMat.value = s.matricula; inTioCargo.value = s.cargo; inTioVenc.value = s.venc; inTioRepres.value = s.repres;
+      r.tioMat = s.matricula; r.tioCodigo = s.codigo||''; r.tioCargo = s.cargo; r.tioVenc = s.venc; r.tioRepres = s.repres;
+      inTioMat.value = s.matricula; inTioCodigo.value = s.codigo||''; inTioCargo.value = s.cargo; inTioVenc.value = s.venc; inTioRepres.value = s.repres;
       aplicarFatorAutomatico(r, selFator);
     }
     updateCalcCells(r); scheduleSave();
   }});
   tr.appendChild(td(inTioNome));
+
+  const inTioCodigo = makeInput({value:r.tioCodigo, oninput:()=>{r.tioCodigo = inTioCodigo.value; scheduleSave();}});
+  tr.appendChild(td(inTioCodigo));
 
   const inTioCargo = makeInput({value:r.tioCargo, list:'cargo-datalist', oninput:()=>{
     r.tioCargo = inTioCargo.value;
@@ -1813,8 +1834,8 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
   }
   const headers = [
     "Nº","Fator",
-    "Matrícula Substituto","Nome Substituto","Cargo Substituto","Vencimento Substituto (R$)","Representação Substituto (R$)",
-    "Matrícula Substituído","Nome Substituído","Cargo Substituído","Vencimento Substituído (R$)","Representação Substituído (R$)",
+    "Matrícula Substituto","Nome Substituto","Código Substituto","Cargo Substituto","Vencimento Substituto (R$)","Representação Substituto (R$)",
+    "Matrícula Substituído","Nome Substituído","Código Substituído","Cargo Substituído","Vencimento Substituído (R$)","Representação Substituído (R$)",
     "Início","Fim","Dias","Avos 13º","Avos Férias",
     "Diferença (R$)","Valor a Receber (R$)","13º Proporcional (20607) (R$)","Férias Proporcionais (21480) (R$)","1/3 de Férias (21485) (R$)",
     "Nº do DODF","Data de Publicação","Nº do Processo"
@@ -1824,8 +1845,8 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
     const c = calcRow(r);
     data.push([
       i+1, r.fator,
-      r.subMat, r.subNome, r.subCargo, round2(parseFloat(r.subVenc)||0), round2(parseFloat(r.subRepres)||0),
-      r.tioMat, r.tioNome, r.tioCargo, round2(parseFloat(r.tioVenc)||0), round2(parseFloat(r.tioRepres)||0),
+      r.subMat, r.subNome, r.subCodigo, r.subCargo, round2(parseFloat(r.subVenc)||0), round2(parseFloat(r.subRepres)||0),
+      r.tioMat, r.tioNome, r.tioCodigo, r.tioCargo, round2(parseFloat(r.tioVenc)||0), round2(parseFloat(r.tioRepres)||0),
       fmtDate(r.inicio), fmtDate(r.fim), c.dias, c.avosDecimo, c.avosFerias,
       round2(c.integral), round2(c.aReceber), round2(c.decimoTerceiro), round2(c.feriasProp), round2(c.tercoFerias),
       r.dodfNum, fmtDate(r.dodfData), r.processo
@@ -1835,7 +1856,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
   const ws = XLSX.utils.aoa_to_sheet(data);
 
   // formato de moeda (R$) nas colunas monetárias
-  const moneyCols = [5,6,10,11,17,18,19,20,21]; // índices 0-based das colunas acima
+  const moneyCols = [6,7,12,13,19,20,21,22,23]; // índices 0-based das colunas acima
   const range = XLSX.utils.decode_range(ws['!ref']);
   for(let R = 1; R <= range.e.r; R++){
     moneyCols.forEach(C=>{
@@ -1914,6 +1935,7 @@ function printRow(row){
       <div class="doc-grid">
         <div class="doc-field"><label>Nome</label><div>${escapeHtml(r.subNome)||'—'}</div></div>
         <div class="doc-field"><label>Matrícula</label><div>${escapeHtml(r.subMat)||'—'}</div></div>
+        <div class="doc-field"><label>Código</label><div>${escapeHtml(r.subCodigo)||'—'}</div></div>
         <div class="doc-field"><label>Cargo</label><div>${escapeHtml(r.subCargo)||'—'}</div></div>
         <div class="doc-field"><label>Vencimento</label><div>R$ ${fmtMoney(parseFloat(r.subVenc)||0)}</div></div>
         <div class="doc-field"><label>Representação</label><div>R$ ${fmtMoney(parseFloat(r.subRepres)||0)}</div></div>
@@ -1925,6 +1947,7 @@ function printRow(row){
       <div class="doc-grid">
         <div class="doc-field"><label>Nome</label><div>${escapeHtml(r.tioNome)||'—'}</div></div>
         <div class="doc-field"><label>Matrícula</label><div>${escapeHtml(r.tioMat)||'—'}</div></div>
+        <div class="doc-field"><label>Código</label><div>${escapeHtml(r.tioCodigo)||'—'}</div></div>
         <div class="doc-field"><label>Cargo</label><div>${escapeHtml(r.tioCargo)||'—'}</div></div>
         <div class="doc-field"><label>Vencimento</label><div>R$ ${fmtMoney(parseFloat(r.tioVenc)||0)}</div></div>
         <div class="doc-field"><label>Representação</label><div>R$ ${fmtMoney(parseFloat(r.tioRepres)||0)}</div></div>
