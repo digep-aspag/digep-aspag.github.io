@@ -49,9 +49,25 @@ export async function checkConnection() {
 // login(email, senha)
 // Faz login. Use uma conta que você mesmo cria no painel do
 // Firebase (passo 5 do README.md) — não é a sua conta do Google.
+//
+// Além de autenticar, registra o acesso na coleção "acessos"
+// (e-mail, data/hora e navegador) para permitir consultar depois
+// quantas vezes cada pessoa entrou no site (função listarAcessos).
 // --------------------------------------------------------------
-export function login(email, senha) {
-  return signInWithEmailAndPassword(auth, email, senha);
+export async function login(email, senha) {
+  const credencial = await signInWithEmailAndPassword(auth, email, senha);
+  try {
+    await addDoc(collection(db, "acessos"), {
+      email: credencial.user.email,
+      criadoEm: serverTimestamp(),
+      userAgent: (typeof navigator !== "undefined" && navigator.userAgent) ? navigator.userAgent : "desconhecido"
+    });
+  } catch (erroRegistro) {
+    // Não deixa o login falhar por causa do registro de acesso —
+    // só avisa no console se não conseguir gravar.
+    console.warn("Não foi possível registrar o acesso:", erroRegistro);
+  }
+  return credencial;
 }
 
 export function logout() {
@@ -126,3 +142,18 @@ export async function obterEstadoModulo(chave) {
 export async function salvarEstadoModulo(chave, dados) { 
   await setDoc(doc(db, "estado_modulos", chave), dados); 
   return true; }
+
+// --------------------------------------------------------------
+// listarAcessos(email)
+// Devolve os registros de acesso (gravados automaticamente pelo
+// login()), mais recentes primeiro. Passe um e-mail para filtrar
+// só os acessos de uma pessoa específica, ou deixe em branco para
+// ver todos.
+// --------------------------------------------------------------
+export async function listarAcessos(email) {
+  const q = email
+    ? query(collection(db, "acessos"), where("email", "==", email), orderBy("criadoEm", "desc"))
+    : query(collection(db, "acessos"), orderBy("criadoEm", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
