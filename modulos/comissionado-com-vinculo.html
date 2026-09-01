@@ -1561,6 +1561,14 @@ function posInitCargoPane(ctx, idx) {
       elements.detBox.classList.add('d-none');
       elements.btnToggle.setAttribute('aria-expanded', 'false');
       elements.btnToggle.textContent = 'Mostrar detalhes';
+
+      /* Marca este cargo como efetivamente calculado — usado pela impressão
+         para decidir quais páginas de cargo entram no PDF. Importante: isso
+         é diferente de "dataset.ready" (que só indica que a aba foi aberta/
+         montada uma vez, inclusive ao reabrir um acerto salvo, quando TODAS
+         as abas são forçadas a abrir para permitir a restauração dos campos —
+         sem essa marcação, cargos vazios reabertos também seriam impressos). */
+      ctx.dataset.calculado = '1';
     });
   });
 
@@ -1642,6 +1650,9 @@ function posInitCargoPane(ctx, idx) {
     elements.btnToggle.disabled = true;
     elements.btnToggle.setAttribute('aria-expanded', 'false');
     elements.btnToggle.textContent = 'Mostrar detalhes';
+
+    // Cargo volta a não contar como "calculado" para fins de impressão
+    ctx.dataset.calculado = '0';
 
     alert(`Dados do Cargo ${idx} foram limpos.`);
   });
@@ -2080,7 +2091,12 @@ function prepararImpressao() {
   const paginas = [];
   for (let i = 1; i <= TOTAL_CARGOS; i++) {
     const pane = $(cargoPanesSel[i - 1]);
-    if (pane && pane.dataset.ready === '1') paginas.push({ pane, idx: i });
+    /* dataset.calculado (não dataset.ready!): "ready" só indica que a aba já
+       foi montada no DOM alguma vez — inclusive quando um acerto salvo é
+       reaberto, momento em que TODAS as 10 abas são forçadas a abrir para
+       permitir a restauração dos campos (ver bloco "editar="). Usar "ready"
+       fazia a impressão incluir cargos vazios/nunca calculados. */
+    if (pane && pane.dataset.calculado === '1') paginas.push({ pane, idx: i });
   }
   if (paginas.length === 0) {
     alert('Calcule ao menos um cargo (botão "Calcular Acerto") antes de gerar o PDF.');
