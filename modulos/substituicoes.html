@@ -1320,10 +1320,10 @@ function calcularFatorAutomatico(subMatricula, tioMatricula){
   return null; // SIT FUNC do substituto desconhecido — não mexe no fator escolhido pelo usuário
 }
 
-function aplicarFatorAutomatico(i, selFatorEl){
-  const novoFator = calcularFatorAutomatico(rows[i].subMat, rows[i].tioMat);
-  if(novoFator && novoFator !== rows[i].fator){
-    rows[i].fator = novoFator;
+function aplicarFatorAutomatico(r, selFatorEl){
+  const novoFator = calcularFatorAutomatico(r.subMat, r.tioMat);
+  if(novoFator && novoFator !== r.fator){
+    r.fator = novoFator;
     selFatorEl.value = novoFator;
   }
 }
