@@ -115,15 +115,34 @@ export async function listarTodos() {
 }
 // --------------------------------------------------------------
 // registrarAcessoSite(user) — uso interno
-// Grava um registro na coleção "acessos" toda vez que uma página
-// do portal é aberta com alguém já autenticado. Uma trava evita
-// registrar mais de uma vez na mesma carga de página (caso o
-// Firebase dispare o evento de autenticação mais de uma vez).
+// Grava um registro na coleção "acessos" na primeira vez que a
+// pessoa abre o portal numa sessão de navegação (aba). Usa
+// sessionStorage — que persiste entre páginas na mesma aba, mas
+// é apagado ao fechar a aba/navegador — para NÃO gerar um
+// registro novo a cada módulo visitado, só na "entrada" no site.
 // --------------------------------------------------------------
-let acessoRegistradoNestaPagina = false;
+const CHAVE_SESSAO_ACESSO = "portal_acesso_registrado";
+
+function jaRegistrouNestaSessao() {
+  try {
+    return sessionStorage.getItem(CHAVE_SESSAO_ACESSO) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function marcarSessaoComoRegistrada() {
+  try {
+    sessionStorage.setItem(CHAVE_SESSAO_ACESSO, "1");
+  } catch (e) {
+    // Se o navegador bloquear sessionStorage (modo privado restrito, etc.),
+    // simplesmente não deduplicamos — não é motivo para falhar nada.
+  }
+}
+
 async function registrarAcessoSite(user) {
-  if (!user || acessoRegistradoNestaPagina) return;
-  acessoRegistradoNestaPagina = true;
+  if (!user || jaRegistrouNestaSessao()) return;
+  marcarSessaoComoRegistrada();
   try {
     await addDoc(collection(db, "acessos"), {
       email: user.email,
@@ -142,8 +161,9 @@ async function registrarAcessoSite(user) {
 // observarLogin(callback)
 // Roda o callback sempre que o estado de login muda (usado para
 // mostrar o e-mail logado na topbar). Também registra, em segundo
-// plano, cada abertura de página autenticada na coleção "acessos"
-// (função listarAcessos permite consultar depois).
+// plano, a entrada no portal na coleção "acessos" — uma vez por
+// sessão de aba, não a cada módulo visitado (função listarAcessos
+// permite consultar depois).
 // --------------------------------------------------------------
 export function observarLogin(callback) {
   onAuthStateChanged(auth, (user) => {
