@@ -49,25 +49,9 @@ export async function checkConnection() {
 // login(email, senha)
 // Faz login. Use uma conta que você mesmo cria no painel do
 // Firebase (passo 5 do README.md) — não é a sua conta do Google.
-//
-// Além de autenticar, registra o acesso na coleção "acessos"
-// (e-mail, data/hora e navegador) para permitir consultar depois
-// quantas vezes cada pessoa entrou no site (função listarAcessos).
 // --------------------------------------------------------------
-export async function login(email, senha) {
-  const credencial = await signInWithEmailAndPassword(auth, email, senha);
-  try {
-    await addDoc(collection(db, "acessos"), {
-      email: credencial.user.email,
-      criadoEm: serverTimestamp(),
-      userAgent: (typeof navigator !== "undefined" && navigator.userAgent) ? navigator.userAgent : "desconhecido"
-    });
-  } catch (erroRegistro) {
-    // Não deixa o login falhar por causa do registro de acesso —
-    // só avisa no console se não conseguir gravar.
-    console.warn("Não foi possível registrar o acesso:", erroRegistro);
-  }
-  return credencial;
+export function login(email, senha) {
+  return signInWithEmailAndPassword(auth, email, senha);
 }
 
 export function logout() {
@@ -129,7 +113,44 @@ export async function listarTodos() {
   const snap = await getDocs(q); 
   return snap.docs.map(d => ({ id: d.id, ...d.data() })); 
 }
-export function observarLogin(callback) { onAuthStateChanged(auth, callback); } 
+// --------------------------------------------------------------
+// registrarAcessoSite(user) — uso interno
+// Grava um registro na coleção "acessos" toda vez que uma página
+// do portal é aberta com alguém já autenticado. Uma trava evita
+// registrar mais de uma vez na mesma carga de página (caso o
+// Firebase dispare o evento de autenticação mais de uma vez).
+// --------------------------------------------------------------
+let acessoRegistradoNestaPagina = false;
+async function registrarAcessoSite(user) {
+  if (!user || acessoRegistradoNestaPagina) return;
+  acessoRegistradoNestaPagina = true;
+  try {
+    await addDoc(collection(db, "acessos"), {
+      email: user.email,
+      criadoEm: serverTimestamp(),
+      pagina: (typeof window !== "undefined" && window.location) ? window.location.pathname : "desconhecida",
+      userAgent: (typeof navigator !== "undefined" && navigator.userAgent) ? navigator.userAgent : "desconhecido"
+    });
+  } catch (erroRegistro) {
+    // Não deixa nada travar por causa do registro de acesso —
+    // só avisa no console se não conseguir gravar.
+    console.warn("Não foi possível registrar o acesso:", erroRegistro);
+  }
+}
+
+// --------------------------------------------------------------
+// observarLogin(callback)
+// Roda o callback sempre que o estado de login muda (usado para
+// mostrar o e-mail logado na topbar). Também registra, em segundo
+// plano, cada abertura de página autenticada na coleção "acessos"
+// (função listarAcessos permite consultar depois).
+// --------------------------------------------------------------
+export function observarLogin(callback) {
+  onAuthStateChanged(auth, (user) => {
+    registrarAcessoSite(user);
+    callback(user);
+  });
+}
 export async function excluirAcerto(id) { await deleteDoc(doc(db, "acertos", id)); }
 export async function buscarAcerto(id) { 
   const snap = await getDoc(doc(db, "acertos", id)); 
@@ -146,9 +167,9 @@ export async function salvarEstadoModulo(chave, dados) {
 // --------------------------------------------------------------
 // listarAcessos(email)
 // Devolve os registros de acesso (gravados automaticamente pelo
-// login()), mais recentes primeiro. Passe um e-mail para filtrar
-// só os acessos de uma pessoa específica, ou deixe em branco para
-// ver todos.
+// observarLogin() em toda página aberta autenticada), mais
+// recentes primeiro. Passe um e-mail para filtrar só os acessos
+// de uma pessoa específica, ou deixe em branco para ver todos.
 // --------------------------------------------------------------
 export async function listarAcessos(email) {
   const q = email
