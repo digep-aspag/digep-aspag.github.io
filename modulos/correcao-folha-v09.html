@@ -45,6 +45,18 @@
 
     .info-box{background:#fff4e9;border:1px solid #f0c48f;border-radius:5px;padding:15px;margin:15px 0;font-size:14px;color:#6b3d10}
 
+    .anexo-colar{
+      position:relative; border:2px dashed #ccc; border-radius:6px; min-height:150px;
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      padding:12px; cursor:text; background:#fafafa; outline:none; transition:border-color .2s, background .2s;
+    }
+    .anexo-colar:focus{ border-color:#C1560C; background:#FFF6EE; }
+    .anexo-colar.tem-imagem{ display:block; padding:10px; cursor:default; }
+    .anexo-placeholder{ color:#999; font-size:13px; line-height:1.5; }
+    .anexo-preview{ max-width:100%; max-height:220px; display:block; margin:0 auto; border-radius:4px; border:1px solid #eee; }
+    .anexo-remover{ display:block; margin:10px auto 0; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:5px 12px; font-size:11px; font-weight:600; cursor:pointer; }
+    .anexo-remover:hover{ background:#bd2130; }
+
     /* ✅ Bloco exclusivo de impressão (tema laranja) */
     .print-only{display:none}
     .print-only h1{color:#C1560C;font-size:20px;margin:0 0 4px}
@@ -61,6 +73,9 @@
     .print-tabela tfoot .print-total-row td{font-weight:700;padding:10px;border-top:2px solid #333}
     .print-tabela tfoot .print-total-row td:not(:first-child){text-align:right;font-size:13px}
     .print-only .print-rodape{font-size:11px;color:#777;text-align:center;margin-top:24px}
+    .print-anexos{margin-top:26px}
+    .print-anexo-img{display:block;max-width:100%;margin:0 auto;border:1px solid #ddd}
+    .print-anexo-separador{border:none;border-top:3px solid #C1560C;margin:20px 0}
 
     @media print{
       .sidebar, .topbar, #banner-edicao{display:none !important}
@@ -204,6 +219,13 @@
     </table>
 
     <p class="print-rodape" id="print-rodape"></p>
+
+    <div class="print-anexos" id="print-anexos-container" style="display:none;">
+      <h2 class="print-secao-titulo">ANEXOS</h2>
+      <img class="print-anexo-img" id="print-anexo1-img" style="display:none;" alt="Anexo 1">
+      <hr class="print-anexo-separador" id="print-anexo-separador" style="display:none;">
+      <img class="print-anexo-img" id="print-anexo2-img" style="display:none;" alt="Anexo 2">
+    </div>
   </div>
 
   <header>
@@ -314,6 +336,37 @@
     <div class="button-group" style="margin-top:10px;">
       <button type="button" class="btn-clear" id="cf-adicionar-linha" style="font-size:12px;padding:6px 12px;">+ ADICIONAR MÊS</button>
       <button type="button" class="btn-danger" id="cf-limpar" style="font-size:12px;padding:6px 12px;">LIMPAR TUDO</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>ANEXOS PARA IMPRESSÃO (OPCIONAL)</h2>
+    <div class="info-box">
+      <strong>Atenção:</strong> estas imagens <u>não são salvas no banco de dados</u> — servem apenas para
+      aparecer na folha de impressão desta sessão. Se você recarregar a página, fechar a aba ou reabrir este
+      acerto depois pelo Histórico, será preciso colar as imagens novamente antes de imprimir.
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label>IMAGEM 1</label>
+          <div class="anexo-colar" id="anexo1-area" tabindex="0">
+            <span class="anexo-placeholder">Clique aqui dentro e cole a imagem<br>(Ctrl+V)</span>
+            <img class="anexo-preview" id="anexo1-preview" style="display:none;" alt="Prévia do anexo 1">
+            <button type="button" class="anexo-remover" id="anexo1-remover" style="display:none;">REMOVER IMAGEM</button>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label>IMAGEM 2</label>
+          <div class="anexo-colar" id="anexo2-area" tabindex="0">
+            <span class="anexo-placeholder">Clique aqui dentro e cole a imagem<br>(Ctrl+V)</span>
+            <img class="anexo-preview" id="anexo2-preview" style="display:none;" alt="Prévia do anexo 2">
+            <button type="button" class="anexo-remover" id="anexo2-remover" style="display:none;">REMOVER IMAGEM</button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -650,6 +703,25 @@
 
     el.printRodape.textContent = `${hojeBR} — Correção de Folha (Versão 09) — Portal de Acertos IBRAM-DF`;
 
+    // Anexos colados (não salvos no banco — só entram na impressão desta sessão)
+    const containerAnexos = document.getElementById("print-anexos-container");
+    const imgAnexo1 = document.getElementById("print-anexo1-img");
+    const imgAnexo2 = document.getElementById("print-anexo2-img");
+    const separadorAnexos = document.getElementById("print-anexo-separador");
+    const temAnexo1 = !!window.__cfAnexos?.anexo1;
+    const temAnexo2 = !!window.__cfAnexos?.anexo2;
+
+    if (temAnexo1 || temAnexo2) {
+      containerAnexos.style.display = "block";
+      if (temAnexo1) { imgAnexo1.src = window.__cfAnexos.anexo1; imgAnexo1.style.display = "block"; }
+      else { imgAnexo1.style.display = "none"; imgAnexo1.removeAttribute("src"); }
+      if (temAnexo2) { imgAnexo2.src = window.__cfAnexos.anexo2; imgAnexo2.style.display = "block"; }
+      else { imgAnexo2.style.display = "none"; imgAnexo2.removeAttribute("src"); }
+      separadorAnexos.style.display = (temAnexo1 && temAnexo2) ? "block" : "none";
+    } else {
+      containerAnexos.style.display = "none";
+    }
+
     window.print();
   };
 
@@ -695,6 +767,55 @@
   $("#cf-adicionar-linha").addEventListener("click", cfAdicionarLinha);
   $("#cf-limpar").addEventListener("click", cfLimpar);
   $("#cf-imprimir").addEventListener("click", imprimir);
+
+  /* ========= Anexos de imagem (colar via Ctrl+V) =========
+     Guardados só em memória (window.__cfAnexos) — nunca entram no objeto
+     salvo no Portal/Firestore. Servem apenas para a impressão da sessão atual. */
+  window.__cfAnexos = { anexo1: null, anexo2: null };
+
+  const configurarAreaColar = (areaId, previewId, removerId, chave) => {
+    const area = document.getElementById(areaId);
+    const preview = document.getElementById(previewId);
+    const btnRemover = document.getElementById(removerId);
+    const placeholder = area?.querySelector(".anexo-placeholder");
+    if (!area || !preview || !btnRemover || !placeholder) return;
+
+    area.addEventListener("paste", (ev) => {
+      const items = ev.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type && item.type.indexOf("image/") === 0) {
+          const arquivo = item.getAsFile();
+          if (!arquivo) continue;
+          const leitor = new FileReader();
+          leitor.onload = (evLeitura) => {
+            const dataUrl = evLeitura.target.result;
+            preview.src = dataUrl;
+            preview.style.display = "block";
+            placeholder.style.display = "none";
+            btnRemover.style.display = "block";
+            area.classList.add("tem-imagem");
+            window.__cfAnexos[chave] = dataUrl;
+          };
+          leitor.readAsDataURL(arquivo);
+          ev.preventDefault();
+          break;
+        }
+      }
+    });
+
+    btnRemover.addEventListener("click", () => {
+      preview.removeAttribute("src");
+      preview.style.display = "none";
+      placeholder.style.display = "block";
+      btnRemover.style.display = "none";
+      area.classList.remove("tem-imagem");
+      window.__cfAnexos[chave] = null;
+    });
+  };
+
+  configurarAreaColar("anexo1-area", "anexo1-preview", "anexo1-remover", "anexo1");
+  configurarAreaColar("anexo2-area", "anexo2-preview", "anexo2-remover", "anexo2");
 
   /* ========= Init ========= */
   const init = () => {
