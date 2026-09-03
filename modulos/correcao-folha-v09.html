@@ -256,6 +256,12 @@
           <input type="text" id="cargo" placeholder="Nome do cargo/função" />
         </div>
       </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="processo-sei">PROCESSO SEI:</label>
+          <input type="text" id="processo-sei" placeholder="00000.00000000/0000-00" />
+        </div>
+      </div>
     </div>
   </section>
 
@@ -391,6 +397,7 @@
     nome: $("#nome"),
     matricula: $("#matricula"),
     cargo: $("#cargo"),
+    processoSei: $("#processo-sei"),
     rubBody: $("#rub-body"),
     rubTotalValor: $("#rub-total-valor"),
     cfBody: $("#cf-body"),
@@ -668,6 +675,7 @@
       itemInfo("Nome", el.nome.value.trim()) +
       itemInfo("Matrícula", el.matricula.value.trim()) +
       itemInfo("Cargo/Função", el.cargo.value.trim()) +
+      itemInfo("Processo SEI", el.processoSei.value.trim()) +
       itemInfo("Total da remuneração", "R$ " + formatarValorTabela(rem));
 
     el.printCompetenciasBody.innerHTML = linhas.map(l => `
@@ -996,6 +1004,7 @@ document.getElementById('salvar-portal').addEventListener('click', async () => {
     nome: document.getElementById('nome').value,
     matricula: document.getElementById('matricula').value,
     cargo: document.getElementById('cargo').value,
+    processoSei: document.getElementById('processo-sei').value,
     rubricas: coletarRubricas(),
     totalRemuneracao: document.getElementById('rub-total-valor').textContent.trim(),
     totalFinal: document.getElementById('cf-total-inss').textContent.trim(),
