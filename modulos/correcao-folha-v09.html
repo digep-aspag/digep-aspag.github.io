@@ -75,6 +75,7 @@
     .print-only .print-rodape{font-size:11px;color:#777;text-align:center;margin-top:24px}
     .print-anexos{margin-top:26px}
     .print-anexo-img{display:block;max-width:100%;margin:0 auto;border:1px solid #ddd}
+    .print-anexo-legenda{font-size:12px;font-weight:700;color:#444;text-align:center;margin:0 0 6px}
     .print-anexo-separador{border:none;border-top:3px solid #C1560C;margin:20px 0}
 
     @media print{
@@ -222,8 +223,10 @@
 
     <div class="print-anexos" id="print-anexos-container" style="display:none;">
       <h2 class="print-secao-titulo">ANEXOS</h2>
+      <div class="print-anexo-legenda" id="print-anexo1-legenda" style="display:none;"></div>
       <img class="print-anexo-img" id="print-anexo1-img" style="display:none;" alt="Anexo 1">
       <hr class="print-anexo-separador" id="print-anexo-separador" style="display:none;">
+      <div class="print-anexo-legenda" id="print-anexo2-legenda" style="display:none;"></div>
       <img class="print-anexo-img" id="print-anexo2-img" style="display:none;" alt="Anexo 2">
     </div>
   </div>
@@ -356,6 +359,7 @@
       <div class="col">
         <div class="form-group">
           <label>IMAGEM 1</label>
+          <input type="text" id="anexo1-legenda" class="anexo-legenda-input" placeholder="Legenda desta imagem (opcional)" style="margin-bottom:8px;" />
           <div class="anexo-colar" id="anexo1-area" tabindex="0">
             <span class="anexo-placeholder">Clique aqui dentro e cole a imagem<br>(Ctrl+V)</span>
             <img class="anexo-preview" id="anexo1-preview" style="display:none;" alt="Prévia do anexo 1">
@@ -366,6 +370,7 @@
       <div class="col">
         <div class="form-group">
           <label>IMAGEM 2</label>
+          <input type="text" id="anexo2-legenda" class="anexo-legenda-input" placeholder="Legenda desta imagem (opcional)" style="margin-bottom:8px;" />
           <div class="anexo-colar" id="anexo2-area" tabindex="0">
             <span class="anexo-placeholder">Clique aqui dentro e cole a imagem<br>(Ctrl+V)</span>
             <img class="anexo-preview" id="anexo2-preview" style="display:none;" alt="Prévia do anexo 2">
@@ -715,16 +720,34 @@
     const containerAnexos = document.getElementById("print-anexos-container");
     const imgAnexo1 = document.getElementById("print-anexo1-img");
     const imgAnexo2 = document.getElementById("print-anexo2-img");
+    const legendaAnexo1 = document.getElementById("print-anexo1-legenda");
+    const legendaAnexo2 = document.getElementById("print-anexo2-legenda");
     const separadorAnexos = document.getElementById("print-anexo-separador");
     const temAnexo1 = !!window.__cfAnexos?.anexo1;
     const temAnexo2 = !!window.__cfAnexos?.anexo2;
+    const textoLegenda1 = document.getElementById("anexo1-legenda")?.value.trim() || "";
+    const textoLegenda2 = document.getElementById("anexo2-legenda")?.value.trim() || "";
 
     if (temAnexo1 || temAnexo2) {
       containerAnexos.style.display = "block";
-      if (temAnexo1) { imgAnexo1.src = window.__cfAnexos.anexo1; imgAnexo1.style.display = "block"; }
-      else { imgAnexo1.style.display = "none"; imgAnexo1.removeAttribute("src"); }
-      if (temAnexo2) { imgAnexo2.src = window.__cfAnexos.anexo2; imgAnexo2.style.display = "block"; }
-      else { imgAnexo2.style.display = "none"; imgAnexo2.removeAttribute("src"); }
+      if (temAnexo1) {
+        imgAnexo1.src = window.__cfAnexos.anexo1;
+        imgAnexo1.style.display = "block";
+        if (textoLegenda1) { legendaAnexo1.textContent = textoLegenda1; legendaAnexo1.style.display = "block"; }
+        else { legendaAnexo1.style.display = "none"; }
+      } else {
+        imgAnexo1.style.display = "none"; imgAnexo1.removeAttribute("src");
+        legendaAnexo1.style.display = "none";
+      }
+      if (temAnexo2) {
+        imgAnexo2.src = window.__cfAnexos.anexo2;
+        imgAnexo2.style.display = "block";
+        if (textoLegenda2) { legendaAnexo2.textContent = textoLegenda2; legendaAnexo2.style.display = "block"; }
+        else { legendaAnexo2.style.display = "none"; }
+      } else {
+        imgAnexo2.style.display = "none"; imgAnexo2.removeAttribute("src");
+        legendaAnexo2.style.display = "none";
+      }
       separadorAnexos.style.display = (temAnexo1 && temAnexo2) ? "block" : "none";
     } else {
       containerAnexos.style.display = "none";
