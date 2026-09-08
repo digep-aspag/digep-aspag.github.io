@@ -225,7 +225,13 @@ em{font-style:italic}
 .field-hint-group:focus-within .field-hint{display:block}
 
 /* ===== Imagens para impressão (aba Resumo) — nunca salvas no Firestore ===== */
-.img-print-label{font-weight:600;font-size:.85rem;color:#3b0764;margin-bottom:.3rem}
+.img-print-label-input{
+  min-height:38px;border:1px dashed #b9a9d6;border-radius:.4rem;
+  padding:6px 10px;margin-bottom:.4rem;font-weight:600;font-size:.85rem;
+  color:#3b0764;background:#faf9fc;text-transform:uppercase;cursor:text;
+}
+.img-print-label-input:empty::before{content:attr(data-placeholder);color:#8a7fa8;font-style:italic;font-weight:400;text-transform:none}
+.img-print-label-input:focus{outline:2px solid #6b21a8;outline-offset:1px;background:#fff}
 .img-paste-box{
   min-height:170px;border:2px dashed #c9c2d8;border-radius:.5rem;
   display:flex;align-items:center;justify-content:center;text-align:center;
@@ -286,7 +292,8 @@ em{font-style:italic}
   #pane-resumo.print-include #card-imagens-impressao .row{display:block !important}
   /* cada grupo (rótulo + imagem) nunca é separado entre páginas */
   #pane-resumo.print-include #card-imagens-impressao .img-print-group{width:100% !important;max-width:100% !important;flex:none !important;break-inside:avoid;page-break-inside:avoid;margin-bottom:22px}
-  #pane-resumo.print-include .img-print-label{font-size:15px;color:#6b21a8;font-weight:700;margin-bottom:6px;font-family:Arial,Helvetica,sans-serif}
+  #pane-resumo.print-include .img-print-label-input{font-size:14px;color:#6b21a8;font-weight:700;margin-bottom:6px;font-family:Arial,Helvetica,sans-serif;border:none !important;background:none !important;padding:0}
+  #pane-resumo.print-include .img-print-label-input:empty{display:none}
   #pane-resumo.print-include .img-paste-box{border:none !important;min-height:0;background:none !important;padding:0;display:block}
   #pane-resumo.print-include .img-paste-box img{max-width:100%;max-height:245mm;width:auto;height:auto;display:block;margin:0 auto}
 }
@@ -486,17 +493,19 @@ em{font-style:italic}
         <div class="card-body">
           <h4 class="card-title mb-2">Imagens para Impressão</h4>
           <p class="text-muted mb-2" style="font-size:.85rem">
-            Cole (Ctrl+V) uma imagem em cada quadro abaixo. Elas aparecem <strong>somente na impressão/PDF</strong>,
-            em página própria logo após o Resumo Geral — nunca são salvas no Portal.
+            Clique em um dos quadros abaixo e cole uma imagem (Ctrl+V) — print de tela, comprovante, etc.
+            Use o campo de texto acima de cada quadro para descrever a imagem (fica sempre em CAIXA ALTA).
+            Imagens e descrições aparecem apenas no PDF/impressão do Resumo e <strong>não são salvas no Portal</strong>;
+            ao reabrir este acerto mais tarde, os quadros ficam vazios novamente.
           </p>
           <div class="row g-3">
-            <div class="col-6 img-print-group">
-              <div class="img-print-label">Imagem 1</div>
+            <div class="col-lg-6 img-print-group">
+              <div class="img-print-label-input no-persist" contenteditable="true" data-placeholder="Descrição da Imagem 1 (aparece na impressão)" id="img-desc-1"></div>
               <div class="img-paste-box no-persist" id="img-paste-1" contenteditable="true" data-placeholder="Clique aqui e cole (Ctrl+V) uma imagem"></div>
               <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-limpar-img" data-target="img-paste-1">Remover imagem</button>
             </div>
-            <div class="col-6 img-print-group">
-              <div class="img-print-label">Imagem 2</div>
+            <div class="col-lg-6 img-print-group">
+              <div class="img-print-label-input no-persist" contenteditable="true" data-placeholder="Descrição da Imagem 2 (aparece na impressão)" id="img-desc-2"></div>
               <div class="img-paste-box no-persist" id="img-paste-2" contenteditable="true" data-placeholder="Clique aqui e cole (Ctrl+V) uma imagem"></div>
               <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-limpar-img" data-target="img-paste-2">Remover imagem</button>
             </div>
@@ -2972,6 +2981,19 @@ function setupImgPasteBox(boxId) {
 }
 setupImgPasteBox('img-paste-1');
 setupImgPasteBox('img-paste-2');
+
+// Descrições das imagens: sempre em CAIXA ALTA (mesmo padrão das linhas manuais)
+['img-desc-1', 'img-desc-2'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => uppercaseContentEditableCaret(el));
+  el.addEventListener('blur', () => uppercaseContentEditableCaret(el));
+  el.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const texto = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, texto);
+  });
+});
 
 $$('.btn-limpar-img').forEach(btn => {
   btn.addEventListener('click', () => {
