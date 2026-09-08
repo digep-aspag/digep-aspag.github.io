@@ -187,12 +187,14 @@ em{font-style:italic}
    dados já calculados.
 ============================================================ */
 /* Áreas de colar imagem (Resumo) — visual em tela */
-.img-paste-area{border:2px dashed #adb5bd;border-radius:8px;min-height:160px;
+.img-paste-row{display:flex;gap:12px;flex-wrap:wrap}
+.img-paste-col{flex:1 1 260px;min-width:220px}
+.img-paste-area{border:2px dashed #adb5bd;border-radius:8px;min-height:110px;
   display:flex;align-items:center;justify-content:center;cursor:text;
   background:#f8f9fa;padding:8px;position:relative;transition:border-color .15s}
 .img-paste-area:focus{outline:none;border-color:#556B2F;background:#f4f6ee}
 .img-paste-area .img-paste-placeholder{color:#6c757d;font-size:.85rem;text-align:center;padding:0 12px}
-.img-paste-area img{max-width:100%;max-height:260px;border-radius:4px}
+.img-paste-area img{max-width:100%;max-height:150px;border-radius:4px}
 
 .print-container{display:none}
 @media print{
@@ -217,11 +219,10 @@ em{font-style:italic}
   .print-page table td:last-child,.print-page table th:last-child{text-align:right}
   .print-page .print-total{font-weight:700;font-size:12pt;margin-top:8px;text-align:right}
   .print-page .print-empty{font-size:10pt;color:#6c757d;font-style:italic}
-  .print-page .print-imagens{margin-top:16px;padding-top:12px;border-top:3px solid #556B2F}
-  .print-page .print-imagens h4{margin:0 0 8px}
-  .print-page .print-imagens-grid{display:flex;gap:12px;flex-wrap:wrap}
-  .print-page .print-imagens-grid figure{margin:0;flex:1 1 45%;max-width:48%}
-  .print-page .print-imagens-grid img{width:100%;height:auto;border:1px solid #dee2e6;border-radius:4px}
+  .print-page .print-imagens-stack{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .print-page .print-imagens-stack figure{margin:0}
+  .print-page .print-imagens-stack img{width:100%;height:auto;max-height:47vh;object-fit:contain;
+    border:1px solid #dee2e6;border-radius:4px}
 }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -410,14 +411,14 @@ em{font-style:italic}
         <div class="mt-4">
           <h5 class="mb-1">Imagens anexas (só aparecem na impressão)</h5>
           <p class="text-muted mb-2" style="font-size:.85rem">Clique em um dos quadros abaixo e cole uma imagem (Ctrl+V) — print de tela, comprovante, etc. As imagens aparecem apenas no PDF/impressão do Resumo e <strong>não são salvas no Portal</strong>; ao reabrir este acerto mais tarde, os quadros ficam vazios novamente.</p>
-          <div class="row g-3">
-            <div class="col-md-6">
+          <div class="img-paste-row">
+            <div class="img-paste-col">
               <div class="img-paste-area" id="img-paste-1" tabindex="0" data-slot="1">
                 <span class="img-paste-placeholder">Clique aqui e cole (Ctrl+V) a imagem 1</span>
               </div>
               <button type="button" class="btn btn-sm btn-outline-danger mt-1 d-none" id="img-paste-1-remover">Remover imagem 1</button>
             </div>
-            <div class="col-md-6">
+            <div class="img-paste-col">
               <div class="img-paste-area" id="img-paste-2" tabindex="0" data-slot="2">
                 <span class="img-paste-placeholder">Clique aqui e cole (Ctrl+V) a imagem 2</span>
               </div>
@@ -2155,17 +2156,6 @@ function construirPaginaImpressaoResumo(dataAtual) {
   html += `</tbody></table>`;
   const clsTotal = total < 0 ? 'valor-negativo' : 'valor-positivo';
 
-  /* Imagens anexas (só impressão — nunca persistidas) */
-  let htmlImagens = '';
-  const temImg1 = !!imagensResumo[1];
-  const temImg2 = !!imagensResumo[2];
-  if (temImg1 || temImg2) {
-    htmlImagens = `<div class="print-imagens"><h4>Imagens anexas</h4><div class="print-imagens-grid">`;
-    if (temImg1) htmlImagens += `<figure><img src="${imagensResumo[1]}" alt="Imagem anexa 1"></figure>`;
-    if (temImg2) htmlImagens += `<figure><img src="${imagensResumo[2]}" alt="Imagem anexa 2"></figure>`;
-    htmlImagens += `</div></div>`;
-  }
-
   const div = document.createElement('div');
   div.className = 'print-page';
   div.innerHTML = `
@@ -2175,7 +2165,32 @@ function construirPaginaImpressaoResumo(dataAtual) {
     <h3>RESUMO GERAL (TODOS OS CARGOS)</h3>
     ${html}
     <div class="print-total">TOTAL LÍQUIDO (todos os cargos): <span class="${clsTotal}">R$ ${formatarMoedaBR(total)}</span></div>
-    ${htmlImagens}
+  `;
+  return div;
+}
+
+/* Página separada, exclusiva para as imagens anexas do Resumo — sempre
+   logo após a página de Resumo Geral. Empilhadas (uma abaixo da outra) e
+   em tamanho maior, já que aqui têm a página inteira só para elas.
+   Retorna null se nenhuma imagem foi colada (nesse caso nenhuma página
+   extra é criada). */
+function construirPaginaImagensResumo(dataAtual) {
+  const temImg1 = !!imagensResumo[1];
+  const temImg2 = !!imagensResumo[2];
+  if (!temImg1 && !temImg2) return null;
+
+  let htmlImagens = '';
+  if (temImg1) htmlImagens += `<figure><img src="${imagensResumo[1]}" alt="Imagem anexa 1"></figure>`;
+  if (temImg2) htmlImagens += `<figure><img src="${imagensResumo[2]}" alt="Imagem anexa 2"></figure>`;
+
+  const div = document.createElement('div');
+  div.className = 'print-page';
+  div.innerHTML = `
+    <h2>Sistema de Acerto — Cargos Comissionados (COM vínculo)</h2>
+    <div class="print-meta"><strong>Servidor:</strong> ${serverData.nome || '—'} &nbsp;•&nbsp; <strong>Matrícula:</strong> ${serverData.matricula || '—'} &nbsp;•&nbsp; <strong>Processo SEI:</strong> ${serverData.processoSei || '—'} &nbsp;•&nbsp; <strong>Data:</strong> ${dataAtual}</div>
+    <hr>
+    <h3>IMAGENS ANEXAS</h3>
+    <div class="print-imagens-stack">${htmlImagens}</div>
   `;
   return div;
 }
@@ -2205,6 +2220,8 @@ function prepararImpressao() {
     container.appendChild(construirPaginaImpressaoCargo(pane, idx, dataAtual));
   });
   container.appendChild(construirPaginaImpressaoResumo(dataAtual));
+  const paginaImagens = construirPaginaImagensResumo(dataAtual);
+  if (paginaImagens) container.appendChild(paginaImagens);
 
   document.body.appendChild(container);
   return true;
