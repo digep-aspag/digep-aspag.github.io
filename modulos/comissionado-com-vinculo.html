@@ -195,6 +195,7 @@ em{font-style:italic}
 .img-paste-area:focus{outline:none;border-color:#556B2F;background:#f4f6ee}
 .img-paste-area .img-paste-placeholder{color:#6c757d;font-size:.85rem;text-align:center;padding:0 12px}
 .img-paste-area img{max-width:100%;max-height:150px;border-radius:4px}
+.img-paste-legenda{text-transform:uppercase}
 
 .print-container{display:none}
 @media print{
@@ -221,7 +222,9 @@ em{font-style:italic}
   .print-page .print-empty{font-size:10pt;color:#6c757d;font-style:italic}
   .print-page .print-imagens-stack{display:flex;flex-direction:column;gap:16px;margin-top:8px}
   .print-page .print-imagens-stack figure{margin:0}
-  .print-page .print-imagens-stack img{width:100%;height:auto;max-height:47vh;object-fit:contain;
+  .print-page .print-imagens-stack .print-imagem-legenda{font-weight:700;font-size:10.5pt;
+    color:#556B2F;text-transform:uppercase;margin:0 0 4px}
+  .print-page .print-imagens-stack img{width:100%;height:auto;max-height:44vh;object-fit:contain;
     border:1px solid #dee2e6;border-radius:4px}
 }
 </style>
@@ -410,15 +413,17 @@ em{font-style:italic}
 
         <div class="mt-4">
           <h5 class="mb-1">Imagens anexas (só aparecem na impressão)</h5>
-          <p class="text-muted mb-2" style="font-size:.85rem">Clique em um dos quadros abaixo e cole uma imagem (Ctrl+V) — print de tela, comprovante, etc. As imagens aparecem apenas no PDF/impressão do Resumo e <strong>não são salvas no Portal</strong>; ao reabrir este acerto mais tarde, os quadros ficam vazios novamente.</p>
+          <p class="text-muted mb-2" style="font-size:.85rem">Clique em um dos quadros abaixo e cole uma imagem (Ctrl+V) — print de tela, comprovante, etc. Use o campo de texto acima de cada quadro para descrever a imagem (fica sempre em CAIXA ALTA). Imagens e descrições aparecem apenas no PDF/impressão do Resumo e <strong>não são salvas no Portal</strong>; ao reabrir este acerto mais tarde, os quadros ficam vazios novamente.</p>
           <div class="img-paste-row">
             <div class="img-paste-col">
+              <input type="text" class="form-control form-control-sm mb-1 img-paste-legenda" id="img-paste-1-legenda" data-slot="1" placeholder="Descrição da imagem 1 (aparece na impressão)">
               <div class="img-paste-area" id="img-paste-1" tabindex="0" data-slot="1">
                 <span class="img-paste-placeholder">Clique aqui e cole (Ctrl+V) a imagem 1</span>
               </div>
               <button type="button" class="btn btn-sm btn-outline-danger mt-1 d-none" id="img-paste-1-remover">Remover imagem 1</button>
             </div>
             <div class="img-paste-col">
+              <input type="text" class="form-control form-control-sm mb-1 img-paste-legenda" id="img-paste-2-legenda" data-slot="2" placeholder="Descrição da imagem 2 (aparece na impressão)">
               <div class="img-paste-area" id="img-paste-2" tabindex="0" data-slot="2">
                 <span class="img-paste-placeholder">Clique aqui e cole (Ctrl+V) a imagem 2</span>
               </div>
@@ -1996,26 +2001,34 @@ $('#btn-exportar-resumo').addEventListener('click', () => {
 
 /* ================================================================
    IMAGENS ANEXAS DO RESUMO (só para impressão — nunca vão ao Firestore)
-   Duas áreas de colar (Ctrl+V) na aba Resumo. As imagens ficam em
-   memória (objeto `imagensResumo`, com dataURL base64) só durante a
-   sessão da página; não entram em coletarEntradas/salvarAcerto, então
-   nunca são persistidas nem restauradas ao reabrir um acerto salvo.
+   Duas áreas de colar (Ctrl+V) na aba Resumo, cada uma com um campo de
+   texto (legenda) exibido acima da imagem na impressão. Tudo fica em
+   memória (objeto `imagensResumo`, com dataURL base64 + legenda em
+   caixa alta) só durante a sessão da página; não entra em
+   coletarEntradas/salvarAcerto, então nunca é persistido nem
+   restaurado ao reabrir um acerto salvo.
    ================================================================ */
-const imagensResumo = { 1: null, 2: null };
+const imagensResumo = {
+  1: { dataUrl: null, legenda: '' },
+  2: { dataUrl: null, legenda: '' }
+};
 
 function initAreaColarImagem(slot) {
   const area = document.getElementById(`img-paste-${slot}`);
   const btnRemover = document.getElementById(`img-paste-${slot}-remover`);
+  const inputLegenda = document.getElementById(`img-paste-${slot}-legenda`);
   if (!area) return;
 
   function mostrarImagem(dataUrl) {
-    imagensResumo[slot] = dataUrl;
+    imagensResumo[slot].dataUrl = dataUrl;
     area.innerHTML = `<img src="${dataUrl}" alt="Imagem anexa ${slot}">`;
     btnRemover?.classList.remove('d-none');
   }
 
   function limparArea() {
-    imagensResumo[slot] = null;
+    imagensResumo[slot].dataUrl = null;
+    imagensResumo[slot].legenda = '';
+    if (inputLegenda) inputLegenda.value = '';
     area.innerHTML = `<span class="img-paste-placeholder">Clique aqui e cole (Ctrl+V) a imagem ${slot}</span>`;
     btnRemover?.classList.add('d-none');
   }
@@ -2038,6 +2051,18 @@ function initAreaColarImagem(slot) {
   btnRemover?.addEventListener('click', () => {
     if (confirm(`Remover a imagem ${slot}?`)) limparArea();
   });
+
+  /* Legenda: sempre em caixa alta, tanto no valor guardado quanto no
+     que aparece no campo enquanto o usuário digita. */
+  if (inputLegenda) {
+    inputLegenda.addEventListener('input', () => {
+      const inicio = inputLegenda.selectionStart;
+      const fim = inputLegenda.selectionEnd;
+      inputLegenda.value = inputLegenda.value.toUpperCase();
+      inputLegenda.setSelectionRange(inicio, fim);
+      imagensResumo[slot].legenda = inputLegenda.value;
+    });
+  }
 }
 initAreaColarImagem(1);
 initAreaColarImagem(2);
@@ -2175,13 +2200,22 @@ function construirPaginaImpressaoResumo(dataAtual) {
    Retorna null se nenhuma imagem foi colada (nesse caso nenhuma página
    extra é criada). */
 function construirPaginaImagensResumo(dataAtual) {
-  const temImg1 = !!imagensResumo[1];
-  const temImg2 = !!imagensResumo[2];
+  const temImg1 = !!imagensResumo[1].dataUrl;
+  const temImg2 = !!imagensResumo[2].dataUrl;
   if (!temImg1 && !temImg2) return null;
 
+  const escapeHtmlLegenda = (txt) => (txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function figuraHtml(slot) {
+    const item = imagensResumo[slot];
+    const legenda = escapeHtmlLegenda(item.legenda);
+    const captionHtml = legenda ? `<figcaption class="print-imagem-legenda">${legenda}</figcaption>` : '';
+    return `<figure>${captionHtml}<img src="${item.dataUrl}" alt="Imagem anexa ${slot}"></figure>`;
+  }
+
   let htmlImagens = '';
-  if (temImg1) htmlImagens += `<figure><img src="${imagensResumo[1]}" alt="Imagem anexa 1"></figure>`;
-  if (temImg2) htmlImagens += `<figure><img src="${imagensResumo[2]}" alt="Imagem anexa 2"></figure>`;
+  if (temImg1) htmlImagens += figuraHtml(1);
+  if (temImg2) htmlImagens += figuraHtml(2);
 
   const div = document.createElement('div');
   div.className = 'print-page';
