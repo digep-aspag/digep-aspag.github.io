@@ -1436,9 +1436,9 @@ function uppercaseContentEditableCaret(el) {
 function criarLinhaManualHtml() {
   return `
             <tr class="manual-row">
-              <td class="manual-codigo" contenteditable="true" spellcheck="false"></td>
-              <td class="manual-descricao" contenteditable="true" spellcheck="false"></td>
-              <td class="manual-valor valor-positivo" contenteditable="true" spellcheck="false">0,00</td>
+              <td class="manual-codigo no-persist" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-descricao no-persist" contenteditable="true" spellcheck="false"></td>
+              <td class="manual-valor valor-positivo no-persist" contenteditable="true" spellcheck="false">0,00</td>
               <td class="text-center"><button type="button" class="btn-remover-linha-manual" title="Apagar esta linha">×</button></td>
             </tr>`;
 }
@@ -1925,14 +1925,25 @@ function posInitCargoPane(ctx, idx) {
     .forEach(el => { el.addEventListener('input', atualizarPreviewAuxilios); el.addEventListener('blur', atualizarPreviewAuxilios); });
   atualizarPreviewAuxilios();
 
-  /* Autopreenchimento pelo símbolo (Representação + Vencimento) */
+  /* Autopreenchimento pelo símbolo (Representação + Vencimento).
+     A ESCRITA nos campos de valor fica DESATIVADA durante a restauração
+     de um acerto salvo (Histórico — ver window.__restaurandoAcerto no
+     script de módulo), porque os valores exatos que o usuário digitou
+     manualmente (que podem ser diferentes da tabela) já vêm prontos no
+     próprio registro salvo; deixar esta função sobrescrever os campos
+     nesse momento apagaria um valor manual antes de ele ser restaurado.
+     O selinho/feedback (referência informativa da tabela) continua
+     aparecendo normalmente mesmo durante a restauração. */
   function aplicarTabelaVerba() {
+    const restaurando = !!window.__restaurandoAcerto;
     const s = (elements.inputSimb.value || '').trim().toUpperCase();
     const v = TABELA_VERBAS[s];
     const inputVenc = $('.input-vencimento', ctx);
     if (v !== undefined) {
-      elements.inputVerba.value = v.repres.toFixed(2).replace('.', ',');
-      if (inputVenc) inputVenc.value = v.venc.toFixed(2).replace('.', ',');
+      if (!restaurando) {
+        elements.inputVerba.value = v.repres.toFixed(2).replace('.', ',');
+        if (inputVenc) inputVenc.value = v.venc.toFixed(2).replace('.', ',');
+      }
       elements.inputVerba.classList.remove('is-invalid');
       elements.inputVerba.classList.add('is-valid');
       elements.inputSimb.classList.remove('is-invalid');
@@ -1952,7 +1963,7 @@ function posInitCargoPane(ctx, idx) {
       elements.inputSimb.classList.remove('is-valid', 'is-invalid');
       elements.feedbackEl.innerHTML = '';
     }
-    atualizarPreviewAuxilios();
+    if (!restaurando) atualizarPreviewAuxilios();
   }
   elements.inputSimb.addEventListener('input', aplicarTabelaVerba);
   elements.inputSimb.addEventListener('blur', aplicarTabelaVerba);
@@ -3128,6 +3139,75 @@ window.addEventListener('afterprint', limparImpressao);
     });
   }
 
+  /* ================================================================
+     LINHAS MANUAIS — salvamento dedicado (substitui, para estes campos,
+     o sistema genérico de chave posicional acima).
+
+     Por que: o sistema genérico (chaveElemento/restaurarEntradas) conta
+     a posição de cada campo entre TODOS os elementos da página que
+     casam com o mesmo seletor, e o restore dispara eventos "blur" que
+     por sua vez chamam aplicarSinalPorCodigoManual() — cuja ordem de
+     execução, ao restaurar várias linhas em sequência, pode não bater
+     exatamente com a ordem em que os valores foram digitados
+     originalmente. Isso já causou um caso real de uma linha manual
+     "herdar" o valor de outra ao reabrir um acerto salvo.
+
+     A solução aqui é mais simples e determinística: cada cargo salva
+     seu próprio array de linhas manuais (código/descrição/valor/sinal),
+     na ordem em que aparecem na tabela, e a restauração escreve esses
+     valores diretamente nas células pelo índice do array — sem
+     depender de contagem de posição global nem de eventos de blur.
+     Por isso as células de linha manual têm a classe "no-persist"
+     (ficam de fora do coletarEntradas/restaurarEntradas genérico). */
+  function coletarLinhasManuais() {
+    const resultado = {};
+    document.querySelectorAll('.tab-pane[id^="pane-c"]').forEach((pane) => {
+      if (!pane.id) return;
+      const linhas = $$('.manual-row', pane).map((tr) => ({
+        codigo: $('.manual-codigo', tr)?.textContent || '',
+        descricao: $('.manual-descricao', tr)?.textContent || '',
+        valor: $('.manual-valor', tr)?.textContent || '0,00',
+        negativo: $('.manual-valor', tr)?.classList.contains('valor-negativo') || false,
+      }));
+      if (linhas.length) resultado[pane.id] = linhas;
+    });
+    return resultado;
+  }
+
+  function restaurarLinhasManuais(linhasManuais) {
+    if (!linhasManuais) return; // acertos salvos antes desta correção não têm este campo
+    Object.keys(linhasManuais).forEach((paneId) => {
+      const pane = document.getElementById(paneId);
+      if (!pane) return;
+      const linhasSalvas = linhasManuais[paneId];
+      const btnAdd = pane.querySelector('.btn-add-linha-manual');
+      // garante linhas suficientes antes de preencher (mesma lógica de
+      // garantirLinhasManuaisSuficientes, mas usando o próprio array salvo)
+      let linhasAtuais = pane.querySelectorAll('.manual-row');
+      while (linhasAtuais.length < linhasSalvas.length && btnAdd) {
+        btnAdd.click();
+        linhasAtuais = pane.querySelectorAll('.manual-row');
+      }
+      linhasAtuais = pane.querySelectorAll('.manual-row');
+      linhasSalvas.forEach((dadosLinha, i) => {
+        const tr = linhasAtuais[i];
+        if (!tr) return;
+        const codigoCell = $('.manual-codigo', tr);
+        const descricaoCell = $('.manual-descricao', tr);
+        const valorCell = $('.manual-valor', tr);
+        if (codigoCell) codigoCell.textContent = dadosLinha.codigo || '';
+        if (descricaoCell) descricaoCell.textContent = dadosLinha.descricao || '';
+        if (valorCell) {
+          valorCell.textContent = dadosLinha.valor || '0,00';
+          valorCell.classList.remove('valor-positivo', 'valor-negativo');
+          valorCell.classList.add(dadosLinha.negativo ? 'valor-negativo' : 'valor-positivo');
+        }
+      });
+      const resultsBody = pane.querySelector('.results-body');
+      if (resultsBody) atualizarTotalResultados(resultsBody);
+    });
+  }
+
   function coletarEntradas() {
     const entradas = {};
     document.querySelectorAll('input, select, textarea, [contenteditable="true"]:not(.no-persist)').forEach((el) => {
@@ -3174,7 +3254,13 @@ window.addEventListener('afterprint', limparImpressao);
         // abertura de todas as abas de cargo, e só então restauramos os valores.
         document.querySelectorAll('.nav-link[data-target^="#pane-c"]').forEach((btn) => btn.click());
         garantirLinhasManuaisSuficientes(registro.dados.entradas);
-        restaurarEntradas(registro.dados.entradas);
+        window.__restaurandoAcerto = true;
+        try {
+          restaurarEntradas(registro.dados.entradas);
+          restaurarLinhasManuais(registro.dados.linhasManuais);
+        } finally {
+          window.__restaurandoAcerto = false;
+        }
         document.querySelector('.nav-link[data-target="#pane-pessoais"]')?.click();
         banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule (e clique em "Atualizar Resumo") antes de clicar em "Salvar no Portal" para atualizar este mesmo registro.';
       } else {
@@ -3202,7 +3288,8 @@ window.addEventListener('afterprint', limparImpressao);
       qtdCargos: document.getElementById('srv-qtd-cargos').value,
       totalGeral: document.getElementById('resumo-total').textContent.trim(),
       resumo: coletarResumo(),
-      entradas: coletarEntradas()
+      entradas: coletarEntradas(),
+      linhasManuais: coletarLinhasManuais()
     };
 
     if (!dados.matricula) {
