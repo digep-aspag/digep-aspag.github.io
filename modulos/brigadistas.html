@@ -3389,6 +3389,44 @@ OBSERVAÇÕES:
     return null;
   }
 
+  // ✅ Correção: tabelas com "+ ADICIONAR MÊS" (correção de INSS por
+  // competência e a aba SIGRH v09) crescem dinamicamente e seus campos são
+  // identificados por POSIÇÃO (pos:...), não por id. Se um acerto foi salvo
+  // com mais linhas do que as 3 que já vêm prontas na tela, a posição da 4ª
+  // linha em diante não existe ainda quando o registro é reaberto para edição
+  // — e a restauração simplesmente não encontra onde colocar aquele valor.
+  // Por isso, antes de restaurar, criamos linhas extras o suficiente para que
+  // toda posição salva tenha, de fato, um campo correspondente na tela.
+  function garantirLinhasParaRestauracao(entradas) {
+    if (!entradas) return;
+    const alvos = [
+      { containerId: 'correcao-inss-faltas-body', selectorLinha: '.correcao-inss-linha', adicionar: adicionarLinhaCorrecaoInss },
+      { containerId: 'sigrh-body', selectorLinha: '.sigrh-linha', adicionar: sigrhAdicionarLinha },
+    ];
+
+    alvos.forEach(({ containerId, selectorLinha, adicionar }) => {
+      let maxIdx = -1;
+      const prefixo = 'pos:' + containerId + '::';
+      Object.keys(entradas).forEach((chave) => {
+        if (chave.indexOf(prefixo) === 0) {
+          const partes = chave.slice(prefixo.length).split('::');
+          const idx = parseInt(partes[partes.length - 1], 10);
+          if (!isNaN(idx) && idx > maxIdx) maxIdx = idx;
+        }
+      });
+      if (maxIdx < 0) return;
+
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      let tentativas = 0;
+      while (container.querySelectorAll(selectorLinha).length <= maxIdx && tentativas < 200) {
+        adicionar();
+        tentativas++;
+      }
+    });
+  }
+
   function coletarEntradas() {
     const entradas = {};
     document.querySelectorAll('input, select, textarea').forEach((el) => {
@@ -3425,6 +3463,7 @@ OBSERVAÇÕES:
       const banner = document.getElementById('banner-edicao');
       banner.style.display = 'block';
       if (registro && registro.dados && registro.dados.entradas) {
+        garantirLinhasParaRestauracao(registro.dados.entradas);
         restaurarEntradas(registro.dados.entradas);
         banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule e clique em "Salvar no Portal" (dentro da aba/seção de resultado) para atualizar este mesmo registro.';
       } else {
