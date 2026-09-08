@@ -3397,14 +3397,21 @@ OBSERVAÇÕES:
   // — e a restauração simplesmente não encontra onde colocar aquele valor.
   // Por isso, antes de restaurar, criamos linhas extras o suficiente para que
   // toda posição salva tenha, de fato, um campo correspondente na tela.
+  //
+  // ⚠️ As funções que criam as linhas (adicionarLinhaCorrecaoInss,
+  // sigrhAdicionarLinha) vivem no OUTRO bloco <script> (o script principal do
+  // app, fora deste <script type="module">) — não são visíveis aqui
+  // diretamente. Por isso, em vez de chamá-las, disparamos um clique real nos
+  // próprios botões "+ ADICIONAR MÊS", cujo evento já está registrado no
+  // escopo correto.
   function garantirLinhasParaRestauracao(entradas) {
     if (!entradas) return;
     const alvos = [
-      { containerId: 'correcao-inss-faltas-body', selectorLinha: '.correcao-inss-linha', adicionar: adicionarLinhaCorrecaoInss },
-      { containerId: 'sigrh-body', selectorLinha: '.sigrh-linha', adicionar: sigrhAdicionarLinha },
+      { containerId: 'correcao-inss-faltas-body', selectorLinha: '.correcao-inss-linha', botaoId: 'adicionar-linha-correcao-inss' },
+      { containerId: 'sigrh-body', selectorLinha: '.sigrh-linha', botaoId: 'sigrh-adicionar-linha' },
     ];
 
-    alvos.forEach(({ containerId, selectorLinha, adicionar }) => {
+    alvos.forEach(({ containerId, selectorLinha, botaoId }) => {
       let maxIdx = -1;
       const prefixo = 'pos:' + containerId + '::';
       Object.keys(entradas).forEach((chave) => {
@@ -3417,11 +3424,12 @@ OBSERVAÇÕES:
       if (maxIdx < 0) return;
 
       const container = document.getElementById(containerId);
-      if (!container) return;
+      const botao = document.getElementById(botaoId);
+      if (!container || !botao) return;
 
       let tentativas = 0;
       while (container.querySelectorAll(selectorLinha).length <= maxIdx && tentativas < 200) {
-        adicionar();
+        botao.click();
         tentativas++;
       }
     });
