@@ -224,6 +224,17 @@ em{font-style:italic}
 .field-hint-group .field-hint{display:none}
 .field-hint-group:focus-within .field-hint{display:block}
 
+/* ===== Imagens para impressão (aba Resumo) — nunca salvas no Firestore ===== */
+.img-print-label{font-weight:600;font-size:.85rem;color:#3b0764;margin-bottom:.3rem}
+.img-paste-box{
+  min-height:170px;border:2px dashed #c9c2d8;border-radius:.5rem;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  background:#faf9fc;cursor:text;overflow:hidden;padding:8px;
+}
+.img-paste-box:empty::before{content:attr(data-placeholder);color:#adb5bd;font-style:italic;font-size:.82rem}
+.img-paste-box:focus{outline:2px solid #6b21a8;outline-offset:2px;background:#fff}
+.img-paste-box img{max-width:100%;max-height:260px;display:block;border-radius:.35rem;margin:0 auto}
+
 /* ============================================================
    IMPRESSÃO / GERAÇÃO DE PDF (via Ctrl+P do navegador)
 ============================================================ */
@@ -267,6 +278,17 @@ em{font-style:italic}
   #pane-resumo.print-include #resumo-table th{background:#f3e8ff !important;color:#3b0764;font-size:12px;padding:4px 8px;font-weight:700}
   #pane-resumo.print-include #resumo-table td{padding:4px 8px;font-size:12px}
   #pane-resumo.print-include #resumo-total{font-size:13px;font-family:Arial,Helvetica,sans-serif}
+
+  /* Imagens: página própria, sempre logo após a página de Resumo Geral */
+  #pane-resumo.print-include #card-imagens-impressao{break-before:page;page-break-before:always;border:none !important;box-shadow:none !important;margin-top:0 !important}
+  #pane-resumo.print-include #card-imagens-impressao.d-none-print-only{display:none !important}
+  #pane-resumo.print-include #card-imagens-impressao .card-title{display:none !important}
+  #pane-resumo.print-include #card-imagens-impressao .row{display:block !important}
+  /* cada grupo (rótulo + imagem) nunca é separado entre páginas */
+  #pane-resumo.print-include #card-imagens-impressao .img-print-group{width:100% !important;max-width:100% !important;flex:none !important;break-inside:avoid;page-break-inside:avoid;margin-bottom:22px}
+  #pane-resumo.print-include .img-print-label{font-size:15px;color:#6b21a8;font-weight:700;margin-bottom:6px;font-family:Arial,Helvetica,sans-serif}
+  #pane-resumo.print-include .img-paste-box{border:none !important;min-height:0;background:none !important;padding:0;display:block}
+  #pane-resumo.print-include .img-paste-box img{max-width:100%;max-height:245mm;width:auto;height:auto;display:block;margin:0 auto}
 }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -459,6 +481,28 @@ em{font-style:italic}
            <button class="btn btn-secondary" id="salvar-portal" type="button">Salvar no Portal</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
         </div>
       </div></div>
+
+      <div class="card shadow-sm mt-3" id="card-imagens-impressao">
+        <div class="card-body">
+          <h4 class="card-title mb-2">Imagens para Impressão</h4>
+          <p class="text-muted mb-2" style="font-size:.85rem">
+            Cole (Ctrl+V) uma imagem em cada quadro abaixo. Elas aparecem <strong>somente na impressão/PDF</strong>,
+            em página própria logo após o Resumo Geral — nunca são salvas no Portal.
+          </p>
+          <div class="row g-3">
+            <div class="col-6 img-print-group">
+              <div class="img-print-label">Imagem 1</div>
+              <div class="img-paste-box no-persist" id="img-paste-1" contenteditable="true" data-placeholder="Clique aqui e cole (Ctrl+V) uma imagem"></div>
+              <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-limpar-img" data-target="img-paste-1">Remover imagem</button>
+            </div>
+            <div class="col-6 img-print-group">
+              <div class="img-print-label">Imagem 2</div>
+              <div class="img-paste-box no-persist" id="img-paste-2" contenteditable="true" data-placeholder="Clique aqui e cole (Ctrl+V) uma imagem"></div>
+              <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-limpar-img" data-target="img-paste-2">Remover imagem</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
     </div>
@@ -2879,6 +2923,14 @@ function prepararImpressao() {
     <div class="rule"></div>`;
   resumoPane.insertBefore(headerResumo, resumoPane.firstChild);
 
+  // Página de imagens só entra na impressão se ao menos uma imagem foi colada
+  const cardImagens = $('#card-imagens-impressao');
+  if (cardImagens) {
+    const temImg1 = !!$('#img-paste-1 img');
+    const temImg2 = !!$('#img-paste-2 img');
+    cardImagens.classList.toggle('d-none-print-only', !temImg1 && !temImg2);
+  }
+
   return true;
 }
 
@@ -2888,7 +2940,45 @@ function limparImpressao() {
   $$('.folha-oficial').forEach(el => el.remove());
   $$('.print-header-injetado').forEach(el => el.remove());
   $$('.print-force-show').forEach(el => el.classList.remove('print-force-show'));
+  $$('.d-none-print-only').forEach(el => el.classList.remove('d-none-print-only'));
 }
+
+/* ===== Imagens para impressão (aba Resumo) — nunca gravadas no Firestore ===== */
+function setupImgPasteBox(boxId) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.addEventListener('paste', (e) => {
+    e.preventDefault(); // bloqueia colar texto/HTML formatado — só aceita imagem
+    const items = (e.clipboardData || window.clipboardData)?.items || [];
+    for (const item of items) {
+      if (item.type && item.type.indexOf('image') === 0) {
+        const blob = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          box.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          box.appendChild(img);
+        };
+        reader.readAsDataURL(blob);
+        break;
+      }
+    }
+  });
+  // impede digitação de texto dentro do quadro (só teclas de atalho, ex.: Ctrl+V)
+  box.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey || e.metaKey)) e.preventDefault();
+  });
+}
+setupImgPasteBox('img-paste-1');
+setupImgPasteBox('img-paste-2');
+
+$$('.btn-limpar-img').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const box = document.getElementById(btn.dataset.target);
+    if (box) box.innerHTML = '';
+  });
+});
 
 $('#btn-imprimir-resumo').addEventListener('click', () => {
   $('#btn-atualizar-resumo').click();
@@ -3018,7 +3108,7 @@ window.addEventListener('afterprint', limparImpressao);
 
   function coletarEntradas() {
     const entradas = {};
-    document.querySelectorAll('input, select, textarea, [contenteditable="true"]').forEach((el) => {
+    document.querySelectorAll('input, select, textarea, [contenteditable="true"]:not(.no-persist)').forEach((el) => {
       const chave = chaveElemento(el);
       if (el.type === 'checkbox' || el.type === 'radio') {
         entradas[chave] = el.checked;
