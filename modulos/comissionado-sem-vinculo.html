@@ -481,12 +481,6 @@ em{font-style:italic}
           </table>
         </div>
         <div id="resumo-total" class="mt-2 fw-bold fs-5"></div>
-        <div class="d-flex gap-2 mt-3">
-          <button class="btn btn-primary" id="btn-atualizar-resumo">Atualizar Resumo</button>
-          <button class="btn btn-secondary" id="btn-exportar-resumo">Exportar JSON</button>
-          <button class="btn btn-success" id="btn-imprimir-resumo">🖨️ Imprimir / Gerar PDF</button>
-           <button class="btn btn-secondary" id="salvar-portal" type="button">Salvar no Portal</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
-        </div>
       </div></div>
 
       <div class="card shadow-sm mt-3" id="card-imagens-impressao">
@@ -509,6 +503,12 @@ em{font-style:italic}
               <div class="img-paste-box no-persist" id="img-paste-2" contenteditable="true" data-placeholder="Clique aqui e cole (Ctrl+V) uma imagem"></div>
               <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-limpar-img" data-target="img-paste-2">Remover imagem</button>
             </div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-primary" id="btn-atualizar-resumo">Atualizar Resumo</button>
+            <button class="btn btn-secondary" id="btn-exportar-resumo">Exportar JSON</button>
+            <button class="btn btn-success" id="btn-imprimir-resumo">🖨️ Imprimir / Gerar PDF</button>
+             <button class="btn btn-secondary" id="salvar-portal" type="button">Salvar no Portal</button> <p id="salvar-portal-status" style="margin-top:8px;font-size:0.85rem;"></p>
           </div>
         </div>
       </div>
@@ -648,25 +648,75 @@ function calcularSeguridadeSocialRGPS(baseRemuneracao) {
    (código 40910); diferença NEGATIVA (devolução de dias) gera devolução da
    DIFERENÇA entre o INSS já recolhido sobre a verba cheia do mês (30 dias) e
    o INSS proporcional aos dias efetivamente trabalhados (código 30910). */
-function calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlim = 0, diasUtilizadosAuxAlim = 0) {
+function calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlim = 0, diasUtilizadosAuxAlim = 0, auxAlimDevolver = 0) {
   const diffTotal = Number((rdias?.valor || 0).toFixed ? rdias.valor.toFixed(2) : rdias.valor) || 0;
   const auxAlim = Number(valorAuxAlim) || 0;
+  const aaDevolver = Number(auxAlimDevolver) || 0;
 
   if (Math.abs(diffTotal) < 0.005) {
     return { codigo: '40910', valor: 0, detalhe: null, diffTotal: 0 };
   }
 
   if (diffTotal > 0) {
-    /* Base = diferença a receber ACRESCIDA do Valor do Auxílio
-       Alimentação informado (mesma regra do ramo de devolução abaixo:
-       o auxílio entra apenas na base do INSS/RGPS sobre a diferença de
-       dias trabalhados). */
+    if (aaDevolver > 0) {
+      /* Há valor a devolver de Auxílio Alimentação: o "Valor do Auxílio
+         Alimentação R$" digitado manualmente é DESCONSIDERADO, e a base
+         do INSS passa a ser a diferença a receber (dias trabalhados)
+         MENOS o valor a devolver de Auxílio Alimentação — nunca
+         negativa (se o auxílio a devolver for maior, a base é zero,
+         sem incidência de INSS nesta rubrica). */
+      const baseLiquida = Math.max(0, Number((diffTotal - aaDevolver).toFixed(2)));
+      const seg = calcularSeguridadeSocialRGPS(baseLiquida);
+      return {
+        codigo: '40910', valor: Number((-seg.total).toFixed(2)),
+        detalhe: { tipo: 'desconto_sobre_diferenca_liq_auxalim', baseCalculo: diffTotal, aaDevolver, baseLiquida, seguridade: seg },
+        diffTotal
+      };
+    }
+    /* Sem devolução de Auxílio Alimentação: comportamento igual ao de
+       sempre — base = diferença a receber ACRESCIDA do Valor do
+       Auxílio Alimentação informado manualmente. */
     const baseComAuxAlim = diffTotal + auxAlim;
     const seg = calcularSeguridadeSocialRGPS(baseComAuxAlim);
     return { codigo: '40910', valor: Number((-seg.total).toFixed(2)), detalhe: { tipo: 'desconto_sobre_diferenca', baseCalculo: diffTotal, auxAlim, baseComAuxAlim, seguridade: seg }, diffTotal };
   }
 
-  /* Base CHEIA (mês inteiro) = Representação + Vencimento + Valor do
+  /* Base CHEIA (mês inteiro) e Base PROPORCIONAL (dias trabalhados) —
+     ver explicação completa abaixo, no ramo sem devolução de auxílio. */
+  const diasProporcionais = rdias.diasNoMes || 0;
+  const vv = Number(valorVerba) || 0;
+  const remProporcionalVerba = Number(((vv / 30) * diasProporcionais).toFixed(2));
+
+  if (aaDevolver > 0) {
+    /* Há valor a devolver de Auxílio Alimentação: o "Valor do Auxílio
+       Alimentação R$" digitado manualmente é DESCONSIDERADO. Em vez de
+       somar um auxílio "cheio" à base cheia e sua proporção à base
+       proporcional (como no ramo sem devolução, abaixo), o valor a
+       devolver de Auxílio Alimentação é subtraído diretamente da base
+       PROPORCIONAL — porque esse valor, quando recebido pelo servidor,
+       já tinha sofrido incidência de INSS; devolvendo-o, a base sobre a
+       qual o servidor tinha direito efetivo cai na mesma proporção, e a
+       tabela progressiva do RGPS recalcula o INSS correto sobre essa
+       base menor (nunca negativa). 30910 = INSS(base cheia) −
+       INSS(base proporcional ajustada). */
+    const baseCheia = vv;
+    const proporcionalAjustada = Math.max(0, Number((remProporcionalVerba - aaDevolver).toFixed(2)));
+    const seg30 = calcularSeguridadeSocialRGPS(baseCheia);
+    const segProporcionalAjustada = calcularSeguridadeSocialRGPS(proporcionalAjustada);
+    const diferenca = Number((seg30.total - segProporcionalAjustada.total).toFixed(2));
+    return {
+      codigo: '30910', valor: diferenca, diffTotal,
+      detalhe: {
+        tipo: 'diferenca_devolucao_com_auxalim_devolvido', diasProporcionais, remProporcionalVerba,
+        aaDevolver, proporcionalAjustada,
+        baseCheia, remProporcional: proporcionalAjustada, seg30, segProporcional: segProporcionalAjustada
+      }
+    };
+  }
+
+  /* Sem devolução de Auxílio Alimentação: comportamento igual ao de
+     sempre.
+     Base CHEIA (mês inteiro) = Representação + Vencimento + Valor do
      Auxílio Alimentação CHEIO — o que foi de fato retido no mês.
 
      Base PROPORCIONAL (o que o servidor tinha direito até a
@@ -681,10 +731,6 @@ function calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlim = 0, di
          22, subtrai-se 22 e usa-se o restante (normaliza para um mês).
 
      30910 = INSS(base cheia) − INSS(base proporcional). */
-  const diasProporcionais = rdias.diasNoMes || 0;
-  const vv = Number(valorVerba) || 0;
-  const remProporcionalVerba = Number(((vv / 30) * diasProporcionais).toFixed(2));
-
   const valorDiarioAuxAlim = auxAlim / 22;
   let diasUtilizAA = Number(diasUtilizadosAuxAlim) || 0;
   if (diasUtilizAA > 22) diasUtilizAA -= 22;
@@ -1559,6 +1605,7 @@ function coletarSnapshotCargo(ctx, idx) {
   const vv = representacao + vencimento;
   const ad = parseValorInput($('.input-adiantamento', ctx)?.value);
   const auxAlimInss = parseValorInput($('.input-aux-alim-inss', ctx)?.value);
+  const auxAlimDevolverInss = calcularAuxilioAlimentacaoCtx(ctx).valorADevolver || 0;
   const avos = calcularAvosFeriasCtx(ctx);
 
   let total = 0;
@@ -1575,7 +1622,7 @@ function coletarSnapshotCargo(ctx, idx) {
     simbolo: ($('.input-simbolo', ctx)?.value || '').toUpperCase(),
     admissao: adm, exoneracao: exo,
     diasTrabalhadosMes: parseInt($('.input-dias-trabalhados', ctx)?.value || '0', 10) || 0,
-    representacao, vencimento, remuneracaoTotal: vv, adiantamento: ad, auxAlimInss,
+    representacao, vencimento, remuneracaoTotal: vv, adiantamento: ad, auxAlimInss, auxAlimDevolverInss,
     avosVencidas: avos.avosVencidos, avosProporcionais: avos.avosUltimoPeriodo,
     avos13: calcularAvosGratificacaoNataliciaCtx(ctx), totalCalculado: total
   };
@@ -2125,13 +2172,22 @@ function posInitCargoPane(ctx, idx) {
       const fc = calcularFeriasCompleto(ctx, valorVerba, avos);
 
       /* ═══════════════════════════════════════════════════════
+         AUXÍLIO ALIMENTAÇÃO — apurado ANTES do INSS sobre dias
+         trabalhados porque, havendo valor a devolver de Auxílio
+         Alimentação, ele entra na base desse INSS (ver
+         calcularBaseSeguridadeSocialCtx). Apurado SOMENTE no último
+         cargo lançado (idêntico à regra do 13º/adiantamento).
+      ═══════════════════════════════════════════════════════ */
+      const auxAlimResultado = ehUltimo ? calcularAuxilioAlimentacaoCtx(ctx) : { valorADevolver: 0 };
+
+      /* ═══════════════════════════════════════════════════════
          INSS/RGPS — servidor SEM vínculo efetivo com o GDF
          (segurado obrigatório do RGPS, art. 12, I, "g", Lei 8.212/1991)
          Incide sobre a diferença TOTAL de dias (Representação + Vencimento)
       ═══════════════════════════════════════════════════════ */
       const valorAuxAlimInss = parseValorInput(elements.inputAuxAlimInss?.value);
       const diasUtilizadosAuxAlimExo = parseInt($('.input-aa-dias-utilizados', ctx)?.value || '0', 10) || 0;
-      const baseSeg = calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlimInss, diasUtilizadosAuxAlimExo);
+      const baseSeg = calcularBaseSeguridadeSocialCtx(valorVerba, rdias, valorAuxAlimInss, diasUtilizadosAuxAlimExo, auxAlimResultado.valorADevolver);
       const inss13 = calcularInssSobre13Ctx(valor13);
 
       /* ═══════════════════════════════════════════════════════
@@ -2165,10 +2221,9 @@ function posInitCargoPane(ctx, idx) {
          13º/adiantamento de 6/12 avos) — nos demais cargos os campos ficam
          bloqueados e os códigos permanecem zerados.
       ═══════════════════════════════════════════════════════ */
-      let auxAlim = { valorADevolver: 0 };
+      let auxAlim = auxAlimResultado;
       let auxTransp = { valorADevolver: 0, custeioAReceber: 0 };
       if (ehUltimo) {
-        auxAlim = calcularAuxilioAlimentacaoCtx(ctx);
         auxTransp = calcularAuxilioTransporteCtx(ctx, valorVerba);
       }
       if (elements.outAaDevolver) elements.outAaDevolver.value = formatarMoeda(auxAlim.valorADevolver);
@@ -2208,7 +2263,10 @@ function posInitCargoPane(ctx, idx) {
       if (Math.abs(baseSeg.diffTotal) < 0.005) {
         html += `sem diferença na remuneração do mês → sem incidência (código 40910, R$ 0,00)<br>`;
       } else if (baseSeg.diffTotal > 0) {
-        if (baseSeg.detalhe.auxAlim > 0) {
+        if (baseSeg.detalhe.tipo === 'desconto_sobre_diferenca_liq_auxalim') {
+          html += `diferença a receber R$ ${baseSeg.diffTotal.toFixed(2)} − auxílio alimentação a devolver R$ ${baseSeg.detalhe.aaDevolver.toFixed(2)} `;
+          html += `= base líquida R$ ${baseSeg.detalhe.baseLiquida.toFixed(2)} → desconto normal de INSS pela tabela RGPS = `;
+        } else if (baseSeg.detalhe.auxAlim > 0) {
           html += `diferença a receber R$ ${baseSeg.diffTotal.toFixed(2)} + auxílio alimentação R$ ${baseSeg.detalhe.auxAlim.toFixed(2)} `;
           html += `= base R$ ${baseSeg.detalhe.baseComAuxAlim.toFixed(2)} → desconto normal de INSS pela tabela RGPS = `;
         } else {
@@ -2217,7 +2275,11 @@ function posInitCargoPane(ctx, idx) {
         html += `<span class="valor-negativo">- R$ ${Math.abs(baseSeg.valor).toFixed(2)}</span> (código 40910)<br>`;
       } else {
         html += `diferença a devolver R$ ${Math.abs(baseSeg.diffTotal).toFixed(2)} → devolução da diferença entre o INSS já `;
-        if (baseSeg.detalhe.auxAlim > 0) {
+        if (baseSeg.detalhe.tipo === 'diferenca_devolucao_com_auxalim_devolvido') {
+          html += `recolhido sobre a base cheia (verba R$ ${valorVerba.toFixed(2)} → INSS R$ ${baseSeg.detalhe.seg30.total.toFixed(2)}) e o INSS sobre a base proporcional (verba pelos `;
+          html += `${baseSeg.detalhe.diasProporcionais} dia(s) trabalhado(s) = R$ ${baseSeg.detalhe.remProporcionalVerba.toFixed(2)} − auxílio alimentação a devolver R$ ${baseSeg.detalhe.aaDevolver.toFixed(2)} `;
+          html += `= base proporcional ajustada R$ ${baseSeg.detalhe.proporcionalAjustada.toFixed(2)} → INSS `;
+        } else if (baseSeg.detalhe.auxAlim > 0) {
           html += `recolhido sobre a base cheia (verba R$ ${valorVerba.toFixed(2)} + auxílio alimentação cheio R$ ${baseSeg.detalhe.auxAlim.toFixed(2)} = `;
           html += `R$ ${baseSeg.detalhe.baseCheia.toFixed(2)} → INSS R$ ${baseSeg.detalhe.seg30.total.toFixed(2)}) e o INSS sobre a base proporcional (verba pelos `;
           html += `${baseSeg.detalhe.diasProporcionais} dia(s) trabalhado(s) = R$ ${baseSeg.detalhe.remProporcionalVerba.toFixed(2)} + auxílio alimentação proporcional `;
@@ -2505,7 +2567,9 @@ function posInitCargoPane(ctx, idx) {
     rel += `- Representação (mensal): R$ ${snap.representacao.toFixed(2)}\n`;
     rel += `- Vencimento (mensal): R$ ${snap.vencimento.toFixed(2)}\n`;
     rel += `- Remuneração total (base de cálculo): R$ ${snap.remuneracaoTotal.toFixed(2)}\n`;
-    if (snap.auxAlimInss > 0)
+    if (snap.auxAlimDevolverInss > 0)
+      rel += `- Auxílio Alimentação a devolver (usado como base do INSS/RGPS sobre diferença de dias, no lugar do valor digitado): R$ ${snap.auxAlimDevolverInss.toFixed(2)}\n`;
+    else if (snap.auxAlimInss > 0)
       rel += `- Valor do Auxílio Alimentação (base do INSS/RGPS sobre diferença de dias): R$ ${snap.auxAlimInss.toFixed(2)}\n`;
     if (adiantRecebido > 0)
       rel += `- Adiantamento 13º recebido: R$ ${adiantRecebido.toFixed(2)} → devolução (60891)\n`;
