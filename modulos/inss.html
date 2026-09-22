@@ -567,6 +567,13 @@ let estado = {
     v01: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} },
     v75: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} },
     v76: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} }
+  },
+
+  // "Salário maternidade" (código 1.0809) por versão/grupo — lido do mesmo PDF do INSS Patronal, alimenta o campo "Salário maternidade" da Base de Cálculo
+  maternidadePdf: {
+    v01: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} },
+    v75: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} },
+    v76: { grupo53:{valor:0, status:''}, grupo54:{valor:0, status:''} }
   }
 };
 
@@ -606,6 +613,11 @@ function calcPatronalTotal(chave){
   return round2((p.grupo53.valor||0) + (p.grupo54.valor||0));
 }
 
+function calcSalMaternidadeTotal(chave){
+  const m = estado.maternidadePdf[chave];
+  return round2((m.grupo53.valor||0) + (m.grupo54.valor||0));
+}
+
 function todosCodigos(){
   return [...estado.codigosFixos, ...estado.codigosExtras];
 }
@@ -630,6 +642,7 @@ function aplicarVinculosNaBase(){
     if(!linha) return;
     linha.salNormal = calcPatronalTotal(chave);
     linha.descSeg = calcCodigosPorVersao(chave);
+    linha.salMat = calcSalMaternidadeTotal(chave);
   });
 }
 
@@ -692,6 +705,8 @@ async function onPdfSelecionadoVersao(chave, inputEl){
   estado.patronal[chave].grupo54.status = 'lendo';
   estado.confInss[chave].grupo53.status = 'lendo';
   estado.confInss[chave].grupo54.status = 'lendo';
+  estado.maternidadePdf[chave].grupo53.status = 'lendo';
+  estado.maternidadePdf[chave].grupo54.status = 'lendo';
   recalcular();
   try{
     const codigosParaProcurar = todosCodigos().map(c=>c.cod).filter(Boolean);
@@ -705,12 +720,14 @@ async function onPdfSelecionadoVersao(chave, inputEl){
     } else {
       estado.patronal[chave].grupo53.status = 'naoencontrado';
       estado.confInss[chave].grupo53.status = 'naoencontrado';
+      estado.maternidadePdf[chave].grupo53.status = 'naoencontrado';
     }
     if(secaoTemporario){
       aplicarExtracaoNoGrupo(chave, 'grupo54', extrairDeSecao(secaoTemporario.texto, codigosParaProcurar));
     } else {
       estado.patronal[chave].grupo54.status = 'naoencontrado';
       estado.confInss[chave].grupo54.status = 'naoencontrado';
+      estado.maternidadePdf[chave].grupo54.status = 'naoencontrado';
     }
     if(!secaoAtivo && !secaoTemporario){
       // não deu para identificar "Ativo"/"Temporário" — usa o primeiro bloco encontrado como Grupo 53
@@ -725,6 +742,8 @@ async function onPdfSelecionadoVersao(chave, inputEl){
     estado.patronal[chave].grupo54.status = 'erro';
     estado.confInss[chave].grupo53.status = 'erro';
     estado.confInss[chave].grupo54.status = 'erro';
+    estado.maternidadePdf[chave].grupo53.status = 'erro';
+    estado.maternidadePdf[chave].grupo54.status = 'erro';
     estado.patronal[chave].erroMsg = e.message || '';
   }
   recalcular();
@@ -741,6 +760,7 @@ function removerPdfVersao(chave){
   ['grupo53','grupo54'].forEach(grupo=>{
     estado.patronal[chave][grupo] = {valor:0, status:''};
     estado.confInss[chave][grupo] = {valor:0, status:''};
+    estado.maternidadePdf[chave][grupo] = {valor:0, status:''};
     todosCodigos().forEach(c=>{ c.valores[chave][grupo] = 0; });
   });
   const linha = estado.linhas.find(l=>l.chave===chave);
@@ -760,6 +780,12 @@ function aplicarExtracaoNoGrupo(chave, grupo, dados){
     estado.confInss[chave][grupo].status = 'ok';
   } else {
     estado.confInss[chave][grupo].status = 'naoencontrado';
+  }
+  if(dados.salarioMaternidade !== null){
+    estado.maternidadePdf[chave][grupo].valor = dados.salarioMaternidade;
+    estado.maternidadePdf[chave][grupo].status = 'ok';
+  } else {
+    estado.maternidadePdf[chave][grupo].status = 'naoencontrado';
   }
   let encontrados = 0;
   todosCodigos().forEach(c=>{
@@ -884,9 +910,7 @@ function extrairDeSecao(textoSecao, codigosParaProcurar){
   const baseInssPatronal = valorAposLabelNaLinha(/BASE\s*INSS\s*PATRONAL/i);
   const valorInssRecolher = valorAposLabelNaLinha(/VALOR\s*INSS\s*A\s*RECOLHER/i);
 
-  const codigos = {};
-  (codigosParaProcurar||[]).forEach(cod=>{
-    if(!cod) return;
+  function valorDoCodigo(cod){
     let padrao;
     if(/^\d{5}$/.test(cod)){
       // no relatório o código aparece como "4.0910" (primeiro dígito, ponto, restante)
@@ -900,10 +924,19 @@ function extrairDeSecao(textoSecao, codigosParaProcurar){
     }catch(e){
       labelRe = new RegExp(padrao, 'i');
     }
-    codigos[cod] = valorAposLabelNaLinha(labelRe);
+    return valorAposLabelNaLinha(labelRe);
+  }
+
+  const codigos = {};
+  (codigosParaProcurar||[]).forEach(cod=>{
+    if(!cod) return;
+    codigos[cod] = valorDoCodigo(cod);
   });
 
-  return {baseInssPatronal, valorInssRecolher, codigos};
+  // código 1.0809 (provento "SALARIO MATERNIDADE") — alimenta o campo "Salário maternidade" da Base de Cálculo
+  const salarioMaternidade = valorDoCodigo('10809');
+
+  return {baseInssPatronal, valorInssRecolher, codigos, salarioMaternidade};
 }
 
 /* =====================================================================
@@ -1539,6 +1572,8 @@ function limparTudo(){
     estado.patronal[chave].grupo54 = {valor:0, status:''};
     estado.confInss[chave].grupo53 = {valor:0, status:''};
     estado.confInss[chave].grupo54 = {valor:0, status:''};
+    estado.maternidadePdf[chave].grupo53 = {valor:0, status:''};
+    estado.maternidadePdf[chave].grupo54 = {valor:0, status:''};
   });
   recalcular();
 }
