@@ -166,7 +166,7 @@
 
   #print-area{display:none;}
   @media print{
-    @page{ size: landscape; margin: 10mm 12mm; }
+    @page{ size: portrait; margin: 10mm 12mm; }
     html, body{ margin:0; height:auto; }
     .shell{ display:none !important; }
     #print-area{ display:block !important; width:100%; padding:0; }
@@ -1452,7 +1452,6 @@ function imprimir(){
         </tr></thead>
         <tbody>${linhasHtml}</tbody>
       </table>
-      ${temSalMaternidade ? `<p style="font-size:.78rem;margin-top:6px;">OBS: quando há salário maternidade, o valor do <strong>DARF Segurado — Código RF 1082-01</strong> é apurado já descontando esse valor do total de "Desc. segurado" (ver seção "Valores a recolher").</p>` : ''}
     </div>
 
     <div class="doc-section">
@@ -1472,6 +1471,7 @@ function imprimir(){
         <div class="card"><label>DARF RAT — Cód. RF 1646-01</label><div>R$ ${fmtMoney(darfRat)}</div></div>
         <div class="card"><label>Total geral</label><div>R$ ${fmtMoney(totalGeral)}</div></div>
       </div>
+      ${temSalMaternidade ? `<p style="font-size:.78rem;margin-top:6px;">OBS: quando há salário maternidade, o valor do <strong>DARF Segurado — Código RF 1082-01</strong> é apurado já descontando esse valor do total de "Desc. segurado" (ver seção "Memória de cálculo por versão de folha").</p>` : ''}
     </div>
 
     <hr class="doc-rule-thin">
