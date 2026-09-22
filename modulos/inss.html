@@ -166,10 +166,10 @@
 
   #print-area{display:none;}
   @media print{
-    @page{ size: auto; margin: 10mm 12mm; }
-    body *{visibility:hidden;}
-    #print-area, #print-area *{visibility:visible;}
-    #print-area{display:block!important; position:absolute; top:0; left:0; width:100%; padding:6px 10px;}
+    @page{ size: landscape; margin: 10mm 12mm; }
+    html, body{ margin:0; height:auto; }
+    .shell{ display:none !important; }
+    #print-area{ display:block !important; width:100%; padding:0; }
   }
   .doc-title{text-align:center; margin-bottom:5px;}
   .doc-title h2{margin:0; font-size:1rem; letter-spacing:.03em;}
@@ -1371,6 +1371,8 @@ function imprimir(){
   const darfRat = geral.rat;
   const totalGeral = round2(darfPatronal + darfSegurado + darfRat);
 
+  const temSalMaternidade = estado.linhas.some(l => Math.abs(l.salMat||0) > 0.004);
+
   const linhasHtml = estado.linhas.map(l=>{
     const c = calcLinha(l);
     return `<tr>
@@ -1382,6 +1384,7 @@ function imprimir(){
       <td>${fmtMoney(c.rat)}</td>
       <td>${fmtMoney(c.inss)}</td>
       <td>${fmtMoney(c.sat)}</td>
+      ${temSalMaternidade ? `<td>${fmtMoney(l.salMat)}</td>` : ''}
       <td>${fmtMoney(c.total)}</td>
     </tr>`;
   }).join('');
@@ -1445,10 +1448,11 @@ function imprimir(){
       <table class="doc-table">
         <thead><tr>
           <th>Versão</th><th>Sal. normal</th><th>Rem. ag. nocivo</th><th>13º</th><th>Desc. segurado</th>
-          <th>RAT</th><th>INSS</th><th>SAT</th><th>Total</th>
+          <th>RAT</th><th>INSS</th><th>SAT</th>${temSalMaternidade ? '<th>Sal. maternidade</th>' : ''}<th>Total</th>
         </tr></thead>
         <tbody>${linhasHtml}</tbody>
       </table>
+      ${temSalMaternidade ? `<p style="font-size:.78rem;margin-top:6px;">OBS: quando há salário maternidade, o valor do <strong>DARF Segurado — Código RF 1082-01</strong> é apurado já descontando esse valor do total de "Desc. segurado" (ver seção "Valores a recolher").</p>` : ''}
     </div>
 
     <div class="doc-section">
