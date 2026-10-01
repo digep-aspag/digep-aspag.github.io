@@ -90,6 +90,7 @@
   .btn-primary:hover{background:var(--azul-800);}
   .btn-danger{color:var(--vermelho); border-color:#f0c9c6;}
   .btn-danger:hover{background:#fdf0ef;}
+  .btn.tem-anexo{background:#e3f0fb; border-color:var(--azul-500);}
   .btn-sm{padding:4px 9px; font-size:.72rem; border-radius:5px;}
 
   .table-scroll{overflow-x:auto; border-radius:var(--radius);}
@@ -162,6 +163,7 @@
   .doc-obs p{margin:0; font-size:.72rem; color:#5c4a12; line-height:1.5;}
   .doc-obs p + p{margin-top:4px;}
   .doc-obs b{color:#3d3009;}
+  .doc-anexo-img{max-width:100%; max-height:220mm; display:block; margin:0 auto; border:1px solid #d7dde3; border-radius:4px;}
 
   textarea.paste-box{
     width:100%; min-height:150px; font-family: Consolas, "Courier New", monospace; font-size:.75rem;
@@ -548,6 +550,59 @@ let filtroMes = ''; // 'YYYY-MM' ou '' (sem filtro) — filtra pela data FIM, s�
 let buscaTabela = ''; // texto livre — busca por nome, matrícula, cargo, DODF ou processo
 let servidorEls = [];
 let rowElsById = new Map(); // referências DOM por linha, indexadas por id estável (não por posição)
+window.__substAnexos = window.__substAnexos || {}; // imagens coladas por linha (chave = id da linha) — memory-only, nunca persistido (mesmo padrão dos outros módulos do portal)
+
+function blobParaDataUrl(blob){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function atualizarEstadoAnexoBtn(btn, rowId){
+  const tem = !!window.__substAnexos[rowId];
+  btn.classList.toggle('tem-anexo', tem);
+  btn.title = tem
+    ? 'Imagem anexada a esta linha — clique para colar outra (substitui) ou Shift+clique para remover'
+    : 'Clique e cole (Ctrl+C na imagem, depois clique aqui) para anexar uma imagem a esta linha — só aparece na impressão';
+}
+
+async function colarImagemNaLinha(row, btn, ev){
+  if(ev && ev.shiftKey){
+    if(window.__substAnexos[row.id]){
+      delete window.__substAnexos[row.id];
+      atualizarEstadoAnexoBtn(btn, row.id);
+    }
+    return;
+  }
+  if(!navigator.clipboard || !navigator.clipboard.read){
+    alert('Este navegador não permite colar imagens via clique. Tente em uma versão recente do Chrome ou Edge.');
+    return;
+  }
+  try{
+    const items = await navigator.clipboard.read();
+    let achou = false;
+    for(const item of items){
+      const tipoImg = item.types.find(t => t.startsWith('image/'));
+      if(tipoImg){
+        const blob = await item.getType(tipoImg);
+        const dataUrl = await blobParaDataUrl(blob);
+        window.__substAnexos[row.id] = dataUrl;
+        achou = true;
+        break;
+      }
+    }
+    if(!achou){
+      alert('Nenhuma imagem encontrada na área de transferência. Copie uma imagem (Ctrl+C, ou "Copiar imagem" no menu de contexto) e clique novamente.');
+    } else {
+      atualizarEstadoAnexoBtn(btn, row.id);
+    }
+  }catch(err){
+    alert('Não foi possível ler a área de transferência (o navegador pode ter negado a permissão). Copie a imagem novamente e tente de novo.');
+  }
+}
 
 function gerarIdLinha(){
   return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
@@ -902,7 +957,11 @@ async function arquivarLancamentosAtuais(){
     return;
   }
   const preenchidas = rows.filter(r => r.subNome || r.tioNome).length;
-  const confirmMsg = `Isso vai mover ${rows.length} linha(s) (${preenchidas} preenchida(s)) da tabela principal para um novo pacote arquivado. A tabela principal ficará vazia, pronta para os próximos lançamentos.\n\nOs dados continuam salvos — você pode abrir, exportar ou restaurar esse pacote a qualquer momento no painel "Lançamentos arquivados", mais abaixo.\n\nDeseja continuar?`;
+  const comAnexo = rows.filter(r => window.__substAnexos[r.id]).length;
+  const avisoAnexo = comAnexo > 0
+    ? `\n\nAtenção: ${comAnexo} linha(s) têm imagem colada (anexo de impressão). Essas imagens ficam só na memória do navegador e NÃO são arquivadas — serão perdidas ao continuar.`
+    : '';
+  const confirmMsg = `Isso vai mover ${rows.length} linha(s) (${preenchidas} preenchida(s)) da tabela principal para um novo pacote arquivado. A tabela principal ficará vazia, pronta para os próximos lançamentos.\n\nOs dados continuam salvos — você pode abrir, exportar ou restaurar esse pacote a qualquer momento no painel "Lançamentos arquivados", mais abaixo.${avisoAnexo}\n\nDeseja continuar?`;
   if(!confirm(confirmMsg)) return;
 
   const isoAgora = new Date().toISOString();
@@ -926,6 +985,7 @@ async function arquivarLancamentosAtuais(){
   await salvarIndiceArquivos();
 
   const quantidadeArquivada = rows.length;
+  rows.forEach(r => delete window.__substAnexos[r.id]);
   rows = [blankRow()];
   renderRows();
   renderArquivosIndice();
@@ -1677,10 +1737,14 @@ function buildRowEl(row){
   const btnPrint = document.createElement('button');
   btnPrint.className = 'btn btn-sm'; btnPrint.title = 'Imprimir'; btnPrint.textContent = '🖨️';
   btnPrint.onclick = ()=> printRow(r);
+  const btnAnexo = document.createElement('button');
+  btnAnexo.className = 'btn btn-sm'; btnAnexo.textContent = '📎';
+  btnAnexo.onclick = (ev)=> colarImagemNaLinha(r, btnAnexo, ev);
+  atualizarEstadoAnexoBtn(btnAnexo, r.id);
   const btnDel = document.createElement('button');
   btnDel.className = 'btn btn-sm btn-danger'; btnDel.title = 'Excluir linha'; btnDel.textContent = '✕';
   btnDel.onclick = ()=> removeRow(r);
-  acoesWrap.appendChild(btnPrint); acoesWrap.appendChild(btnDel);
+  acoesWrap.appendChild(btnPrint); acoesWrap.appendChild(btnAnexo); acoesWrap.appendChild(btnDel);
   tdAcoes.appendChild(acoesWrap);
   tr.appendChild(tdAcoes);
 
@@ -1772,6 +1836,7 @@ function removeRow(row){
   const idx = rows.indexOf(row);
   if(idx === -1) return;
   rows.splice(idx, 1);
+  delete window.__substAnexos[row.id];
 
   // remove só o <tr> desta linha — não reconstrói a tabela inteira
   const el = rowElsById.get(row.id);
@@ -1923,6 +1988,13 @@ function printRow(row){
   const c = calcRow(r);
   const area = document.getElementById('print-area');
   const hoje = new Date().toLocaleDateString('pt-BR');
+  const imagemAnexada = window.__substAnexos[r.id];
+  const blocoAnexo = imagemAnexada ? `
+    <div class="doc-section">
+      <h3>Anexo</h3>
+      <img src="${imagemAnexada}" class="doc-anexo-img" alt="Imagem anexada">
+    </div>
+  ` : '';
   area.innerHTML = `
     <div class="doc-title">
       <h2>TERMO DE SUBSTITUIÇÃO — CARGO COMISSIONADO</h2>
@@ -1990,6 +2062,7 @@ function printRow(row){
         <div class="doc-field full"><label>Nº do processo</label><div>${escapeHtml(r.processo)||'—'}</div></div>
       </div>
     </div>
+    ${blocoAnexo}
 
     <hr class="doc-rule-thin">
   `;
