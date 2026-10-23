@@ -424,6 +424,30 @@
   let contadorId = 0;
   let editandoId = null;
   let modoEdicaoHistorico = false;
+  // Ao limpar o servidor, o próximo "Salvar no histórico" cria um registro NOVO.
+  function iniciarNovoRegistro(){
+    if(!editandoId) return;
+    editandoId = null;
+    if(modoEdicaoHistorico){
+      modoEdicaoHistorico = false;
+      $('avisoEdicao').hidden = true;
+      el.indicadorRascunho.textContent = 'Novo cálculo — o rascunho automático voltou a ser salvo.';
+    }
+    aviso('Novo cálculo: o próximo “Salvar no histórico” criará um registro novo.', 5000);
+  }
+
+  // ---- Limites do Firestore e controle de "registro novo x atualização" ----
+  const LIMITE_BYTES_FIRESTORE = 1000000;    // Firestore: máx. 1 MiB por documento (margem de segurança)
+  function tamanhoBytes(obj){ try{ return new Blob([JSON.stringify(obj)]).size; }catch(e){ return 0; } }
+  function kb(n){ return Math.round(n / 1024).toLocaleString('pt-BR') + ' KB'; }
+  function tempoRestante(inicio, feitos, total){
+    if(!feitos || feitos >= total) return '';
+    const seg = Math.round((Date.now() - inicio) / feitos * (total - feitos) / 1000);
+    if(seg < 60) return ` · faltam ~${seg}s`;
+    const m = Math.floor(seg / 60), s = seg % 60;
+    return ` · faltam ~${m} min${s ? ' ' + String(s).padStart(2, '0') + 's' : ''}`;
+  }
+
   let calculando = false;
   let usuarioEmail = '';
   const cacheRespostas = new Map();
@@ -725,9 +749,10 @@
 
     let feitos = 0, falhas = 0;
     const totalFila = fila.length;
+    const inicio = Date.now();
     const progresso = (espera) => {
       el.barra.style.width = (totalFila ? Math.round(feitos / totalFila * 100) : 100) + '%';
-      el.textoProgresso.textContent = `Consultando SINDEC… ${feitos}/${totalFila} lançamento(s)${falhas ? ` · ${falhas} com erro` : ''}` +
+      el.textoProgresso.textContent = `Consultando SINDEC… ${feitos}/${totalFila} lançamento(s)${falhas ? ` · ${falhas} com erro` : ''}${tempoRestante(inicio, feitos, totalFila)}` +
         (espera ? ` · aguardando ${espera}s para continuar…` : '');
     };
     aoAguardar = (s) => progresso(s);
@@ -1223,10 +1248,15 @@
       totalDevido: t.devido, totalCorrecao: t.correcao, totalJuros: t.juros, totalMulta: t.multa, totalAtualizado: t.total,
       totalFinal: moeda(t.total)
     });
+    const bytes = tamanhoBytes(dados);
+    if(bytes > LIMITE_BYTES_FIRESTORE){
+      window.alert(`Não é possível salvar: este registro tem ${kb(bytes)}, acima do limite de 1 MB por registro do banco de dados. Use “Exportar Excel” para guardar o resultado.`);
+      return;
+    }
     el.btnSalvar.disabled = true;
     try{
       if(editandoId){ await atualizarAcerto(editandoId, TIPO_ACERTO, dados); aviso('Registro do histórico atualizado.'); }
-      else{ editandoId = await salvarAcerto(TIPO_ACERTO, dados); aviso('Salvo no histórico de acertos.'); }
+      else{ editandoId = await salvarAcerto(TIPO_ACERTO, dados); aviso('Salvo no histórico como registro novo.'); }
     }catch(err){
       aviso('Erro ao salvar: ' + err.message, 6000);
     }finally{
@@ -1286,6 +1316,7 @@
     estado.servidor = { matricula: '', nome: '', cpf: '', processo: '' };
     estado.linhas = [];
     $('avisoIndices').hidden = true;
+    iniciarNovoRegistro();
     preencherServidor(); renderizarLancamentos(); renderizar(); agendarRascunho();
   });
   el.tbodyInd.addEventListener('input', aoEditarLancamento);
