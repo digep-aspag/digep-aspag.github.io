@@ -91,6 +91,7 @@
   table.lista tbody tr[data-tipo="inss-patronal"]{ border-left-color:#B45309; }
   table.lista tbody tr[data-tipo="atualizacao-lpa"]{ border-left-color:#0F766E; }
   table.lista tbody tr[data-tipo="atualizacao-sindec"]{ border-left-color:#4338CA; }
+  table.lista tbody tr[data-tipo="atualizacao-sindec-debito"]{ border-left-color:#BE185D; }
 
   .celula-nome{ max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .celula-sub{ display:block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); margin-top:0.1rem; }
@@ -213,6 +214,7 @@
       <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
       <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
       <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
+      <a href="atualizacao-sindec-debito.html"><span class="selo" style="background:#BE185D;">DEB</span> Atualização SINDEC - Débito em Apuração</a>
       <div class="divisor"></div>
       <a href="historico.html" class="ativo"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
       <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
@@ -311,7 +313,8 @@
     'correcao-folha': 'CORREÇÃO DE FOLHA',
     'inss-patronal': 'INSS PATRONAL',
     'atualizacao-lpa': 'ATUALIZAÇÃO LPA',
-    'atualizacao-sindec': 'ATUALIZAÇÃO SINDEC - PASSIVO A SERVIDORES'
+    'atualizacao-sindec': 'ATUALIZAÇÃO SINDEC - PASSIVO A SERVIDORES',
+    'atualizacao-sindec-debito': 'ATUALIZAÇÃO SINDEC - DÉBITO EM APURAÇÃO'
   };
   const TIPO_NOME = {
     brigadista: 'Brigadista (Grupo 54)',
@@ -321,7 +324,8 @@
     'correcao-folha': 'Correção de folha (SIGRH v09)',
     'inss-patronal': 'Memória de Cálculo — INSS Patronal',
     'atualizacao-lpa': 'Atualização LPA',
-    'atualizacao-sindec': 'Atualização (SINDEC) - Passivo a Servidores'
+    'atualizacao-sindec': 'Atualização (SINDEC) - Passivo a Servidores',
+    'atualizacao-sindec-debito': 'Atualização SINDEC - Débito em Apuração'
   };
   const TIPO_ARQUIVO = {
     brigadista: 'brigadistas.html',
@@ -331,7 +335,8 @@
     'correcao-folha': 'correcao-folha-v09.html',
     'inss-patronal': 'inss.html',
     'atualizacao-lpa': 'atualizacao-lpa.html',
-    'atualizacao-sindec': 'atualizacao-sindec.html'
+    'atualizacao-sindec': 'atualizacao-sindec.html',
+    'atualizacao-sindec-debito': 'atualizacao-sindec-debito.html'
   };
   const ICONE_TIPO = {
     brigadista: '🧯',
@@ -341,7 +346,8 @@
     'correcao-folha': '📄',
     'inss-patronal': '🏢',
     'atualizacao-lpa': '💰',
-    'atualizacao-sindec': '📈'
+    'atualizacao-sindec': '📈',
+    'atualizacao-sindec-debito': '📉'
   };
 
   let todosAcertos = [];
@@ -597,6 +603,30 @@
           descricao: ind
             ? `${l.fato || ''} (${dataBR(l.dataFG)})`
             : `${l.matricula || ''} ${l.nome || ''} — ${l.fato || ''} (${dataBR(l.dataFG)})`,
+          valor: l.resultado && l.resultado.total != null ? formatarMoedaSimples(l.resultado.total) : '—'
+        }))
+      };
+    }
+
+    // Atualização SINDEC - Débito em Apuração: um servidor com vários lançamentos (débito com o GDF)
+    if (registro.tipo === 'atualizacao-sindec-debito') {
+      const sv = d.servidor || {};
+      const dataBR = (iso) => (iso || '').split('-').reverse().join('/');
+      const juros = (d.parametros && d.parametros.modoJuros) === 'sem' ? 'sem juros (boa-fé)' : 'com juros';
+      return {
+        nome: sv.nome || '(sem nome)',
+        matricula: sv.matricula || '—',
+        matriculaLabel: 'Matrícula',
+        cargo: `Débito atualizado até ${d.competenciaLabel || '—'} · ${juros}`,
+        cargoLabel: 'Tipo',
+        processoSei: sv.processo || '',
+        nascimento: '',
+        admissao: '',
+        exoneracao: '',
+        total: d.totalFinal || (d.totalAtualizado != null ? formatarMoedaSimples(d.totalAtualizado) : '—'),
+        linhas: (d.linhas || []).map((l) => ({
+          codigo: l.codigo || '',
+          descricao: `${l.fato || 'Débito'} (${dataBR(l.dataFG)})`,
           valor: l.resultado && l.resultado.total != null ? formatarMoedaSimples(l.resultado.total) : '—'
         }))
       };
