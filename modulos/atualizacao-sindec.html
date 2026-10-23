@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualização (SINDEC) - Passivo a Servidores — Portal de Acertos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --paper-dark:#EAE6DC; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6;
+    --green:#2F8F5B; --red:#C1443B; --neg:#dc3545;
+    --dea:#4338CA; --dea-escuro:#3730A3; --dea-claro:#EEF0FB;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; }
+
+  /* ---------- sidebar / topbar (padrão do portal) ---------- */
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{ width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4; display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{ display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE; padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; }
+  .sidebar nav.menu a:hover, .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{ width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0; }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; }
+  .status-grupo{ display:flex; gap:1.4rem; flex-wrap:wrap; }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .dot.wait{ background:var(--accent); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo-modulo{ padding:1.8rem 2.2rem 3rem; }
+  h2.titulo-pagina{ font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; margin:0 0 0.3rem; }
+  p.subtitulo-pagina{ margin:0 0 1.1rem; font-size:0.9rem; color:var(--ink-soft); max-width:900px; line-height:1.55; }
+  .base-legal{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; background:var(--dea-claro); color:var(--dea-escuro); border:1px solid #C9CDF3; padding:0.35rem 0.6rem; border-radius:6px; margin-bottom:1.2rem; }
+  .indicador-rascunho{ font-size:0.74rem; color:var(--ink-soft); margin:0 0 0.8rem; font-family:'IBM Plex Mono',monospace; }
+
+  .aviso{ background:#FFF4E5; border:1px solid #F0C36D; color:#8A5A00; padding:12px 16px; border-radius:8px; font-size:13.5px; line-height:1.5; margin-bottom:16px; }
+  .aviso.edicao{ background:var(--dea-claro); border-color:#C9CDF3; color:var(--dea-escuro); }
+  .aviso ul{ margin:0.3rem 0 0 1.1rem; padding:0; }
+
+  .grade-paineis{ display:grid; grid-template-columns:minmax(320px,1fr) minmax(380px,1.3fr); gap:1rem; margin-bottom:1rem; }
+  @media(max-width:1100px){ .grade-paineis{ grid-template-columns:1fr; } }
+  .painel{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:1rem 1.2rem; }
+  .painel h3{ font-family:'Fraunces',serif; font-size:1.02rem; font-weight:600; margin:0 0 0.8rem; display:flex; align-items:center; gap:0.5rem; }
+  .painel h3 .num{ width:22px; height:22px; border-radius:50%; background:var(--dea); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; display:inline-flex; align-items:center; justify-content:center; }
+
+  .abas{ display:flex; gap:0.4rem; margin:0 0 1rem; border-bottom:2px solid var(--line); }
+  .aba{ border:none; border-bottom:3px solid transparent; border-radius:6px 6px 0 0; background:transparent; padding:0.6rem 1.1rem; font-weight:600; color:var(--ink-soft); margin-bottom:-2px; }
+  .aba:hover{ background:var(--paper-dark); }
+  .aba.ativa{ color:var(--dea-escuro); border-bottom-color:var(--dea); background:#fff; }
+  .aba .cont{ font-family:'IBM Plex Mono',monospace; font-size:0.7rem; background:var(--dea-claro); color:var(--dea-escuro); border-radius:10px; padding:0.05rem 0.45rem; margin-left:0.35rem; }
+  .grade-paineis.individual{ grid-template-columns:1fr; }
+  .tabela-lanc{ width:100%; border-collapse:collapse; font-size:0.82rem; margin-top:0.9rem; }
+  .tabela-lanc th{ background:var(--paper-dark); text-align:left; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); padding:0.45rem 0.4rem; white-space:nowrap; }
+  .tabela-lanc td{ padding:0.25rem 0.3rem; border-bottom:1px solid var(--line); }
+  .tabela-lanc input{ width:100%; font-family:'IBM Plex Sans',sans-serif; font-size:0.84rem; padding:0.4rem 0.45rem; border:1px solid var(--line); border-radius:5px; background:#fff; }
+  .tabela-lanc input:focus{ outline:none; border-color:var(--dea); }
+  .tabela-lanc input.mono{ font-family:'IBM Plex Mono',monospace; }
+  .tabela-lanc input.valor{ text-align:right; }
+  .tabela-lanc input.invalido{ border-color:var(--red); background:#FFF6F5; }
+  .tabela-lanc td.n{ font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); width:2rem; }
+  .tabela-lanc .vazio{ text-align:center; color:var(--ink-soft); padding:1rem; }
+  .dropzone{ border:2px dashed #C9CDF3; border-radius:8px; padding:1.1rem; text-align:center; background:#FAFAFE; cursor:pointer; transition:background 0.15s, border-color 0.15s; }
+  .dropzone:hover, .dropzone.arrastando{ background:var(--dea-claro); border-color:var(--dea); }
+  .dropzone strong{ color:var(--dea-escuro); }
+  .dropzone small{ display:block; margin-top:0.35rem; color:var(--ink-soft); font-size:0.75rem; }
+  .info-arquivo{ font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--ink-soft); margin-top:0.6rem; min-height:1em; }
+  .linha-botoes{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.8rem; }
+
+  .campos{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0.8rem 1rem; }
+  .campo label{ display:block; font-size:0.7rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem; }
+  .campo input, .campo select{ width:100%; font-family:'IBM Plex Sans',sans-serif; font-size:0.9rem; padding:0.48rem 0.6rem; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); }
+  .campo input[type=date]{ font-family:'IBM Plex Mono',monospace; }
+  .campo input:focus, .campo select:focus{ outline:none; border-color:var(--dea); }
+  .campo .ajuda{ font-size:0.7rem; color:var(--ink-soft); margin-top:0.25rem; line-height:1.35; }
+  .campo.span2{ grid-column:span 2; }
+  @media(max-width:640px){ .campo.span2{ grid-column:auto; } }
+
+  button{ font-family:'IBM Plex Sans',sans-serif; font-size:0.86rem; font-weight:500; padding:0.55rem 1rem; border-radius:6px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; transition:background 0.15s, border-color 0.15s; }
+  button:hover{ background:var(--paper-dark); }
+  button:disabled{ opacity:0.55; cursor:not-allowed; }
+  button.primaria{ background:var(--sidebar); border-color:var(--sidebar); color:#fff; }
+  button.primaria:hover{ background:var(--sidebar-hover); }
+  button.salvar{ background:var(--dea); border-color:var(--dea); color:#fff; }
+  button.salvar:hover{ background:var(--dea-escuro); }
+
+  .barra-acao{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; background:#fff; border:1px solid var(--line); border-radius:8px; padding:0.9rem 1.2rem; margin-bottom:1rem; }
+  #btnAtualizar{ font-size:1rem; font-weight:600; padding:0.75rem 1.5rem; background:var(--dea); border-color:var(--dea); color:#fff; display:flex; align-items:center; gap:0.5rem; }
+  #btnAtualizar:hover:not(:disabled){ background:var(--dea-escuro); }
+  .progresso{ flex:1; min-width:220px; }
+  .progresso .trilho{ height:8px; background:var(--paper-dark); border-radius:4px; overflow:hidden; }
+  .progresso .preenchido{ height:100%; width:0; background:var(--dea); transition:width 0.2s; }
+  .progresso .texto{ font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); margin-top:0.35rem; }
+  .barra-acao .acoes-dir{ display:flex; gap:0.5rem; flex-wrap:wrap; }
+
+  .resumo-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0.8rem; margin-bottom:1rem; }
+  .resumo-card{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:0.8rem 1rem; }
+  .resumo-card .rot{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); font-weight:600; }
+  .resumo-card .num{ font-family:'Fraunces',serif; font-size:1.3rem; font-weight:600; margin-top:0.2rem; white-space:nowrap; }
+  .resumo-card .cod{ font-family:'IBM Plex Mono',monospace; font-size:0.66rem; color:var(--dea); }
+  .resumo-card.destaque{ border-color:var(--dea); background:var(--dea-claro); }
+
+  .tabela-wrapper{ background:#fff; border:1px solid var(--line); border-radius:8px; overflow:auto; max-height:70vh; }
+  table.dea{ border-collapse:collapse; width:100%; min-width:1450px; font-size:0.8rem; }
+  table.dea thead th{ position:sticky; top:0; z-index:2; background:var(--paper-dark); border-bottom:1px solid var(--line); text-align:left; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); padding:0.55rem 0.5rem; white-space:nowrap; }
+  table.dea thead th.num{ text-align:right; }
+  table.dea thead th .cod{ display:block; font-family:'IBM Plex Mono',monospace; color:var(--dea); font-size:0.62rem; }
+  table.dea tbody td{ padding:0.42rem 0.5rem; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.dea tbody tr.linha:hover{ background:#FAFAF8; }
+  table.dea td.mono{ font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  table.dea td.num{ font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; }
+  table.dea td.neg{ color:var(--neg); }
+  table.dea td.nome{ max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.dea td.fato{ max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.dea tr.grupo td{ background:var(--sidebar); color:#fff; font-family:'Fraunces',serif; font-weight:600; font-size:0.86rem; padding:0.45rem 0.7rem; }
+  table.dea tr.subtotal td{ background:var(--dea-claro); font-weight:600; border-bottom:2px solid #C9CDF3; }
+  table.dea tr.total-geral td{ background:var(--paper-dark); font-weight:700; border-top:2px solid var(--ink); }
+  table.dea .vazio{ text-align:center; padding:2.5rem 1rem; color:var(--ink-soft); font-size:0.9rem; }
+
+  .st{ display:inline-flex; align-items:center; gap:0.3rem; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; padding:0.15rem 0.45rem; border-radius:4px; white-space:nowrap; }
+  .st.pendente{ background:var(--paper-dark); color:var(--ink-soft); }
+  .st.calculando{ background:#FFF4E5; color:#8A5A00; }
+  .st.ok{ background:#E5F4EC; color:#1E6B42; }
+  .st.erro{ background:#FBEAE8; color:var(--red); cursor:help; }
+  .st.desatualizado{ background:#FFF4E5; color:#8A5A00; }
+  .obs-mini{ display:block; font-size:0.66rem; color:var(--ink-soft); margin-top:0.15rem; max-width:220px; white-space:normal; line-height:1.3; }
+
+  .cell-acoes{ white-space:nowrap; text-align:right; }
+  .icon-btn{ padding:0.3rem 0.5rem; font-size:0.8rem; line-height:1; border-radius:5px; margin-left:0.2rem; }
+  .icon-btn.del:hover{ background:#FBEAE8; border-color:#E7B4AF; color:var(--red); }
+
+  .tabela-resumo{ margin-top:1rem; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:auto; max-width:900px; }
+  .tabela-resumo table{ border-collapse:collapse; width:100%; font-size:0.82rem; }
+  .tabela-resumo th, .tabela-resumo td{ padding:0.45rem 0.7rem; border-bottom:1px solid var(--line); }
+  .tabela-resumo th{ background:var(--paper-dark); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); text-align:right; }
+  .tabela-resumo th:first-child, .tabela-resumo td:first-child{ text-align:left; }
+  .tabela-resumo td{ font-family:'IBM Plex Mono',monospace; text-align:right; }
+  .tabela-resumo tr.tot td{ font-weight:700; border-top:2px solid var(--ink); }
+
+  /* ---------- modais ---------- */
+  .modal-fundo{ position:fixed; inset:0; background:rgba(15,42,61,0.45); display:none; align-items:flex-start; justify-content:center; padding:4vh 1rem; z-index:60; overflow:auto; }
+  .modal-fundo.aberto{ display:flex; }
+  .modal{ background:#fff; border-radius:10px; width:100%; max-width:860px; box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+  .modal header{ display:flex; justify-content:space-between; align-items:center; padding:0.9rem 1.2rem; border-bottom:1px solid var(--line); }
+  .modal header h4{ margin:0; font-family:'Fraunces',serif; font-size:1.1rem; }
+  .modal .corpo{ padding:1rem 1.2rem; }
+  .modal footer{ display:flex; justify-content:flex-end; gap:0.5rem; padding:0.8rem 1.2rem; border-top:1px solid var(--line); }
+  .mem-meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.5rem 1rem; font-size:0.82rem; margin-bottom:0.9rem; }
+  .mem-meta span.lbl{ display:block; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); font-weight:600; }
+  .mem-tabela{ width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .mem-tabela th, .mem-tabela td{ border:1px solid var(--line); padding:0.4rem 0.5rem; text-align:left; }
+  .mem-tabela th{ background:var(--paper-dark); font-size:0.68rem; text-transform:uppercase; }
+  .mem-tabela td.n{ font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; }
+  pre.req{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:0.6rem; font-size:0.72rem; overflow:auto; margin:0.8rem 0 0; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--sidebar); color:#fff; padding:0.6rem 1.1rem; border-radius:8px; font-size:0.82rem; box-shadow:0 6px 18px rgba(0,0,0,0.18); opacity:0; pointer-events:none; transition:opacity 0.25s ease; z-index:80; max-width:90vw; text-align:center; }
+  .toast.visivel{ opacity:1; }
+
+  @media(max-width:840px){ .shell{ flex-direction:column; } .sidebar{ width:100%; min-height:auto; } .conteudo-modulo{ padding:1.2rem 1rem 2rem; } }
+
+  /* ---------- impressão ---------- */
+  #areaImpressao{ display:none; }
+  @page{ size:A4 landscape; margin:10mm; }
+  @media print{
+    body{ background:#fff; }
+    .shell, .toast, .modal-fundo{ display:none !important; }
+    #areaImpressao{ display:block !important; }
+  }
+  #areaImpressao{ font-size:9pt; color:#000; }
+  .imp-cabecalho{ border-bottom:2px solid #000; padding-bottom:0.4rem; margin-bottom:0.6rem; }
+  .imp-orgao{ font-family:'IBM Plex Mono',monospace; font-size:7.5pt; text-transform:uppercase; letter-spacing:0.05em; }
+  #areaImpressao h1{ font-family:'Fraunces',serif; font-size:14pt; margin:0.15rem 0 0.3rem; }
+  .imp-meta{ display:flex; gap:1.2rem; flex-wrap:wrap; font-size:8pt; }
+  .imp-tabela{ width:100%; border-collapse:collapse; font-size:7.5pt; margin-top:0.5rem; }
+  .imp-tabela th, .imp-tabela td{ border:1px solid #888; padding:0.18rem 0.3rem; text-align:left; vertical-align:top; }
+  .imp-tabela thead th{ background:#E8E8E8; font-size:6.8pt; text-transform:uppercase; }
+  .imp-tabela thead{ display:table-header-group; }
+  .imp-tabela tr{ page-break-inside:avoid; }
+  .imp-tabela td.n{ text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  .imp-tabela td.neg{ color:#dc3545; }
+  .imp-tabela tr.g td{ background:#D9DCF5; font-weight:700; }
+  .imp-tabela tr.s td{ background:#F0F0F0; font-weight:700; }
+  .imp-tabela tr.t td{ font-weight:700; border-top:2px solid #000; }
+  .imp-nota{ font-size:7.5pt; margin-top:0.6rem; line-height:1.45; }
+  .imp-mem{ page-break-before:always; }
+  .imp-mem h2{ font-family:'Fraunces',serif; font-size:12pt; margin:0 0 0.4rem; }
+  .imp-mem .bloco{ page-break-inside:avoid; margin-bottom:0.5rem; }
+  .imp-mem .bloco .tit{ font-weight:700; font-size:8pt; margin-bottom:0.15rem; }
+  .imp-assinatura{ margin-top:1.6rem; display:flex; gap:3rem; font-size:8pt; }
+  .imp-secao{ font-family:'Fraunces',serif; font-size:10.5pt; font-weight:700; margin:0.9rem 0 0.3rem; }
+  .imp-ident{ display:grid; grid-template-columns:repeat(4, 1fr); gap:0.25rem 1rem; font-size:8.5pt; border:1px solid #888; padding:0.4rem 0.6rem; }
+  .imp-ident span.l{ display:block; font-size:6.8pt; text-transform:uppercase; color:#555; }
+  .imp-texto{ font-size:8.5pt; line-height:1.5; text-align:justify; margin:0.2rem 0; }
+  .imp-assinatura div{ border-top:1px solid #000; padding-top:0.2rem; min-width:260px; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <a href="atualizacao-sindec.html" class="ativo"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-grupo">
+        <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+        <div class="status-pill"><span class="dot wait" id="sindec-dot"></span><span id="sindec-text">verificando SINDEC/TCDF…</span></div>
+      </div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+
+    <div class="conteudo-modulo">
+      <h2 class="titulo-pagina">Atualização (SINDEC) - Passivo a Servidores</h2>
+      <p class="subtitulo-pagina">
+        Atualize uma relação inteira de Dívida de Exercícios Anteriores (aba <strong>Relação (lote)</strong>) ou os valores
+        de um único servidor (aba <strong>Individual</strong>) com um clique. Cada lançamento é calculado pelo sistema oficial do Tribunal de Contas do DF (SINDEC, cálculo “Passivos a Servidores”),
+        que aplica a correção monetária (INPC até 29/06/2009; IPCA-E/IPCA-15 a partir de 30/06/2009) e os juros de mora
+        do período (1% a.m. até 31/08/2001; 0,5% a.m. até 29/06/2009; juros da poupança a partir de 30/06/2009).
+      </p>
+      <div class="base-legal">Base legal: Res. TCDF nº 387/2024 (art. 2º) · Decisões TCDF nº 2.625/2021 e 56/2022 · Portaria nº 407/2011 · Decisão TCDF nº 3.315/2002</div>
+
+      <div class="aviso" id="avisoArquivo" hidden>
+        Este arquivo foi aberto diretamente do disco (<code>file://</code>). Para que o login e a consulta ao SINDEC funcionem, acesse pelo GitHub Pages.
+      </div>
+      <div class="aviso edicao" id="avisoEdicao" hidden></div>
+      <div class="aviso" id="avisoImportacao" hidden></div>
+      <div class="aviso" id="avisoIndices" hidden></div>
+
+      <p class="indicador-rascunho" id="indicadorRascunho">Os dados desta relação ficam salvos automaticamente na sua conta.</p>
+
+      <div class="abas" role="tablist">
+        <button type="button" class="aba ativa" data-modo="lote" role="tab">Relação (lote)<span class="cont" id="contLote">0</span></button>
+        <button type="button" class="aba" data-modo="individual" role="tab">Individual<span class="cont" id="contInd">0</span></button>
+      </div>
+
+      <div class="grade-paineis" id="gradePaineis">
+        <div class="painel" id="painelIndividual" hidden>
+          <h3><span class="num">1</span> Servidor e lançamentos</h3>
+          <div class="campos">
+            <div class="campo"><label for="i-matricula">Matrícula *</label><input id="i-matricula" type="text" autocomplete="off"></div>
+            <div class="campo span2"><label for="i-nome">Nome do servidor *</label><input id="i-nome" type="text" autocomplete="off"></div>
+            <div class="campo"><label for="i-cpf">CPF</label><input id="i-cpf" type="text" autocomplete="off"></div>
+            <div class="campo span2"><label for="i-processo">Processo SEI de origem do crédito/débito</label><input id="i-processo" type="text" autocomplete="off"></div>
+          </div>
+          <table class="tabela-lanc">
+            <thead><tr><th>#</th><th>Cód. SIGRH</th><th>Fato gerador (descrição)</th><th>Data do fato gerador *</th><th>Valor devido (R$) *</th><th>Início dos juros (opcional)</th><th>Observação</th><th></th></tr></thead>
+            <tbody id="tbodyInd"></tbody>
+          </table>
+          <div class="linha-botoes">
+            <button type="button" id="btnAddLanc">+ Adicionar lançamento</button>
+            <button type="button" id="btnLimparInd">Limpar servidor</button>
+          </div>
+          <div class="ajuda" style="font-size:0.72rem;color:var(--ink-soft);margin-top:0.5rem;">Valores negativos (devoluções) são aceitos, ex.: -277,77. “Início dos juros” em branco segue a regra geral dos parâmetros.</div>
+        </div>
+
+        <div class="painel" id="painelLote">
+          <h3><span class="num">1</span> Relação de valores</h3>
+          <label class="dropzone" id="dropzone" for="inputArquivo" tabindex="0" aria-label="Importar planilha" style="display:block;">
+            <strong>Clique para importar</strong> ou arraste a planilha aqui
+            <small>Planilha DEA (.xlsx / .xls / .csv) — o cabeçalho é localizado automaticamente pela linha que contém “MATRÍCULA”.</small>
+          </label>
+          <input type="file" id="inputArquivo" accept=".xlsx,.xls,.csv" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+          <div class="info-arquivo" id="infoArquivo"></div>
+          <div class="linha-botoes">
+            <button type="button" id="btnAdicionar">+ Adicionar linha</button>
+            <button type="button" id="btnModelo">⬇ Baixar modelo em branco</button>
+            <button type="button" id="btnLimpar">Limpar relação</button>
+          </div>
+        </div>
+
+        <div class="painel">
+          <h3><span class="num">2</span> Parâmetros do cálculo</h3>
+          <div class="campos">
+            <div class="campo">
+              <label for="dataAtualizacao">Data para atualização</label>
+              <input type="date" id="dataAtualizacao">
+              <div class="ajuda">Termo final da correção e dos juros.</div>
+            </div>
+            <div class="campo">
+              <label for="modoJuros">Juros de mora (cód. 20088)</label>
+              <select id="modoJuros">
+                <option value="fg">A partir da data do fato gerador</option>
+                <option value="unica">A partir de uma data única</option>
+                <option value="sem">Sem incidência de juros</option>
+              </select>
+              <div class="ajuda">A coluna “DATA INÍCIO JUROS” da planilha, se existir, prevalece na linha.</div>
+            </div>
+            <div class="campo" id="campoDataJurosUnica" hidden>
+              <label for="dataJurosUnica">Data de início dos juros</label>
+              <input type="date" id="dataJurosUnica">
+              <div class="ajuda">Ex.: data do requerimento administrativo.</div>
+            </div>
+            <div class="campo">
+              <label for="criterioArred">Arredondamento</label>
+              <select id="criterioArred">
+                <option value="parcelas">Preservar parcelas do SINDEC (total = devido + correção + juros)</option>
+                <option value="total">Preservar total do SINDEC (diferença de centavo vai para os juros)</option>
+              </select>
+            </div>
+            <div class="campo span2">
+              <label for="referencia">Referência / Processo SEI (opcional)</label>
+              <input type="text" id="referencia" placeholder="Ex.: 00391-00000000/2026-00 — DEA 2026">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="barra-acao">
+        <button type="button" id="btnAtualizar" disabled>⟳ Atualizar valores pelo SINDEC</button>
+        <button type="button" id="btnReprocessar" hidden title="Consulta novamente apenas as linhas com erro ou desatualizadas">↻ Reprocessar só as pendentes</button>
+        <div class="progresso">
+          <div class="trilho"><div class="preenchido" id="barraProgresso"></div></div>
+          <div class="texto" id="textoProgresso">Importe uma relação para começar.</div>
+        </div>
+        <div class="acoes-dir">
+          <button type="button" id="btnExcel" disabled>Exportar Excel</button>
+          <button type="button" id="btnImprimir" disabled>Imprimir</button>
+          <button type="button" id="btnSalvar" class="salvar" disabled>Salvar no histórico</button>
+        </div>
+      </div>
+
+      <div class="resumo-grid" id="resumoGrid"></div>
+
+      <div class="tabela-wrapper">
+        <table class="dea" id="tabelaDea">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Matrícula</th>
+              <th>Nome do servidor</th>
+              <th>Processo de origem</th>
+              <th>Cód. SIGRH</th>
+              <th>Fato gerador</th>
+              <th>Data F.G.</th>
+              <th>Início juros</th>
+              <th class="num">Valores devidos</th>
+              <th class="num">Atualização monetária<span class="cod">cód. 20827</span></th>
+              <th class="num">Juros de mora<span class="cod">cód. 20088</span></th>
+              <th class="num">Valor total atualizado</th>
+              <th>Situação</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="tabela-resumo" id="tabelaResumo" hidden></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: adicionar / editar linha -->
+<div class="modal-fundo" id="modalLinha">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalLinha">
+    <header><h4 id="tituloModalLinha">Linha</h4><button type="button" class="icon-btn" data-fechar>✕</button></header>
+    <div class="corpo">
+      <div class="campos" id="formLinha">
+        <div class="campo"><label for="f-matricula">Matrícula *</label><input id="f-matricula" type="text"></div>
+        <div class="campo span2"><label for="f-nome">Nome do servidor *</label><input id="f-nome" type="text"></div>
+        <div class="campo"><label for="f-cpf">CPF</label><input id="f-cpf" type="text"></div>
+        <div class="campo span2"><label for="f-processo">Processo de origem do crédito/débito</label><input id="f-processo" type="text"></div>
+        <div class="campo"><label for="f-paginas">Páginas do documento</label><input id="f-paginas" type="text"></div>
+        <div class="campo"><label for="f-conta">Conta contábil</label><input id="f-conta" type="text"></div>
+        <div class="campo"><label for="f-codigo">Código SIGRH</label><input id="f-codigo" type="text"></div>
+        <div class="campo span2"><label for="f-fato">Fato gerador (descrição do código)</label><input id="f-fato" type="text"></div>
+        <div class="campo"><label for="f-dataFG">Data do fato gerador *</label><input id="f-dataFG" type="date"></div>
+        <div class="campo"><label for="f-exercicio">Exercício</label><input id="f-exercicio" type="number" step="1"></div>
+        <div class="campo"><label for="f-valor">Valor devido (R$) *</label><input id="f-valor" type="text" inputmode="decimal" placeholder="Ex.: 1.234,56 ou -277,77"></div>
+        <div class="campo"><label for="f-dataJuros">Início dos juros (opcional)</label><input id="f-dataJuros" type="date"><div class="ajuda">Em branco = regra geral dos parâmetros.</div></div>
+        <div class="campo span2"><label for="f-obs">Observação</label><input id="f-obs" type="text"></div>
+      </div>
+    </div>
+    <footer><button type="button" data-fechar>Cancelar</button><button type="button" class="salvar" id="btnConfirmarLinha">Confirmar</button></footer>
+  </div>
+</div>
+
+<!-- Modal: memória de cálculo -->
+<div class="modal-fundo" id="modalMemoria">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloMemoria">
+    <header><h4 id="tituloMemoria">Memória de cálculo — SINDEC</h4><button type="button" class="icon-btn" data-fechar>✕</button></header>
+    <div class="corpo" id="corpoMemoria"></div>
+    <footer><button type="button" data-fechar>Fechar</button></footer>
+  </div>
+</div>
+
+<div id="areaImpressao"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  // O Firebase é carregado de forma dinâmica (ver "Inicialização"): se a importação falhar
+  // (arquivo aberto via file://, caminho ../assets incorreto, rede bloqueada), a tela,
+  // a importação da planilha e o cálculo no SINDEC continuam funcionando.
+  let fb = null;
+  const semFirebase = async () => { throw new Error('banco de dados indisponível nesta página'); };
+  const salvarAcerto = (...a) => fb ? fb.salvarAcerto(...a) : semFirebase();
+  const buscarAcerto = (...a) => fb ? fb.buscarAcerto(...a) : semFirebase();
+  const atualizarAcerto = (...a) => fb ? fb.atualizarAcerto(...a) : semFirebase();
+  const obterEstadoModulo = (...a) => fb ? fb.obterEstadoModulo(...a) : semFirebase();
+  const salvarEstadoModulo = (...a) => fb ? fb.salvarEstadoModulo(...a) : semFirebase();
+
+  function mostrarErroGeral(msg){
+    const av = document.getElementById('avisoImportacao');
+    if(!av) return;
+    av.innerHTML = '<strong>Erro no módulo:</strong> ' + String(msg).replace(/</g,'&lt;');
+    av.hidden = false;
+  }
+  window.addEventListener('error', (e) => mostrarErroGeral(e.message || 'erro de script'));
+  window.addEventListener('unhandledrejection', (e) => mostrarErroGeral((e.reason && e.reason.message) || e.reason));
+
+  // =====================================================================
+  // Constantes
+  // =====================================================================
+  const TIPO_ACERTO = 'atualizacao-sindec';
+  const CHAVE_RASCUNHO = 'atualizacao-sindec';
+  const API_SINDEC = 'https://api-sindec.tc.df.gov.br/api';
+  const ENDPOINT_CALCULO = API_SINDEC + '/calcular3013';
+  // Linhas enviadas uma a uma, com intervalo mínimo, para não sobrecarregar o servidor do TCDF.
+  // HTTP 406 do SINDEC = "Indicadores carecem de atualização" (índice do período ainda não publicado
+  // para a data de atualização informada). O retorno é instável entre os servidores do TCDF,
+  // por isso há novas tentativas antes de marcar a linha; persistindo, o módulo oferece recalcular
+  // tudo até a última data com índices disponíveis.
+  const INTERVALO_MS = 500;                 // intervalo mínimo entre consultas
+  const TENTATIVAS_INDICES = 3;             // novas tentativas quando o SINDEC responde 406
+  const ESPERAS_LIMITE = [5, 10, 20, 30];   // segundos de espera para 429/503 ou falha de rede
+  const TIMEOUT_MS = 30000;
+  const DATA_MINIMA = '1994-07-01'; // SINDEC retorna valores em R$ somente a partir do Plano Real
+  const URL_EXCELJS = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+  const ORGAO_CODIGO = '029';
+  const ORGAO_NOME = 'INSTITUTO DO MEIO AMBIENTE E DOS RECURSOS HÍDRICOS DO DISTRITO FEDERAL - IBRAM-DF';
+
+  // =====================================================================
+  // Estado
+  // =====================================================================
+  // Dois conjuntos independentes: relação importada (lote) e atualização individual.
+  // "estado.linhas" aponta sempre para o conjunto da aba ativa.
+  const estado = {
+    modo: 'lote',
+    lote: { linhas: [], arquivo: '', importadoEm: '' },
+    individual: { servidor: { matricula: '', nome: '', cpf: '', processo: '' }, linhas: [] },
+    get linhas(){ return this[this.modo].linhas; },
+    set linhas(v){ this[this.modo].linhas = v; },
+    get arquivo(){ return this.lote.arquivo; },
+    set arquivo(v){ this.lote.arquivo = v; },
+    get importadoEm(){ return this.lote.importadoEm; },
+    set importadoEm(v){ this.lote.importadoEm = v; }
+  };
+  let contadorId = 0;
+  let editandoId = null;          // id do documento no Firestore (?editar=)
+  let modoEdicaoHistorico = false;
+  let calculando = false;
+  let linhaEmEdicao = null;       // id local da linha aberta no modal
+  let usuarioEmail = '';
+  const cacheRespostas = new Map();
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    tbody: $('tbody'), resumoGrid: $('resumoGrid'), tabelaResumo: $('tabelaResumo'),
+    dataAtualizacao: $('dataAtualizacao'), modoJuros: $('modoJuros'), dataJurosUnica: $('dataJurosUnica'),
+    campoDataJurosUnica: $('campoDataJurosUnica'), criterioArred: $('criterioArred'),
+    referencia: $('referencia'), btnReprocessar: $('btnReprocessar'),
+    btnAtualizar: $('btnAtualizar'), btnExcel: $('btnExcel'), btnImprimir: $('btnImprimir'), btnSalvar: $('btnSalvar'),
+    barra: $('barraProgresso'), textoProgresso: $('textoProgresso'),
+    infoArquivo: $('infoArquivo'), avisoImportacao: $('avisoImportacao'), indicadorRascunho: $('indicadorRascunho'),
+    toast: $('toast')
+  };
+
+  // =====================================================================
+  // Utilitários
+  // =====================================================================
+  function esc(s){
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  const fmtBRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+  function moeda(n){ return (n == null || Number.isNaN(n)) ? '' : fmtBRL.format(n); }
+  function r2(n){ return Math.round((n + (n >= 0 ? 1 : -1) * 1e-9) * 100) / 100; }
+  function soma(arr){ return r2(arr.reduce((a, b) => a + (b || 0), 0)); }
+
+  // "R$ 1.435,21" | "1.435,21" | "-277,77" | 1435.21 -> número
+  function parseValor(v){
+    if(v == null || v === '') return null;
+    if(typeof v === 'number') return Number.isFinite(v) ? v : null;
+    let s = String(v).trim();
+    const negativo = /^\(.*\)$/.test(s) || /-/.test(s);
+    s = s.replace(/[^\d,.]/g, '');
+    if(!s) return null;
+    if(s.includes(',')){ s = s.replace(/\./g, '').replace(',', '.'); }
+    else if((s.match(/\./g) || []).length > 1){ s = s.replace(/\./g, ''); }
+    const n = parseFloat(s);
+    if(Number.isNaN(n)) return null;
+    return negativo ? -Math.abs(n) : n;
+  }
+
+  function isoValida(iso){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) return false;
+    const [a, m, d] = iso.split('-').map(Number);
+    const dt = new Date(Date.UTC(a, m - 1, d));
+    return dt.getUTCFullYear() === a && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  }
+  // número serial do Excel | Date | "dd/mm/aaaa" | "aaaa-mm-dd" -> "aaaa-mm-dd"
+  function parseData(v){
+    if(v == null || v === '') return '';
+    if(typeof v === 'number' && v > 59 && v < 80000){
+      const ms = Date.UTC(1899, 11, 30) + Math.round(v) * 86400000;
+      return new Date(ms).toISOString().slice(0, 10);
+    }
+    if(v instanceof Date && !Number.isNaN(v.getTime())){
+      return `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+    }
+    const s = String(v).trim();
+    let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if(m){
+      let ano = Number(m[3]); if(ano < 100) ano += 2000;
+      const iso = `${ano}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+      return isoValida(iso) ? iso : 'INVALIDA:' + s;
+    }
+    m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return isoValida(m[0]) ? m[0] : 'INVALIDA:' + s;
+    return 'INVALIDA:' + s;
+  }
+  function dataBR(iso){
+    if(!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso && iso.startsWith('INVALIDA:') ? iso.slice(9) : (iso || '');
+    const [a, m, d] = iso.split('-');
+    return `${d}/${m}/${a}`;
+  }
+  // Ano usado no título da DEA e no nome do arquivo: ano da data para atualização
+  function anoDea(){
+    const d = document.getElementById('dataAtualizacao').value;
+    return /^\d{4}/.test(d) ? d.slice(0, 4) : String(new Date().getFullYear());
+  }
+  function hojeISO(){
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function normalizarCabecalho(s){
+    return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+  }
+  function textoCelula(v){
+    if(v == null) return '';
+    if(typeof v === 'number') return Number.isInteger(v) ? String(v) : String(v);
+    return String(v).trim();
+  }
+  let toastTimer = null;
+  function aviso(msg, ms){
+    el.toast.textContent = msg;
+    el.toast.classList.add('visivel');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.toast.classList.remove('visivel'), ms || 3800);
+  }
+  function limpoParaFirestore(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  // =====================================================================
+  // Modelo de linha
+  // =====================================================================
+  function novaLinha(d){
+    d = d || {};
+    return {
+      id: 'L' + (++contadorId),
+      matricula: d.matricula || '', nome: d.nome || '', cpf: d.cpf || '',
+      processo: d.processo || '', paginas: d.paginas || '', conta: d.conta || '',
+      codigo: d.codigo || '', fato: d.fato || '', dataFG: d.dataFG || '',
+      exercicio: d.exercicio || '', valor: (d.valor == null ? null : Number(d.valor)),
+      dataJuros: d.dataJuros || '', obs: d.obs || '',
+      resultado: d.resultado || null   // {status, ...}
+    };
+  }
+  function exercicioDaLinha(l){
+    const e = parseInt(l.exercicio, 10);
+    if(e > 1900 && e < 2200) return e;
+    if(/^\d{4}-/.test(l.dataFG)) return Number(l.dataFG.slice(0, 4));
+    return 0;
+  }
+  function invalidarResultados(motivo){
+    let n = 0;
+    [...estado.lote.linhas, ...estado.individual.linhas].forEach(l => {
+      if(l.resultado && l.resultado.status === 'ok'){ l.resultado.status = 'desatualizado'; l.resultado.motivo = motivo; n++; }
+    });
+    return n;
+  }
+
+  // =====================================================================
+  // Importação da planilha
+  // =====================================================================
+  const MAPA_COLUNAS = [
+    // [chave, teste(cabecalhoNormalizado)]
+    ['matricula', h => /^MATRICULA/.test(h)],
+    ['nome', h => /NOME/.test(h)],
+    ['cpf', h => /^CPF/.test(h)],
+    ['processo', h => /PROCESSO/.test(h)],
+    ['paginas', h => /PAGINA/.test(h)],
+    ['conta', h => /CONTA/.test(h)],
+    ['codigo', h => /SIGRH|^CODIGO$|^RUBRICA$|^COD\.?$/.test(h)],
+    ['dataJuros', h => /JUROS/.test(h) && /(DATA|INICIO)/.test(h)],
+    ['dataFG', h => /DATA/.test(h) && /(FATO|VALOR ORIGINAL|BASE|COMPETENCIA)/.test(h)],
+    ['fato', h => /FATO GERADOR/.test(h) && !/DATA/.test(h)],
+    ['exercicio', h => /^EXERCICIO/.test(h)],
+    ['valor', h => /VALOR(ES)? DEVIDO|VALOR ORIGINAL|^VALOR$/.test(h) && !/DATA/.test(h)],
+    ['obs', h => /OBSERV/.test(h)]
+  ];
+
+  function localizarCabecalho(matriz){
+    for(let i = 0; i < Math.min(matriz.length, 60); i++){
+      const linha = (matriz[i] || []).map(normalizarCabecalho);
+      if(linha.some(h => /^MATRICULA/.test(h)) && linha.some(h => /VALOR/.test(h))) return i;
+    }
+    return -1;
+  }
+
+  function interpretarMatriz(matriz){
+    const iCab = localizarCabecalho(matriz);
+    if(iCab < 0) throw new Error('Cabeçalho não encontrado: a planilha precisa ter uma linha com as colunas “MATRÍCULA” e “VALORES DEVIDOS”.');
+    const cab = (matriz[iCab] || []).map(normalizarCabecalho);
+    const col = {};
+    cab.forEach((h, idx) => {
+      if(!h) return;
+      for(const [chave, teste] of MAPA_COLUNAS){
+        if(col[chave] == null && teste(h)){ col[chave] = idx; break; }
+      }
+    });
+    if(col.valor == null) throw new Error('Coluna de valor não encontrada (esperado “VALORES DEVIDOS (R$)”).');
+    if(col.dataFG == null) throw new Error('Coluna de data não encontrada (esperado “DATA DO FATO GERADOR”).');
+
+    // Coluna de bloco de exercício (coluna A mesclada no modelo), quando não tem cabeçalho
+    let colBloco = null;
+    for(let c = 0; c < Math.min(cab.length || 1, 3); c++){
+      if(!cab[c] && Object.values(col).indexOf(c) < 0){ colBloco = c; break; }
+    }
+
+    const linhas = [];
+    const problemas = [];
+    let blocoAtual = '';
+    for(let i = iCab + 1; i < matriz.length; i++){
+      const r = matriz[i] || [];
+      if(colBloco != null){
+        const b = parseInt(r[colBloco], 10);
+        if(b > 1900 && b < 2200) blocoAtual = String(b);
+      }
+      const textoLinha = r.map(textoCelula).join(' ');
+      if(/VALOR(ES)? TOTA/i.test(normalizarCabecalho(textoLinha))) continue;
+      const get = (k) => col[k] == null ? null : r[col[k]];
+      const valorBruto = get('valor');
+      const matricula = textoCelula(get('matricula'));
+      const nome = textoCelula(get('nome'));
+      if((valorBruto == null || valorBruto === '') && !matricula && !nome) continue;
+      if(!matricula && !nome) continue;
+      const valor = parseValor(valorBruto);
+      const dataFG = parseData(get('dataFG'));
+      const exercicio = textoCelula(get('exercicio')) || blocoAtual || (dataFG && /^\d{4}/.test(dataFG) ? dataFG.slice(0,4) : '');
+      const linha = novaLinha({
+        matricula, nome,
+        cpf: textoCelula(get('cpf')),
+        processo: textoCelula(get('processo')),
+        paginas: textoCelula(get('paginas')),
+        conta: textoCelula(get('conta')),
+        codigo: textoCelula(get('codigo')),
+        fato: textoCelula(get('fato')),
+        dataFG,
+        exercicio,
+        valor,
+        dataJuros: col.dataJuros == null ? '' : parseData(get('dataJuros')),
+        obs: textoCelula(get('obs'))
+      });
+      linha._linhaPlanilha = i + 1;
+      if(valor == null) problemas.push(`Linha ${i + 1} (${nome || matricula}): valor ausente ou inválido.`);
+      if(!dataFG || dataFG.startsWith('INVALIDA:')) problemas.push(`Linha ${i + 1} (${nome || matricula}): data do fato gerador ausente ou inválida.`);
+      linhas.push(linha);
+    }
+    return { linhas, problemas, colunas: col };
+  }
+
+  async function importarArquivo(arquivo){
+    if(!arquivo) return;
+    if(typeof XLSX === 'undefined'){ aviso('Biblioteca de planilhas não carregou. Verifique a conexão e recarregue a página.'); return; }
+    try{
+      const buffer = await arquivo.arrayBuffer();
+      let wb;
+      if(/\.(csv|txt)$/i.test(arquivo.name)){
+        // CSV: decodifica UTF-8 (ou Windows-1252, padrão do Excel em português) e detecta o separador
+        let texto = new TextDecoder('utf-8').decode(buffer);
+        if(texto.includes('�')) texto = new TextDecoder('windows-1252').decode(buffer);
+        texto = texto.replace(/^﻿/, '');
+        const primeira = texto.split(/\r?\n/).find(l => /MATR/i.test(l)) || texto.split(/\r?\n/)[0] || '';
+        const contar = (c) => primeira.split(c).length - 1;
+        const fs = [';', '\t', ','].sort((a, b) => contar(b) - contar(a))[0];
+        // raw:true evita que datas dd/mm/aaaa sejam lidas no padrão americano (mm/dd)
+        wb = XLSX.read(texto, { type:'string', FS: fs, raw:true });
+      }else{
+        wb = XLSX.read(buffer, { type:'array', cellDates:false });
+      }
+      let resultado = null, abaUsada = '';
+      for(const nomeAba of wb.SheetNames){
+        const matriz = XLSX.utils.sheet_to_json(wb.Sheets[nomeAba], { header:1, raw:true, defval:null, blankrows:true });
+        if(localizarCabecalho(matriz) >= 0){ resultado = interpretarMatriz(matriz); abaUsada = nomeAba; break; }
+      }
+      if(!resultado) throw new Error('Nenhuma aba com o cabeçalho esperado (MATRÍCULA / VALORES DEVIDOS).');
+      if(resultado.linhas.length === 0) throw new Error('Nenhuma linha de dados encontrada abaixo do cabeçalho.');
+
+      if(estado.linhas.length > 0){
+        const substituir = window.confirm(`Já existem ${estado.linhas.length} linha(s) na relação.\n\nOK = substituir pela planilha importada\nCancelar = acrescentar ao final`);
+        if(substituir) estado.linhas = [];
+      }
+      estado.linhas.push(...resultado.linhas);
+      estado.arquivo = arquivo.name;
+      estado.importadoEm = new Date().toLocaleString('pt-BR');
+
+      const exercicios = [...new Set(resultado.linhas.map(exercicioDaLinha))].filter(Boolean).sort();
+      el.infoArquivo.textContent = `${arquivo.name} · aba “${abaUsada}” · ${resultado.linhas.length} linha(s) · exercício(s): ${exercicios.join(', ') || '—'}`;
+      if(resultado.problemas.length){
+        el.avisoImportacao.innerHTML = `<strong>Atenção — ${resultado.problemas.length} linha(s) com pendência</strong> (serão sinalizadas e não serão enviadas ao SINDEC até a correção):<ul>${resultado.problemas.slice(0, 12).map(p => `<li>${esc(p)}</li>`).join('')}</ul>${resultado.problemas.length > 12 ? '…' : ''}`;
+        el.avisoImportacao.hidden = false;
+      }else{
+        el.avisoImportacao.hidden = true;
+      }
+      renderizar();
+      agendarRascunho();
+      aviso(`${resultado.linhas.length} linha(s) importada(s). Clique em “Atualizar valores pelo SINDEC”.`);
+    }catch(err){
+      console.error(err);
+      el.avisoImportacao.innerHTML = '<strong>Não foi possível importar:</strong> ' + esc(err.message);
+      el.avisoImportacao.hidden = false;
+    }
+  }
+
+  // =====================================================================
+  // Cálculo via SINDEC (POST /calcular3013)
+  // =====================================================================
+  function dataJurosDaLinha(l){
+    if(l.dataJuros && isoValida(l.dataJuros)) return l.dataJuros;
+    const modo = el.modoJuros.value;
+    if(modo === 'sem') return '';
+    if(modo === 'unica') return el.dataJurosUnica.value || '';
+    return l.dataFG;
+  }
+
+  function validarLinha(l, dataAtualizacao){
+    if(l.valor == null || Number.isNaN(l.valor)) return 'Valor devido ausente ou inválido.';
+    if(l.valor === 0) return 'Valor devido igual a zero.';
+    if(!isoValida(l.dataFG)) return 'Data do fato gerador ausente ou inválida.';
+    if(l.dataFG < DATA_MINIMA) return 'Data anterior a 01/07/1994 (fora do padrão monetário do Real).';
+    if(l.dataFG > dataAtualizacao) return 'Data do fato gerador posterior à data de atualização.';
+    const dj = dataJurosDaLinha(l);
+    if(el.modoJuros.value === 'unica' && !l.dataJuros && !isoValida(dj)) return 'Informe a data única de início dos juros nos parâmetros.';
+    if(dj && !isoValida(dj)) return 'Data de início dos juros inválida.';
+    if(dj && dj > dataAtualizacao) return 'Início dos juros posterior à data de atualização.';
+    return null;
+  }
+
+  function montarRequisicao(l, dataAtualizacao){
+    const req = {
+      descricao: `${l.matricula} ${l.nome} ${l.codigo} ${l.fato}`.replace(/\s+/g, ' ').trim().slice(0, 250),
+      dataValorOriginal: l.dataFG,
+      valorOriginal: r2(Math.abs(l.valor)),
+      dataAtualizacao
+    };
+    const dj = dataJurosDaLinha(l);
+    if(dj) req.dataJuros = dj; // o campo deve ser OMITIDO quando não há juros (null gera erro 500 no TCDF)
+    return req;
+  }
+
+  const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+  let ultimaConsulta = 0;
+  let aoAguardar = null; // callback de progresso durante esperas por limite
+  let linhasSemIndices = 0; // linhas recusadas por índices na rodada atual (reduz novas tentativas)
+
+  async function chamarSindec(req, opcoes){
+    opcoes = opcoes || {};
+    const chave = JSON.stringify({ ...req, descricao: '' });
+    if(!opcoes.semCache && cacheRespostas.has(chave)) return cacheRespostas.get(chave);
+    let recusasLimite = 0, falhasRede = 0, recusasIndices = 0;
+    const maxIndices = opcoes.tentativasIndices != null ? opcoes.tentativasIndices : (linhasSemIndices >= 2 ? 1 : TENTATIVAS_INDICES);
+    while(true){
+      const falta = ultimaConsulta + INTERVALO_MS - Date.now();
+      if(falta > 0) await dormir(falta);
+      ultimaConsulta = Date.now();
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+      let resp, json = null;
+      try{
+        resp = await fetch(ENDPOINT_CALCULO, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req),
+          signal: ctrl.signal
+        });
+        clearTimeout(timer);
+        try{ json = await resp.json(); }catch(e){ /* corpo não-JSON */ }
+      }catch(err){
+        clearTimeout(timer);
+        if(++falhasRede > ESPERAS_LIMITE.length){
+          throw new Error(err.name === 'AbortError' ? 'Tempo de resposta do SINDEC esgotado.' : 'Falha de rede ao acessar o SINDEC (conexão ou firewall).');
+        }
+        await esperarLimite(ESPERAS_LIMITE[falhasRede - 1]);
+        continue;
+      }
+      const mensagemSindec = json && json.erro && json.erro.mensagem
+        ? String(json.erro.mensagem).replace(/<br\s*\/?>/gi, ' ').replace(/\s+/g, ' ').trim() : '';
+      if(resp.status === 406 || /carecem de atualiza/i.test(mensagemSindec)){
+        if(++recusasIndices <= maxIndices){ await dormir(1500); continue; }
+        throw Object.assign(new Error(`Índices ainda não publicados no SINDEC para ${dataBR(req.dataAtualizacao)} (TCDF: “${mensagemSindec || 'indicadores carecem de atualização'}”).`), { indicesIndisponiveis: true });
+      }
+      if(resp.status === 429 || resp.status === 503){
+        if(++recusasLimite > ESPERAS_LIMITE.length) throw new Error(`SINDEC indisponível no momento (HTTP ${resp.status}). Tente novamente em alguns minutos.`);
+        await esperarLimite(ESPERAS_LIMITE[recusasLimite - 1]);
+        continue;
+      }
+      if(resp.status === 422 || (json && json.sucesso === false)){
+        const det = mensagemSindec || (json && json.erros ? (json.erros.detail || json.erros.title) : `HTTP ${resp.status}`);
+        throw new Error('SINDEC recusou os dados: ' + det);
+      }
+      if(!resp.ok) throw new Error(`SINDEC respondeu HTTP ${resp.status}.`);
+      if(!json || json.sucesso !== true || !json.resultado) throw new Error('Resposta do SINDEC em formato inesperado.');
+      cacheRespostas.set(chave, json.resultado);
+      return json.resultado;
+    }
+  }
+
+  // Procura, a partir do dia anterior à data informada, a data mais recente em que o SINDEC
+  // calcula a linha de referência de forma estável (duas respostas válidas seguidas).
+  async function encontrarDataCalculavel(reqRef, dataInicial){
+    let d = new Date(dataInicial + 'T12:00:00');
+    for(let i = 1; i <= 45; i++){
+      d.setDate(d.getDate() - 1);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if(reqRef.dataJuros && iso < reqRef.dataJuros) return null;
+      if(iso < reqRef.dataValorOriginal) return null;
+      el.textoProgresso.textContent = `Procurando a última data com índices publicados no SINDEC… testando ${dataBR(iso)}`;
+      const req = { ...reqRef, dataAtualizacao: iso };
+      try{
+        await chamarSindec(req, { semCache: true, tentativasIndices: 0 });
+        await chamarSindec(req, { semCache: true, tentativasIndices: 0 });
+        return iso;
+      }catch(err){
+        if(!err.indicesIndisponiveis) throw err;
+      }
+    }
+    return null;
+  }
+
+  async function esperarLimite(segundos){
+    for(let s = segundos; s > 0; s--){
+      if(aoAguardar) aoAguardar(s);
+      await dormir(1000);
+    }
+    if(aoAguardar) aoAguardar(0);
+  }
+
+  // Converte a resposta do SINDEC no resultado da linha (colunas M, N e O do modelo)
+  function interpretarResposta(l, req, res){
+    const memoria = (res.memoriaCalculo || []).map(m => ({
+      texto: m.texto || '', indice: m.indice || '',
+      antes: m.valores ? m.valores.valorAntes : null,
+      depois: m.valores ? m.valores.valorDepois : null,
+      correcao: m.valores && m.valores.correcaoMonetaria != null ? m.valores.correcaoMonetaria : null,
+      juros: m.valores && m.valores.juros != null ? m.valores.juros : null,
+      atualizado: m.valores ? m.valores.valorAtualizado : null
+    }));
+    const base = r2(Math.abs(l.valor));
+    const correcaoBruta = memoria.reduce((a, m) => a + (m.correcao || 0), 0);
+    const jurosBruto = memoria.reduce((a, m) => a + (m.juros || 0), 0);
+    // Valores exibidos pelo SINDEC (string "R$ x.xxx,xx") são a fonte oficial; o bruto é o fallback.
+    let correcao = parseValor(res.correcaoMonetaria); if(correcao == null) correcao = r2(correcaoBruta);
+    let juros = req.dataJuros ? parseValor(res.juros) : 0; if(juros == null) juros = r2(jurosBruto);
+    let totalSindec = parseValor(res.valorCorrigido); if(totalSindec == null) totalSindec = r2(base + correcaoBruta + jurosBruto);
+    let total = r2(base + correcao + juros);
+    let ajuste = 0;
+    if(el.criterioArred.value === 'total' && Math.abs(total - totalSindec) >= 0.005){
+      ajuste = r2(totalSindec - total);
+      juros = r2(juros + ajuste);
+      total = totalSindec;
+    }
+    const sinal = l.valor < 0 ? -1 : 1;
+    return {
+      status: 'ok',
+      correcao: r2(sinal * correcao),
+      juros: r2(sinal * juros),
+      total: r2(sinal * total),
+      totalSindec: r2(sinal * totalSindec),
+      difSindec: r2(sinal * (total - totalSindec)),
+      ajusteJuros: r2(sinal * ajuste),
+      correcaoPerc: res.correcaoMonetariaPercentual || '',
+      jurosPerc: res.jurosPercentual || '',
+      dataAtualizacao: req.dataAtualizacao,
+      dataJuros: req.dataJuros || '',
+      negativo: l.valor < 0,
+      criterio: el.criterioArred.value,
+      memoria,
+      calculadoEm: new Date().toISOString()
+    };
+  }
+
+  function mostrarAvisoIndices(dataAtualizacao){
+    const av = $('avisoIndices');
+    const afetadas = estado.linhas.filter(l => l.resultado && l.resultado.indicesIndisponiveis);
+    if(!afetadas.length){ av.hidden = true; return; }
+    av.innerHTML = `<strong>${afetadas.length} linha(s) não puderam ser atualizadas até ${dataBR(dataAtualizacao)}:</strong>
+      o SINDEC ainda não publicou todos os índices (juros da poupança/IPCA-15) até essa data —
+      mensagem do TCDF: “Indicadores carecem de atualização para realizar o cálculo até a data de atualização informada”.
+      Para que toda a relação use a <em>mesma</em> data, recalcule tudo até a última data disponível.
+      <div style="margin-top:0.6rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button type="button" class="salvar" id="btnDataCalculavel">Encontrar a última data disponível e recalcular tudo</button>
+      </div>`;
+    av.hidden = false;
+    $('btnDataCalculavel').addEventListener('click', async () => {
+      const ref = afetadas[0].resultado.requisicao;
+      if(!ref) return;
+      const btn = $('btnDataCalculavel');
+      btn.disabled = true; calculando = true; alternarBotoes();
+      let nova = null;
+      try{ nova = await encontrarDataCalculavel(ref, dataAtualizacao); }
+      catch(err){ aviso('Erro ao consultar o SINDEC: ' + err.message, 6000); }
+      calculando = false;
+      if(!nova){ btn.disabled = false; alternarBotoes(); aviso('Não foi encontrada data calculável nos últimos 45 dias.', 6000); return; }
+      el.dataAtualizacao.value = nova;
+      av.hidden = true;
+      aviso(`Data para atualização ajustada para ${dataBR(nova)}. Recalculando toda a relação…`, 5000);
+      invalidarResultados('data de atualização ajustada');
+      await atualizarTodos(false);
+    });
+  }
+
+  async function atualizarTodos(somentePendentes){
+    if(calculando) return;
+    somentePendentes = somentePendentes === true;
+    const dataAtualizacao = el.dataAtualizacao.value;
+    if(!isoValida(dataAtualizacao)){ aviso('Informe a data para atualização.'); el.dataAtualizacao.focus(); return; }
+    if(el.modoJuros.value === 'unica' && !isoValida(el.dataJurosUnica.value)){
+      aviso('Informe a data única de início dos juros.'); el.dataJurosUnica.focus(); return;
+    }
+    if(estado.linhas.length === 0){ aviso(estado.modo === 'lote' ? 'Nenhuma linha na relação.' : 'Adicione ao menos um lançamento.'); return; }
+    if(estado.modo === 'individual'){
+      sincronizarServidor();
+      const sv = estado.individual.servidor;
+      if(!sv.matricula || !sv.nome){ aviso('Informe a matrícula e o nome do servidor.'); $(sv.matricula ? 'i-nome' : 'i-matricula').focus(); return; }
+    }
+
+    calculando = true;
+    linhasSemIndices = 0;
+    $('avisoIndices').hidden = true;
+    alternarBotoes();
+    const fila = [];
+    estado.linhas.forEach(l => {
+      if(somentePendentes && l.resultado && l.resultado.status === 'ok' && l.resultado.dataAtualizacao === dataAtualizacao) return;
+      const erro = validarLinha(l, dataAtualizacao);
+      if(erro){ l.resultado = { status:'erro', erro, dataAtualizacao }; }
+      else{ l.resultado = { status:'calculando' }; fila.push(l); }
+    });
+    renderizar();
+
+    let feitos = 0, falhas = 0;
+    const totalFila = fila.length;
+    const progresso = (espera) => {
+      const pct = totalFila ? Math.round(feitos / totalFila * 100) : 100;
+      el.barra.style.width = pct + '%';
+      el.textoProgresso.textContent = `Consultando SINDEC… ${feitos}/${totalFila} linha(s)${falhas ? ` · ${falhas} com erro` : ''}` +
+        (espera ? ` · limite de consultas do TCDF atingido, aguardando ${espera}s para continuar…` : '');
+    };
+    aoAguardar = (s) => progresso(s);
+    progresso();
+
+    let cursor = 0;
+    async function trabalhador(){
+      while(cursor < fila.length){
+        const l = fila[cursor++];
+        const req = montarRequisicao(l, dataAtualizacao);
+        try{
+          const res = await chamarSindec(req);
+          l.resultado = interpretarResposta(l, req, res);
+          l.resultado.requisicao = req;
+        }catch(err){
+          l.resultado = { status:'erro', erro: err.message, dataAtualizacao, requisicao: req, indicesIndisponiveis: !!err.indicesIndisponiveis };
+          if(err.indicesIndisponiveis) linhasSemIndices++;
+          falhas++;
+        }
+        feitos++;
+        progresso();
+        atualizarLinhaNaTabela(l);
+      }
+    }
+    await trabalhador(); // sequencial: uma consulta por vez (limite do servidor do TCDF)
+    aoAguardar = null;
+
+    calculando = false;
+    const erros = estado.linhas.filter(l => l.resultado && l.resultado.status === 'erro').length;
+    mostrarAvisoIndices(dataAtualizacao);
+    el.textoProgresso.textContent = `Concluído em ${new Date().toLocaleTimeString('pt-BR')} · ${estado.linhas.length - erros} linha(s) atualizada(s) até ${dataBR(dataAtualizacao)}${erros ? ` · ${erros} com erro (passe o mouse sobre a situação)` : ''}.`;
+    renderizar();
+    agendarRascunho();
+    aviso(erros ? `Atualização concluída com ${erros} erro(s).` : 'Todos os valores foram atualizados pelo SINDEC.');
+  }
+
+  // =====================================================================
+  // Agrupamento e totais
+  // =====================================================================
+  function agrupar(){
+    const grupos = new Map();
+    estado.linhas.forEach(l => {
+      const e = exercicioDaLinha(l);
+      if(!grupos.has(e)) grupos.set(e, []);
+      grupos.get(e).push(l);
+    });
+    return [...grupos.entries()].sort((a, b) => a[0] - b[0]).map(([exercicio, linhas]) => ({ exercicio, linhas, tot: totais(linhas) }));
+  }
+  function totais(linhas){
+    const ok = linhas.filter(l => l.resultado && (l.resultado.status === 'ok' || l.resultado.status === 'desatualizado'));
+    return {
+      qtd: linhas.length,
+      devido: soma(linhas.map(l => l.valor || 0)),
+      correcao: soma(ok.map(l => l.resultado.correcao)),
+      juros: soma(ok.map(l => l.resultado.juros)),
+      total: soma(ok.map(l => l.resultado.total)),
+      calculadas: ok.length
+    };
+  }
+
+  // =====================================================================
+  // Renderização
+  // =====================================================================
+  function celulaValor(v){
+    if(v == null || Number.isNaN(v)) return '<td class="num">—</td>';
+    return `<td class="num${v < 0 ? ' neg' : ''}">${moeda(v)}</td>`;
+  }
+  function situacaoHtml(l){
+    const r = l.resultado;
+    if(!r) return '<span class="st pendente">pendente</span>';
+    if(r.status === 'calculando') return '<span class="st calculando">consultando…</span>';
+    if(r.status === 'erro') return `<span class="st erro" title="${esc(r.erro)}">⚠ erro</span><span class="obs-mini">${esc(r.erro)}</span>`;
+    const extras = [];
+    if(r.negativo) extras.push('negativo: sinal reaplicado');
+    if(r.ajusteJuros) extras.push(`ajuste de arredondamento nos juros: ${moeda(r.ajusteJuros)}`);
+    else if(r.difSindec) extras.push(`total SINDEC: ${moeda(r.totalSindec)}`);
+    if(r.status === 'desatualizado') return `<span class="st desatualizado" title="${esc(r.motivo || '')}">↻ recalcular</span><span class="obs-mini">${esc(r.motivo || 'parâmetros alterados')}</span>`;
+    return `<span class="st ok">✓ ${dataBR(r.dataAtualizacao)}</span>${extras.length ? `<span class="obs-mini">${esc(extras.join(' · '))}</span>` : ''}`;
+  }
+  function linhaHtml(l, n){
+    const r = l.resultado;
+    const temValores = r && (r.status === 'ok' || r.status === 'desatualizado');
+    const dj = dataJurosDaLinha(l);
+    return `<tr class="linha" data-id="${l.id}">
+      <td class="mono">${n}</td>
+      <td class="mono">${esc(l.matricula)}</td>
+      <td class="nome" title="${esc(l.nome)}">${esc(l.nome)}</td>
+      <td class="mono">${esc(l.processo)}</td>
+      <td class="mono">${esc(l.codigo)}</td>
+      <td class="fato" title="${esc(l.fato)}">${esc(l.fato)}</td>
+      <td class="mono">${esc(dataBR(l.dataFG))}</td>
+      <td class="mono" title="${l.dataJuros ? 'definida na linha' : 'regra geral'}">${dj ? esc(dataBR(dj)) + (l.dataJuros ? '*' : '') : '—'}</td>
+      ${celulaValor(l.valor)}
+      ${temValores ? celulaValor(r.correcao) : '<td class="num">—</td>'}
+      ${temValores ? celulaValor(r.juros) : '<td class="num">—</td>'}
+      ${temValores ? celulaValor(r.total) : '<td class="num">—</td>'}
+      <td>${situacaoHtml(l)}</td>
+      <td class="cell-acoes">
+        <button type="button" class="icon-btn" data-acao="memoria" title="Memória de cálculo" ${temValores ? '' : 'disabled'}>🔍</button>
+        ${estado.modo === 'lote' ? '<button type="button" class="icon-btn" data-acao="editar" title="Editar linha">✎</button>' : ''}
+        <button type="button" class="icon-btn del" data-acao="excluir" title="Excluir linha">🗑</button>
+      </td>
+    </tr>`;
+  }
+
+  function renderizar(){
+    const grupos = agrupar();
+    if(estado.linhas.length === 0){
+      el.tbody.innerHTML = estado.modo === 'lote'
+        ? '<tr><td colspan="14" class="vazio">Nenhuma linha. Importe a planilha DEA ou adicione linhas manualmente.</td></tr>'
+        : '<tr><td colspan="14" class="vazio">Nenhum lançamento. Preencha os dados do servidor e os lançamentos acima.</td></tr>';
+    }else{
+      let html = '', n = 0;
+      grupos.forEach(g => {
+        html += `<tr class="grupo"><td colspan="14">Exercício ${g.exercicio || '(não informado)'} · ${g.tot.qtd} lançamento(s)</td></tr>`;
+        g.linhas.forEach(l => { html += linhaHtml(l, ++n); });
+        html += `<tr class="subtotal"><td colspan="8">Valores totais por exercício — ${g.exercicio || '—'}</td>
+          ${celulaValor(g.tot.devido)}${celulaValor(g.tot.correcao)}${celulaValor(g.tot.juros)}${celulaValor(g.tot.total)}<td colspan="2"></td></tr>`;
+      });
+      const t = totais(estado.linhas);
+      html += `<tr class="total-geral"><td colspan="8">TOTAL GERAL</td>${celulaValor(t.devido)}${celulaValor(t.correcao)}${celulaValor(t.juros)}${celulaValor(t.total)}<td colspan="2"></td></tr>`;
+      el.tbody.innerHTML = html;
+    }
+    renderizarResumo(grupos);
+    alternarBotoes();
+  }
+
+  function atualizarLinhaNaTabela(l){
+    const tr = el.tbody.querySelector(`tr[data-id="${l.id}"]`);
+    if(!tr) return;
+    const n = tr.firstElementChild.textContent;
+    tr.outerHTML = linhaHtml(l, n);
+  }
+
+  function renderizarResumo(grupos){
+    const t = totais(estado.linhas);
+    const servidores = new Set(estado.linhas.map(l => l.matricula || l.nome)).size;
+    const erros = estado.linhas.filter(l => l.resultado && l.resultado.status === 'erro').length;
+    if(estado.linhas.length === 0){ el.resumoGrid.innerHTML = ''; el.tabelaResumo.hidden = true; return; }
+    el.resumoGrid.innerHTML = `
+      <div class="resumo-card"><div class="rot">Lançamentos / servidores</div><div class="num">${estado.linhas.length} / ${servidores}</div><div class="cod">${t.calculadas} atualizado(s)${erros ? ` · ${erros} erro(s)` : ''}</div></div>
+      <div class="resumo-card"><div class="rot">Valores devidos</div><div class="num">${moeda(t.devido)}</div><div class="cod">valor original</div></div>
+      <div class="resumo-card"><div class="rot">Atualização monetária</div><div class="num">${moeda(t.correcao)}</div><div class="cod">código 20827</div></div>
+      <div class="resumo-card"><div class="rot">Juros de mora</div><div class="num">${moeda(t.juros)}</div><div class="cod">código 20088</div></div>
+      <div class="resumo-card destaque"><div class="rot">Valor total atualizado</div><div class="num">${moeda(t.total)}</div><div class="cod">${el.dataAtualizacao.value ? 'até ' + dataBR(el.dataAtualizacao.value) : ''}</div></div>`;
+    let linhas = grupos.map(g => `<tr><td>${g.exercicio || '—'}</td><td>${g.tot.qtd}</td><td>${moeda(g.tot.devido)}</td><td>${moeda(g.tot.correcao)}</td><td>${moeda(g.tot.juros)}</td><td>${moeda(g.tot.total)}</td></tr>`).join('');
+    linhas += `<tr class="tot"><td>TOTAL</td><td>${t.qtd}</td><td>${moeda(t.devido)}</td><td>${moeda(t.correcao)}</td><td>${moeda(t.juros)}</td><td>${moeda(t.total)}</td></tr>`;
+    el.tabelaResumo.innerHTML = `<table><thead><tr><th>Exercício</th><th>Lanç.</th><th>Valores devidos</th><th>Atualização (20827)</th><th>Juros (20088)</th><th>Total atualizado</th></tr></thead><tbody>${linhas}</tbody></table>`;
+    el.tabelaResumo.hidden = false;
+  }
+
+  function alternarBotoes(){
+    const temLinhas = estado.linhas.length > 0;
+    const temCalculo = estado.linhas.some(l => l.resultado && (l.resultado.status === 'ok' || l.resultado.status === 'desatualizado'));
+    el.btnAtualizar.disabled = calculando || !temLinhas;
+    const pendentes = estado.linhas.filter(l => l.resultado && (l.resultado.status === 'erro' || l.resultado.status === 'desatualizado')).length;
+    el.btnReprocessar.hidden = calculando || !pendentes || !temCalculo;
+    el.btnReprocessar.textContent = `↻ Reprocessar só as pendentes (${pendentes})`;
+    el.btnAtualizar.textContent = calculando ? '⏳ Atualizando…' : '⟳ Atualizar valores pelo SINDEC';
+    el.btnExcel.disabled = calculando || !temLinhas;
+    el.btnImprimir.disabled = calculando || !temCalculo;
+    el.btnSalvar.disabled = calculando || !temCalculo;
+    if(!calculando && !temLinhas){ el.barra.style.width = '0'; el.textoProgresso.textContent = estado.modo === 'lote' ? 'Importe uma relação para começar.' : 'Informe o servidor e ao menos um lançamento.'; }
+    document.querySelectorAll('.aba').forEach(b => { b.disabled = calculando; });
+    $('contLote').textContent = estado.lote.linhas.length;
+    $('contInd').textContent = estado.individual.linhas.length;
+  }
+
+  // =====================================================================
+  // Modal de linha (adicionar / editar)
+  // =====================================================================
+  const CAMPOS_FORM = ['matricula','nome','cpf','processo','paginas','conta','codigo','fato','dataFG','exercicio','valor','dataJuros','obs'];
+  function abrirModal(id){ $(id).classList.add('aberto'); }
+  function fecharModais(){ document.querySelectorAll('.modal-fundo').forEach(m => m.classList.remove('aberto')); }
+  document.querySelectorAll('.modal-fundo').forEach(m => {
+    m.addEventListener('click', (e) => { if(e.target === m || e.target.hasAttribute('data-fechar')) fecharModais(); });
+  });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') fecharModais(); });
+
+  function abrirFormLinha(l){
+    linhaEmEdicao = l ? l.id : null;
+    $('tituloModalLinha').textContent = l ? 'Editar linha' : 'Adicionar linha';
+    CAMPOS_FORM.forEach(c => {
+      const inp = $('f-' + c);
+      let v = l ? l[c] : '';
+      if(c === 'valor') v = (l && l.valor != null) ? String(l.valor).replace('.', ',') : '';
+      if((c === 'dataFG' || c === 'dataJuros') && v && !isoValida(v)) v = '';
+      if(!l && c === 'exercicio') v = '';
+      inp.value = v == null ? '' : v;
+    });
+    abrirModal('modalLinha');
+    setTimeout(() => $('f-matricula').focus(), 50);
+  }
+
+  $('btnConfirmarLinha').addEventListener('click', () => {
+    const d = {};
+    CAMPOS_FORM.forEach(c => { d[c] = $('f-' + c).value.trim(); });
+    d.valor = parseValor(d.valor);
+    if(!d.matricula || !d.nome){ aviso('Matrícula e nome são obrigatórios.'); return; }
+    if(!isoValida(d.dataFG)){ aviso('Informe a data do fato gerador.'); return; }
+    if(d.valor == null || d.valor === 0){ aviso('Informe o valor devido (diferente de zero).'); return; }
+    d.nome = d.nome.toUpperCase(); d.fato = d.fato.toUpperCase();
+    if(!d.exercicio) d.exercicio = d.dataFG.slice(0, 4);
+    if(linhaEmEdicao){
+      const l = estado.linhas.find(x => x.id === linhaEmEdicao);
+      Object.assign(l, d);
+      if(l.resultado && l.resultado.status !== 'erro'){ l.resultado.status = 'desatualizado'; l.resultado.motivo = 'linha editada'; }
+      else l.resultado = null;
+    }else{
+      estado.linhas.push(novaLinha(d));
+    }
+    fecharModais();
+    renderizar();
+    agendarRascunho();
+  });
+
+  // =====================================================================
+  // Modal de memória de cálculo
+  // =====================================================================
+  function mostrarMemoria(l){
+    const r = l.resultado;
+    const num = (v) => v == null ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    const passos = (r.memoria || []).map(m => `<tr>
+        <td>${esc(m.texto)}</td><td>${esc(m.indice)}</td>
+        <td class="n">${num(m.antes)}</td>
+        <td class="n">${m.correcao != null ? num(m.correcao) : (m.juros != null ? num(m.juros) : '—')}</td>
+        <td class="n">${num(m.atualizado)}</td></tr>`).join('');
+    $('corpoMemoria').innerHTML = `
+      <div class="mem-meta">
+        <div><span class="lbl">Servidor</span>${esc(l.matricula)} — ${esc(l.nome)}</div>
+        <div><span class="lbl">Fato gerador</span>${esc(l.codigo)} ${esc(l.fato)}</div>
+        <div><span class="lbl">Data do valor original</span>${dataBR(l.dataFG)}</div>
+        <div><span class="lbl">Início dos juros</span>${r.dataJuros ? dataBR(r.dataJuros) : 'sem juros'}</div>
+        <div><span class="lbl">Data para atualização</span>${dataBR(r.dataAtualizacao)}</div>
+        <div><span class="lbl">Valor devido</span>${moeda(l.valor)}</div>
+        <div><span class="lbl">Correção monetária (20827)</span>${moeda(r.correcao)} <small>(fator ${esc(r.correcaoPerc)})</small></div>
+        <div><span class="lbl">Juros de mora (20088)</span>${moeda(r.juros)} <small>${esc(r.jurosPerc)}</small></div>
+        <div><span class="lbl">Valor total atualizado</span><strong>${moeda(r.total)}</strong></div>
+        <div><span class="lbl">Total exibido pelo SINDEC</span>${moeda(r.totalSindec)}</div>
+      </div>
+      ${r.negativo ? '<div class="aviso" style="margin:0 0 0.8rem;">Valor negativo (devolução/desconto): o SINDEC só aceita valores positivos — o cálculo foi feito sobre o módulo e o sinal negativo foi reaplicado na atualização e nos juros.</div>' : ''}
+      <table class="mem-tabela">
+        <thead><tr><th>Etapa</th><th>Índice / regra</th><th>Base (R$)</th><th>Acréscimo (R$)</th><th>Valor acumulado (R$)</th></tr></thead>
+        <tbody>${passos || '<tr><td colspan="5">Sem detalhamento retornado.</td></tr>'}</tbody>
+      </table>
+      <p style="font-size:0.74rem;color:var(--ink-soft);margin:0.6rem 0 0;">Valores de base e acréscimo sem arredondamento, conforme retornados pela API do SINDEC/TCDF (módulo “Passivos a Servidores”). Os juros resultam do percentual acumulado aplicado sobre o valor já corrigido monetariamente; a coluna “Base” reproduz o campo informado pelo SINDEC.</p>
+      <pre class="req">POST ${ENDPOINT_CALCULO}\n${esc(JSON.stringify(r.requisicao || {}, null, 2))}</pre>`;
+    abrirModal('modalMemoria');
+  }
+
+  // =====================================================================
+  // Exportação Excel — layout do modelo DEA (colunas A–P)
+  // =====================================================================
+  function carregarScript(url){
+    return new Promise((ok, falha) => {
+      const s = document.createElement('script');
+      s.src = url; s.onload = ok; s.onerror = () => falha(new Error('Falha ao carregar ' + url));
+      document.head.appendChild(s);
+    });
+  }
+  async function garantirExcelJS(){
+    if(window.ExcelJS) return window.ExcelJS;
+    await carregarScript(URL_EXCELJS);
+    return window.ExcelJS;
+  }
+  function baixarBuffer(buffer, nome){
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nome;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const FMT_MOEDA = '"R$" #,##0.00;[Red]-"R$" #,##0.00';
+  const CABECALHOS_MODELO = ['', 'MATRÍCULA', 'NOME DO SERVIDOR', 'CPF', 'PROCESSO DE ORIGEM DO CRÉDITO/DÉBITO', 'PÁGINAS DO DOCUMENTO', 'CONTA CONTÁBIL', 'CÓDIGO SIGRH', 'FATO GERADOR (DESCRIÇÃO DO CÓDIGO)', 'DATA DO FATO GERADOR', 'EXERCÍCIO', 'VALORES DEVIDOS (R$)', 'ATUALIZAÇÃO MONETÁRIA (CÓDIGO 20827)', 'JUROS DE MORA (CÓDIGO 20088)', 'VALOR TOTAL ATUALIZADO', 'OBSERVAÇÃO'];
+  const LARGURAS_MODELO = [9, 14.75, 45, 17, 25.6, 14, 14, 12.25, 40, 13.4, 9.9, 19.25, 19, 17, 19, 30];
+
+  function prepararAbaModelo(ws, titulo){
+    LARGURAS_MODELO.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+    const borda = { style:'thin', color:{ argb:'FF808080' } };
+    ws.mergeCells('B8:P8');
+    ws.getCell('B8').value = titulo;
+    ws.getCell('B8').font = { bold:true, size:13 };
+    ws.getCell('B8').alignment = { horizontal:'center' };
+    ws.getCell('C9').value = ORGAO_CODIGO;
+    ws.mergeCells('D9:P9');
+    ws.getCell('D9').value = ORGAO_NOME;
+    ['C9','D9'].forEach(c => { ws.getCell(c).font = { bold:true }; ws.getCell(c).alignment = { horizontal:'center' }; });
+    const cab = ws.getRow(10);
+    CABECALHOS_MODELO.forEach((h, i) => {
+      const c = cab.getCell(i + 1);
+      c.value = h || null;
+      if(i === 0) return;
+      c.font = { bold:true, size:9, color:{ argb:'FFFFFFFF' } };
+      c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F2A3D' } };
+      c.alignment = { wrapText:true, vertical:'middle', horizontal:'center' };
+      c.border = { top:borda, left:borda, bottom:borda, right:borda };
+    });
+    cab.height = 42;
+    ws.views = [{ state:'frozen', ySplit:10 }];
+    ws.pageSetup = { orientation:'landscape', paperSize:9, fitToPage:true, fitToWidth:1, fitToHeight:0,
+      margins:{ left:0.3, right:0.3, top:0.4, bottom:0.4, header:0.2, footer:0.2 }, printTitlesRow:'10:10' };
+    return borda;
+  }
+
+  async function exportarExcel(){
+    try{
+      el.btnExcel.disabled = true;
+      const ExcelJS = await garantirExcelJS();
+      const wb = new ExcelJS.Workbook();
+      wb.creator = usuarioEmail || 'Portal de Acertos';
+      wb.created = new Date();
+      const exercicioDea = anoDea();
+      const ws = wb.addWorksheet('Modelo');
+      const sv = estado.individual.servidor;
+      const tituloBase = estado.modo === 'individual'
+        ? `ATUALIZAÇÃO DE PASSIVO A SERVIDOR — ${sv.matricula} ${sv.nome}`
+        : `DÍVIDA DE EXERCÍCIOS ANTERIORES — DEA ${exercicioDea}`;
+      const borda = prepararAbaModelo(ws, tituloBase + (el.dataAtualizacao.value ? ` · valores atualizados pelo SINDEC/TCDF até ${dataBR(el.dataAtualizacao.value)}` : ''));
+      const todasBordas = { top:borda, left:borda, bottom:borda, right:borda };
+
+      let r = 11;
+      const linhasSubtotal = [];
+      const resumoExercicios = [];
+      agrupar().forEach(g => {
+        const inicio = r;
+        g.linhas.forEach(l => {
+          const res = l.resultado;
+          const ok = res && (res.status === 'ok' || res.status === 'desatualizado');
+          const obs = [l.obs];
+          if(res && res.status === 'erro') obs.push('ERRO SINDEC: ' + res.erro);
+          if(ok && res.ajusteJuros) obs.push(`Ajuste arred. juros ${moeda(res.ajusteJuros)}`);
+          if(ok && res.status === 'desatualizado') obs.push('Recalcular: ' + (res.motivo || 'parâmetros alterados'));
+          if(ok && res.dataJuros && res.dataJuros !== l.dataFG) obs.push('Juros desde ' + dataBR(res.dataJuros));
+          const linha = ws.getRow(r);
+          const matNum = /^\d+$/.test(l.matricula) ? Number(l.matricula) : l.matricula;
+          const dt = isoValida(l.dataFG) ? new Date(Date.UTC(...l.dataFG.split('-').map((x, i) => i === 1 ? Number(x) - 1 : Number(x)))) : (l.dataFG || null);
+          linha.values = [null, matNum, l.nome, l.cpf, l.processo, /^\d+$/.test(l.paginas) ? Number(l.paginas) : l.paginas, l.conta,
+            /^\d+$/.test(l.codigo) ? Number(l.codigo) : l.codigo, l.fato, dt, exercicioDaLinha(l) || null, l.valor,
+            ok ? res.correcao : null, ok ? res.juros : null,
+            ok ? { formula:`L${r}+M${r}+N${r}`, result: res.total } : null,
+            obs.filter(Boolean).join(' | ') || null].map(x => x === '' ? null : x);
+          for(let c = 2; c <= 16; c++){
+            const cel = linha.getCell(c);
+            cel.border = todasBordas;
+            cel.font = { size:9 };
+            cel.alignment = { vertical:'middle', wrapText: c === 3 || c === 9 || c === 16 };
+          }
+          linha.getCell(10).numFmt = 'dd/mm/yyyy';
+          [12,13,14,15].forEach(c => { linha.getCell(c).numFmt = FMT_MOEDA; });
+          if(res && res.status === 'erro') linha.getCell(16).font = { size:9, color:{ argb:'FFC1443B' } };
+          r++;
+        });
+        const fim = r - 1;
+        // coluna A: exercício mesclado no bloco (padrão do modelo)
+        ws.getCell(`A${inicio}`).value = g.exercicio || null;
+        if(fim > inicio) ws.mergeCells(`A${inicio}:A${fim}`);
+        ws.getCell(`A${inicio}`).alignment = { vertical:'middle', horizontal:'center', textRotation:90 };
+        ws.getCell(`A${inicio}`).font = { bold:true, size:12 };
+        // subtotal do exercício
+        ws.mergeCells(`D${r}:K${r}`);
+        ws.getCell(`D${r}`).value = 'Valores Totais Por Exercício';
+        ws.getCell(`D${r}`).alignment = { horizontal:'center' };
+        [['L', g.tot.devido], ['M', g.tot.correcao], ['N', g.tot.juros], ['O', g.tot.total]].forEach(([c, v]) => {
+          const cel = ws.getCell(`${c}${r}`);
+          cel.value = { formula:`SUM(${c}${inicio}:${c}${fim})`, result: v };
+          cel.numFmt = FMT_MOEDA;
+        });
+        for(let c = 2; c <= 16; c++){
+          const cel = ws.getRow(r).getCell(c);
+          cel.font = { bold:true, size:9 };
+          cel.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEEF0FB' } };
+          cel.border = todasBordas;
+        }
+        linhasSubtotal.push(r);
+        resumoExercicios.push({ exercicio: g.exercicio, linha: r, tot: g.tot });
+        r += 2;
+      });
+
+      // Quadro-resumo por exercício (como o quadro E132:F138 do modelo, ampliado)
+      r += 1;
+      const cabResumo = ['Exercício', 'Valores devidos', 'Atualização (20827)', 'Juros (20088)', 'Total atualizado'];
+      const colsResumo = ['E', 'F', 'G', 'H', 'I'];
+      cabResumo.forEach((h, i) => {
+        const c = ws.getCell(`${colsResumo[i]}${r}`);
+        c.value = h; c.font = { bold:true, size:9, color:{ argb:'FFFFFFFF' } };
+        c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF4338CA' } };
+        c.border = todasBordas; c.alignment = { horizontal:'center' };
+      });
+      const iniResumo = r + 1;
+      resumoExercicios.forEach(x => {
+        r++;
+        ws.getCell(`E${r}`).value = x.exercicio || '—';
+        [['F','L', x.tot.devido], ['G','M', x.tot.correcao], ['H','N', x.tot.juros], ['I','O', x.tot.total]].forEach(([c, src, v]) => {
+          ws.getCell(`${c}${r}`).value = { formula:`${src}${x.linha}`, result: v };
+          ws.getCell(`${c}${r}`).numFmt = FMT_MOEDA;
+        });
+        colsResumo.forEach(c => { ws.getCell(`${c}${r}`).border = todasBordas; ws.getCell(`${c}${r}`).font = { size:9 }; });
+      });
+      r++;
+      const tg = totais(estado.linhas);
+      ws.getCell(`E${r}`).value = 'TOTAL';
+      [['F', tg.devido], ['G', tg.correcao], ['H', tg.juros], ['I', tg.total]].forEach(([c, v]) => {
+        ws.getCell(`${c}${r}`).value = { formula:`SUM(${c}${iniResumo}:${c}${r - 1})`, result: v };
+        ws.getCell(`${c}${r}`).numFmt = FMT_MOEDA;
+      });
+      colsResumo.forEach(c => { const cel = ws.getCell(`${c}${r}`); cel.border = todasBordas; cel.font = { bold:true, size:9 }; });
+
+      r += 2;
+      ws.getCell(`B${r}`).value = `Fonte: SINDEC/TCDF — Passivos a Servidores (api-sindec.tc.df.gov.br/api/calcular3013). Base legal: Res. TCDF nº 387/2024; Decisões TCDF nº 2.625/2021 e 56/2022; Portaria nº 407/2011. Juros: ${descricaoJuros()}. Arredondamento: ${el.criterioArred.selectedOptions[0].text}.`;
+      ws.getCell(`B${r}`).font = { italic:true, size:8 };
+      ws.mergeCells(`B${r}:P${r}`);
+      ws.getCell(`B${r}`).alignment = { wrapText:true };
+      ws.getRow(r).height = 30;
+
+      // Aba 2 — memória de cálculo
+      const wm = wb.addWorksheet('Memória SINDEC');
+      wm.columns = [
+        { header:'Matrícula', width:12 }, { header:'Nome', width:34 }, { header:'Cód.', width:8 }, { header:'Fato gerador', width:30 },
+        { header:'Data F.G.', width:11 }, { header:'Início juros', width:11 }, { header:'Data atualização', width:12 },
+        { header:'Valor devido', width:14 }, { header:'Etapa', width:30 }, { header:'Índice / regra', width:44 },
+        { header:'Base', width:16 }, { header:'Acréscimo', width:16 }, { header:'Valor acumulado', width:16 }
+      ];
+      wm.getRow(1).font = { bold:true, color:{ argb:'FFFFFFFF' } };
+      wm.getRow(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F2A3D' } };
+      estado.linhas.forEach(l => {
+        const res = l.resultado;
+        if(!res || !res.memoria) return;
+        res.memoria.forEach(m => {
+          const row = wm.addRow([l.matricula, l.nome, l.codigo, l.fato, dataBR(l.dataFG), res.dataJuros ? dataBR(res.dataJuros) : 'sem juros',
+            dataBR(res.dataAtualizacao), l.valor, m.texto, m.indice, m.antes, m.correcao != null ? m.correcao : m.juros, m.atualizado]);
+          [8, 11, 12, 13].forEach(c => { row.getCell(c).numFmt = '#,##0.000000'; });
+          row.getCell(8).numFmt = FMT_MOEDA;
+        });
+      });
+      wm.pageSetup = { orientation:'landscape', paperSize:9, fitToPage:true, fitToWidth:1, fitToHeight:0 };
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const sufixo = el.dataAtualizacao.value ? '_atualizado_' + el.dataAtualizacao.value : '';
+      const nomeArq = estado.modo === 'individual'
+        ? `Atualizacao_SINDEC_${String(sv.matricula || 'servidor').replace(/[^\w-]/g, '')}${sufixo}.xlsx`
+        : `DEA_${exercicioDea}${sufixo}.xlsx`;
+      baixarBuffer(buffer, nomeArq);
+      aviso('Planilha exportada no layout do modelo DEA.');
+    }catch(err){
+      console.error(err);
+      aviso('Erro ao exportar: ' + err.message, 6000);
+    }finally{
+      alternarBotoes();
+    }
+  }
+
+  async function baixarModelo(){
+    try{
+      const ExcelJS = await garantirExcelJS();
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('Modelo');
+      const ano = anoDea();
+      const borda = prepararAbaModelo(ws, `DÍVIDA DE EXERCÍCIOS ANTERIORES — DEA ${ano}`);
+      ws.getCell('Q10').value = 'DATA INÍCIO JUROS (opcional)';
+      ws.getCell('Q10').font = { bold:true, size:9, color:{ argb:'FF4338CA' } };
+      ws.getCell('Q10').alignment = { wrapText:true, vertical:'middle', horizontal:'center' };
+      ws.getColumn(17).width = 16;
+      for(let i = 11; i <= 40; i++){
+        for(let c = 2; c <= 17; c++) ws.getRow(i).getCell(c).border = { top:borda, left:borda, bottom:borda, right:borda };
+        ws.getRow(i).getCell(10).numFmt = 'dd/mm/yyyy';
+        ws.getRow(i).getCell(17).numFmt = 'dd/mm/yyyy';
+        ws.getRow(i).getCell(12).numFmt = FMT_MOEDA;
+      }
+      ws.getCell('B42').value = 'Preencha a partir da linha 11. Colunas obrigatórias: MATRÍCULA, NOME, DATA DO FATO GERADOR e VALORES DEVIDOS. Valores negativos (devoluções) são aceitos. As colunas M, N e O são preenchidas pelo Portal após a atualização.';
+      ws.getCell('B42').font = { italic:true, size:8 };
+      ws.mergeCells('B42:P42');
+      const buffer = await wb.xlsx.writeBuffer();
+      baixarBuffer(buffer, `Modelo_DEA_${ano}.xlsx`);
+    }catch(err){
+      aviso('Erro ao gerar modelo: ' + err.message, 6000);
+    }
+  }
+
+  // =====================================================================
+  // Impressão
+  // =====================================================================
+  function descricaoJuros(){
+    const m = el.modoJuros.value;
+    if(m === 'sem') return 'sem incidência';
+    if(m === 'unica') return 'a partir de ' + (el.dataJurosUnica.value ? dataBR(el.dataJurosUnica.value) : '—');
+    return 'a partir da data do fato gerador';
+  }
+
+  function imprimir(){
+    if(estado.modo === 'individual') return imprimirIndividual();
+    const incluirMemoria = window.confirm('Incluir a memória de cálculo detalhada (índices e etapas do SINDEC) na impressão?\n\nOK = incluir · Cancelar = somente o quadro');
+    const grupos = agrupar();
+    const tg = totais(estado.linhas);
+    const v = (x) => `<td class="n${x < 0 ? ' neg' : ''}">${x == null ? '—' : moeda(x)}</td>`;
+    let corpo = '';
+    let n = 0;
+    grupos.forEach(g => {
+      corpo += `<tr class="g"><td colspan="12">Exercício ${g.exercicio || '—'}</td></tr>`;
+      g.linhas.forEach(l => {
+        const r = l.resultado;
+        const ok = r && (r.status === 'ok' || r.status === 'desatualizado');
+        corpo += `<tr><td>${++n}</td><td>${esc(l.matricula)}</td><td>${esc(l.nome)}</td><td>${esc(l.processo)}</td><td>${esc(l.codigo)}</td><td>${esc(l.fato)}</td><td>${dataBR(l.dataFG)}</td>
+          ${v(l.valor)}${ok ? v(r.correcao) : '<td class="n">—</td>'}${ok ? v(r.juros) : '<td class="n">—</td>'}${ok ? v(r.total) : '<td class="n">—</td>'}
+          <td>${r && r.status === 'erro' ? 'ERRO: ' + esc(r.erro) : esc(l.obs || '')}</td></tr>`;
+      });
+      corpo += `<tr class="s"><td colspan="7">Valores totais do exercício ${g.exercicio || '—'}</td>${v(g.tot.devido)}${v(g.tot.correcao)}${v(g.tot.juros)}${v(g.tot.total)}<td></td></tr>`;
+    });
+    corpo += `<tr class="t"><td colspan="7">TOTAL GERAL</td>${v(tg.devido)}${v(tg.correcao)}${v(tg.juros)}${v(tg.total)}<td></td></tr>`;
+
+    let memoriaHtml = '';
+    if(incluirMemoria){
+      memoriaHtml = '<div class="imp-mem"><h2>Memória de cálculo — SINDEC/TCDF (Passivos a Servidores)</h2>';
+      estado.linhas.forEach((l, i) => {
+        const r = l.resultado;
+        if(!r || !r.memoria) return;
+        const passos = r.memoria.map(m => `<tr><td>${esc(m.texto)}</td><td>${esc(m.indice)}</td><td class="n">${Number(m.antes).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:6})}</td><td class="n">${Number(m.correcao != null ? m.correcao : m.juros).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:6})}</td><td class="n">${Number(m.atualizado).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:6})}</td></tr>`).join('');
+        memoriaHtml += `<div class="bloco"><div class="tit">${i + 1}. ${esc(l.matricula)} — ${esc(l.nome)} · ${esc(l.codigo)} ${esc(l.fato)} · valor ${moeda(l.valor)} em ${dataBR(l.dataFG)} · juros desde ${r.dataJuros ? dataBR(r.dataJuros) : '—'} · atualização até ${dataBR(r.dataAtualizacao)} → correção ${moeda(r.correcao)} (fator ${esc(r.correcaoPerc)}) · juros ${moeda(r.juros)} (${esc(r.jurosPerc)}) · total ${moeda(r.total)}</div>
+          <table class="imp-tabela"><thead><tr><th>Etapa</th><th>Índice / regra</th><th>Base</th><th>Acréscimo</th><th>Acumulado</th></tr></thead><tbody>${passos}</tbody></table></div>`;
+      });
+      memoriaHtml += '</div>';
+    }
+
+    $('areaImpressao').innerHTML = `
+      <div class="imp-cabecalho">
+        <div class="imp-orgao">${ORGAO_CODIGO} · ${ORGAO_NOME} — DIGEP/ASPAG</div>
+        <h1>Dívida de Exercícios Anteriores — DEA ${anoDea()}: atualização monetária e juros de mora</h1>
+        <div class="imp-meta">
+          ${el.referencia.value ? `<span>Referência: <strong>${esc(el.referencia.value)}</strong></span>` : ''}
+          <span>Atualização até: <strong>${dataBR(el.dataAtualizacao.value)}</strong></span>
+          <span>Juros: <strong>${descricaoJuros()}</strong></span>
+          <span>Lançamentos: <strong>${estado.linhas.length}</strong></span>
+          <span>Gerado em: <strong>${new Date().toLocaleString('pt-BR')}</strong></span>
+          ${usuarioEmail ? `<span>Por: <strong>${esc(usuarioEmail)}</strong></span>` : ''}
+        </div>
+      </div>
+      <table class="imp-tabela">
+        <thead><tr><th>#</th><th>Matrícula</th><th>Nome do servidor</th><th>Processo</th><th>Cód.</th><th>Fato gerador</th><th>Data F.G.</th><th>Valores devidos</th><th>Atualização monetária (20827)</th><th>Juros de mora (20088)</th><th>Total atualizado</th><th>Observação</th></tr></thead>
+        <tbody>${corpo}</tbody>
+      </table>
+      <div class="imp-nota">
+        Cálculo efetuado pelo Sistema de Índices e Indicadores Econômicos e de Atualização de Valores — SINDEC, do Tribunal de Contas do Distrito Federal,
+        ferramenta oficial nos termos do art. 2º da Resolução TCDF nº 387/2024, módulo “Passivos a Servidores” (Decisões TCDF nº 2.625/2021 e 56/2022 e Portaria nº 407/2011):
+        correção monetária pelo INPC até 29/06/2009 e pelo IPCA-E/IPCA-15 a partir de 30/06/2009; juros de mora de 1% a.m. até 31/08/2001, 0,5% a.m. de 01/09/2001 a 29/06/2009
+        e, a partir de 30/06/2009, juros da poupança (70% da SELIC quando esta for ≤ 8,5% a.a.; 0,5% a.m. nos demais casos), incidentes sobre o valor corrigido.
+        Valores negativos (devoluções) foram calculados sobre o módulo, com reaplicação do sinal. Critério de arredondamento: ${esc(el.criterioArred.selectedOptions[0].text)}.
+      </div>
+      <div class="imp-assinatura"><div>Elaborado por (nome / matrícula)</div><div>Conferido por (nome / matrícula)</div></div>
+      ${memoriaHtml}`;
+    setTimeout(() => window.print(), 150);
+  }
+
+  // Memória de cálculo individual — para juntada ao processo SEI
+  function imprimirIndividual(){
+    sincronizarServidor();
+    const sv = estado.individual.servidor;
+    const linhas = estado.linhas;
+    const tg = totais(linhas);
+    const fmt6 = (x) => x == null ? '—' : Number(x).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    const v = (x) => `<td class="n${x < 0 ? ' neg' : ''}">${x == null ? '—' : moeda(x)}</td>`;
+    let corpo = '';
+    linhas.forEach((l, i) => {
+      const r = l.resultado;
+      const ok = r && (r.status === 'ok' || r.status === 'desatualizado');
+      corpo += `<tr><td>${i + 1}</td><td>${esc(l.codigo)}</td><td>${esc(l.fato)}</td><td>${dataBR(l.dataFG)}</td><td>${ok && r.dataJuros ? dataBR(r.dataJuros) : '—'}</td>
+        ${v(l.valor)}${ok ? v(r.correcao) : '<td class="n">—</td>'}${ok ? v(r.juros) : '<td class="n">—</td>'}${ok ? v(r.total) : '<td class="n">—</td>'}
+        <td>${r && r.status === 'erro' ? 'ERRO: ' + esc(r.erro) : esc(l.obs || '')}${ok && r.negativo ? ' (devolução)' : ''}</td></tr>`;
+    });
+    corpo += `<tr class="t"><td colspan="5">TOTAL</td>${v(tg.devido)}${v(tg.correcao)}${v(tg.juros)}${v(tg.total)}<td></td></tr>`;
+
+    let memoria = '';
+    linhas.forEach((l, i) => {
+      const r = l.resultado;
+      if(!r || !r.memoria) return;
+      const passos = r.memoria.map(m => `<tr><td>${esc(m.texto)}</td><td>${esc(m.indice)}</td><td class="n">${fmt6(m.antes)}</td><td class="n">${fmt6(m.correcao != null ? m.correcao : m.juros)}</td><td class="n">${fmt6(m.atualizado)}</td></tr>`).join('');
+      memoria += `<div class="bloco"><div class="tit">5.${i + 1}. Lançamento ${i + 1} — ${esc(l.codigo)} ${esc(l.fato)}: valor de ${moeda(l.valor)} em ${dataBR(l.dataFG)}; juros desde ${r.dataJuros ? dataBR(r.dataJuros) : '— (sem juros)'}; atualização até ${dataBR(r.dataAtualizacao)}.
+        Correção monetária: ${moeda(r.correcao)} (fator ${esc(r.correcaoPerc)}); juros de mora: ${moeda(r.juros)} (${esc(r.jurosPerc || '—')}); total atualizado: ${moeda(r.total)}${r.difSindec ? ` (total exibido pelo SINDEC: ${moeda(r.totalSindec)})` : ''}${r.ajusteJuros ? ` (ajuste de arredondamento nos juros: ${moeda(r.ajusteJuros)})` : ''}.</div>
+        <table class="imp-tabela"><thead><tr><th>Etapa</th><th>Índice / regra</th><th>Base (R$)</th><th>Acréscimo (R$)</th><th>Acumulado (R$)</th></tr></thead><tbody>${passos}</tbody></table></div>`;
+    });
+
+    const temNegativo = linhas.some(l => l.valor < 0);
+    $('areaImpressao').innerHTML = `
+      <div class="imp-cabecalho">
+        <div class="imp-orgao">${ORGAO_CODIGO} · ${ORGAO_NOME} — DIGEP/ASPAG</div>
+        <h1>Memória de Cálculo — Atualização Monetária e Juros de Mora de Passivo a Servidor</h1>
+        <div class="imp-meta">
+          ${el.referencia.value ? `<span>Referência: <strong>${esc(el.referencia.value)}</strong></span>` : ''}
+          <span>Gerado em: <strong>${new Date().toLocaleString('pt-BR')}</strong></span>
+          ${usuarioEmail ? `<span>Por: <strong>${esc(usuarioEmail)}</strong></span>` : ''}
+        </div>
+      </div>
+
+      <div class="imp-secao">1. Identificação do servidor</div>
+      <div class="imp-ident">
+        <div><span class="l">Matrícula</span>${esc(sv.matricula)}</div>
+        <div style="grid-column:span 2;"><span class="l">Nome</span>${esc(sv.nome)}</div>
+        <div><span class="l">CPF</span>${esc(sv.cpf) || '—'}</div>
+        <div style="grid-column:span 4;"><span class="l">Processo de origem do crédito/débito</span>${esc(sv.processo) || '—'}</div>
+      </div>
+
+      <div class="imp-secao">2. Parâmetros do cálculo</div>
+      <p class="imp-texto">
+        Data para atualização: <strong>${dataBR(el.dataAtualizacao.value)}</strong> · Juros de mora: <strong>${descricaoJuros()}</strong>
+        (lançamentos com data própria de início indicada no quadro) · Critério de arredondamento: ${esc(el.criterioArred.selectedOptions[0].text)}.
+      </p>
+
+      <div class="imp-secao">3. Demonstrativo dos valores atualizados</div>
+      <table class="imp-tabela">
+        <thead><tr><th>#</th><th>Cód. SIGRH</th><th>Fato gerador</th><th>Data F.G.</th><th>Início juros</th><th>Valor devido</th><th>Atualização monetária (cód. 20827)</th><th>Juros de mora (cód. 20088)</th><th>Total atualizado</th><th>Observação</th></tr></thead>
+        <tbody>${corpo}</tbody>
+      </table>
+
+      <div class="imp-secao">4. Fundamentação</div>
+      <p class="imp-texto">
+        4.1. A atualização foi realizada no Sistema de Índices e Indicadores Econômicos e de Atualização de Valores — SINDEC, do Tribunal de Contas do
+        Distrito Federal, instituído pela Resolução TCDF nº 116/2000 e definido como ferramenta oficial para o cálculo de atualização monetária de passivos
+        financeiros reconhecidos administrativamente, nos termos do art. 2º da Resolução TCDF nº 387/2024, no módulo “Passivos a Servidores”
+        (Decisões TCDF nº 2.625/2021 e 56/2022 e Portaria nº 407/2011).
+      </p>
+      <p class="imp-texto">
+        4.2. Correção monetária: INPC até 29/06/2009 e IPCA-E/IPCA-15 a partir de 30/06/2009, aplicada sobre o valor devido desde a data do fato gerador.
+        Juros de mora: 1% a.m. até 31/08/2001; 0,5% a.m. de 01/09/2001 a 29/06/2009; a partir de 30/06/2009, juros aplicados à caderneta de poupança
+        (70% da taxa SELIC quando esta for igual ou inferior a 8,5% a.a.; 0,5% a.m. nos demais casos), incidentes sobre o valor corrigido.
+        A atualização monetária de débitos e créditos de servidores perante a Administração foi considerada correta pela Decisão TCDF nº 3.315/2002.
+      </p>
+      ${temNegativo ? `<p class="imp-texto">4.3. Os lançamentos com valor negativo (devoluções/descontos) foram atualizados sobre o seu valor absoluto, com reaplicação do sinal, uma vez que o SINDEC admite apenas valores positivos.</p>` : ''}
+
+      <div class="imp-secao">5. Memória de cálculo detalhada (valores retornados pelo SINDEC, sem arredondamento)</div>
+      <div class="imp-mem" style="page-break-before:auto;">${memoria || '<p class="imp-texto">Sem lançamentos calculados.</p>'}</div>
+
+      <div class="imp-assinatura" style="margin-top:2.4rem;">
+        <div>Elaborado por<br><small>Nome / cargo / matrícula</small></div>
+        <div>Conferido por<br><small>Nome / cargo / matrícula</small></div>
+      </div>`;
+    setTimeout(() => window.print(), 150);
+  }
+
+  // =====================================================================
+  // Aba "Individual"
+  // =====================================================================
+  const CAMPOS_SERVIDOR = ['matricula', 'nome', 'cpf', 'processo'];
+  function sincronizarServidor(){
+    const sv = estado.individual.servidor;
+    CAMPOS_SERVIDOR.forEach(c => { sv[c] = $('i-' + c).value.trim(); });
+    sv.nome = sv.nome.toUpperCase();
+    estado.individual.linhas.forEach(l => { l.matricula = sv.matricula; l.nome = sv.nome; l.cpf = sv.cpf; l.processo = sv.processo; });
+  }
+  function preencherServidor(){
+    const sv = estado.individual.servidor;
+    CAMPOS_SERVIDOR.forEach(c => { $('i-' + c).value = sv[c] || ''; });
+  }
+  function valorParaCampo(v){
+    if(v == null || Number.isNaN(v)) return '';
+    return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function renderizarIndividual(){
+    const tb = $('tbodyInd');
+    const linhas = estado.individual.linhas;
+    if(!linhas.length){
+      tb.innerHTML = '<tr><td colspan="8" class="vazio">Nenhum lançamento — clique em “+ Adicionar lançamento”.</td></tr>';
+      return;
+    }
+    tb.innerHTML = linhas.map((l, i) => `<tr data-id="${l.id}">
+      <td class="n">${i + 1}</td>
+      <td style="width:7rem;"><input class="mono" data-campo="codigo" value="${esc(l.codigo)}"></td>
+      <td><input data-campo="fato" value="${esc(l.fato)}" placeholder="Ex.: DIF. ATS"></td>
+      <td style="width:10rem;"><input type="date" class="mono${l.dataFG && !isoValida(l.dataFG) ? ' invalido' : ''}" data-campo="dataFG" value="${isoValida(l.dataFG) ? l.dataFG : ''}"></td>
+      <td style="width:9.5rem;"><input class="mono valor" data-campo="valor" inputmode="decimal" value="${esc(valorParaCampo(l.valor))}" placeholder="0,00"></td>
+      <td style="width:10rem;"><input type="date" class="mono" data-campo="dataJuros" value="${isoValida(l.dataJuros) ? l.dataJuros : ''}"></td>
+      <td><input data-campo="obs" value="${esc(l.obs)}"></td>
+      <td style="width:2.5rem;"><button type="button" class="icon-btn del" data-remover title="Remover lançamento">🗑</button></td>
+    </tr>`).join('');
+  }
+  function adicionarLancamento(){
+    sincronizarServidor();
+    const ult = estado.individual.linhas[estado.individual.linhas.length - 1];
+    const sv = estado.individual.servidor;
+    const nova = novaLinha({ matricula: sv.matricula, nome: sv.nome, cpf: sv.cpf, processo: sv.processo,
+      codigo: ult ? ult.codigo : '', fato: ult ? ult.fato : '' });
+    estado.individual.linhas.push(nova);
+    renderizarIndividual();
+    renderizar();
+    agendarRascunho();
+    const tr = $('tbodyInd').querySelector(`tr[data-id="${nova.id}"]`);
+    if(tr) tr.querySelector(ult ? 'input[data-campo="dataFG"]' : 'input[data-campo="codigo"]').focus();
+  }
+  let timerRenderInd = null;
+  function aoEditarLancamento(e){
+    const inp = e.target.closest('input[data-campo]');
+    if(!inp) return;
+    const tr = inp.closest('tr');
+    const l = estado.individual.linhas.find(x => x.id === tr.dataset.id);
+    if(!l) return;
+    const campo = inp.dataset.campo;
+    let v = inp.value;
+    if(campo === 'valor'){
+      v = parseValor(v);
+      inp.classList.toggle('invalido', inp.value.trim() !== '' && v == null);
+    }else if(campo === 'fato'){
+      v = v.toUpperCase();
+    }else if(campo === 'dataFG'){
+      l.exercicio = isoValida(v) ? v.slice(0, 4) : '';
+    }
+    l[campo] = v;
+    if(l.resultado){
+      if(l.resultado.status === 'ok'){ l.resultado.status = 'desatualizado'; l.resultado.motivo = 'lançamento alterado'; }
+      else if(l.resultado.status === 'erro'){ l.resultado = null; }
+    }
+    clearTimeout(timerRenderInd);
+    timerRenderInd = setTimeout(renderizar, 250);
+    agendarRascunho();
+  }
+
+  function definirModo(modo){
+    if(calculando || (modo !== 'lote' && modo !== 'individual')) return;
+    if(estado.modo === 'individual') sincronizarServidor();
+    estado.modo = modo;
+    document.querySelectorAll('.aba').forEach(b => b.classList.toggle('ativa', b.dataset.modo === modo));
+    $('painelLote').hidden = modo !== 'lote';
+    $('painelIndividual').hidden = modo !== 'individual';
+    $('gradePaineis').classList.toggle('individual', modo === 'individual');
+    el.avisoImportacao.hidden = true;
+    el.barra.style.width = '0';
+    el.textoProgresso.textContent = '';
+    if(modo === 'individual'){ preencherServidor(); renderizarIndividual(); }
+    renderizar();
+    mostrarAvisoIndices(el.dataAtualizacao.value);
+  }
+
+  // =====================================================================
+  // Persistência — rascunho (estado_modulos) e histórico (acertos)
+  // =====================================================================
+  function limparLinhas(linhas){
+    return linhas.map(l => {
+      const { id, _linhaPlanilha, ...resto } = l;
+      if(resto.resultado && resto.resultado.status === 'calculando') resto.resultado = null;
+      return resto;
+    });
+  }
+  function parametrosAtuais(){
+    return {
+      dataAtualizacao: el.dataAtualizacao.value, modoJuros: el.modoJuros.value,
+      dataJurosUnica: el.dataJurosUnica.value, criterioArred: el.criterioArred.value,
+      referencia: el.referencia.value
+    };
+  }
+  // Rascunho: guarda as duas abas
+  function serializarRascunho(){
+    if(estado.modo === 'individual') sincronizarServidor();
+    return {
+      versao: 2, modo: estado.modo, parametros: parametrosAtuais(),
+      lote: { arquivo: estado.lote.arquivo, importadoEm: estado.lote.importadoEm, linhas: limparLinhas(estado.lote.linhas) },
+      individual: { servidor: { ...estado.individual.servidor }, linhas: limparLinhas(estado.individual.linhas) }
+    };
+  }
+  // Histórico: guarda apenas a aba ativa
+  function serializar(){
+    if(estado.modo === 'individual') sincronizarServidor();
+    const base = { modo: estado.modo, parametros: parametrosAtuais(), linhas: limparLinhas(estado.linhas) };
+    if(estado.modo === 'individual') base.servidor = { ...estado.individual.servidor };
+    else { base.arquivo = estado.lote.arquivo; base.importadoEm = estado.lote.importadoEm; }
+    return base;
+  }
+  function aplicarEstado(s){
+    if(!s) return;
+    const p = s.parametros || {};
+    if(p.dataAtualizacao) el.dataAtualizacao.value = p.dataAtualizacao;
+    if(p.modoJuros) el.modoJuros.value = p.modoJuros;
+    el.dataJurosUnica.value = p.dataJurosUnica || '';
+    if(p.criterioArred) el.criterioArred.value = p.criterioArred;
+    el.referencia.value = p.referencia || '';
+    el.campoDataJurosUnica.hidden = el.modoJuros.value !== 'unica';
+    if(s.lote || s.individual){
+      // formato de rascunho (duas abas)
+      const lt = s.lote || {};
+      estado.lote.arquivo = lt.arquivo || ''; estado.lote.importadoEm = lt.importadoEm || '';
+      estado.lote.linhas = (lt.linhas || []).map(novaLinha);
+      const ind = s.individual || {};
+      estado.individual.servidor = { matricula: '', nome: '', cpf: '', processo: '', ...(ind.servidor || {}) };
+      estado.individual.linhas = (ind.linhas || []).map(novaLinha);
+    }else if(s.modo === 'individual'){
+      estado.individual.servidor = { matricula: '', nome: '', cpf: '', processo: '', ...(s.servidor || {}) };
+      estado.individual.linhas = (s.linhas || []).map(novaLinha);
+    }else{
+      estado.lote.arquivo = s.arquivo || ''; estado.lote.importadoEm = s.importadoEm || '';
+      estado.lote.linhas = (s.linhas || []).map(novaLinha);
+    }
+    if(estado.lote.arquivo) el.infoArquivo.textContent = `${estado.lote.arquivo} · importado em ${estado.lote.importadoEm} · ${estado.lote.linhas.length} linha(s)`;
+    estado.modo = 'lote';
+    definirModo(s.modo === 'individual' ? 'individual' : 'lote');
+  }
+
+  let timerRascunho = null;
+  function agendarRascunho(){
+    if(modoEdicaoHistorico) return;
+    el.indicadorRascunho.textContent = 'Salvando rascunho…';
+    clearTimeout(timerRascunho);
+    timerRascunho = setTimeout(async () => {
+      try{
+        await salvarEstadoModulo(CHAVE_RASCUNHO, limpoParaFirestore(serializarRascunho()));
+        el.indicadorRascunho.textContent = `Rascunho salvo automaticamente às ${new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}.`;
+      }catch(err){
+        el.indicadorRascunho.textContent = 'Não foi possível salvar o rascunho: ' + err.message;
+      }
+    }, 1000);
+  }
+
+  async function salvarHistorico(){
+    if(estado.modo === 'individual') sincronizarServidor();
+    const pend = estado.linhas.filter(l => !l.resultado || l.resultado.status !== 'ok').length;
+    if(pend && !window.confirm(`${pend} linha(s) estão com erro, pendentes ou desatualizadas.\nDeseja salvar mesmo assim?`)) return;
+    const t = totais(estado.linhas);
+    const dados = limpoParaFirestore({
+      ...serializar(),
+      titulo: el.referencia.value || (estado.modo === 'individual'
+        ? `${estado.individual.servidor.matricula} ${estado.individual.servidor.nome} — atualização até ${dataBR(el.dataAtualizacao.value)}`
+        : `DEA ${anoDea()} — atualização até ${dataBR(el.dataAtualizacao.value)}`),
+      competenciaLabel: dataBR(el.dataAtualizacao.value),
+      totalLinhas: estado.linhas.length,
+      totalServidores: new Set(estado.linhas.map(l => l.matricula || l.nome)).size,
+      totalDevido: t.devido, totalCorrecao: t.correcao, totalJuros: t.juros, totalAtualizado: t.total,
+      totalFinal: moeda(t.total)
+    });
+    el.btnSalvar.disabled = true;
+    try{
+      if(editandoId){
+        await atualizarAcerto(editandoId, TIPO_ACERTO, dados);
+        aviso('Registro do histórico atualizado.');
+      }else{
+        const id = await salvarAcerto(TIPO_ACERTO, dados);
+        editandoId = id;
+        aviso('Salvo no histórico de acertos.');
+      }
+    }catch(err){
+      aviso('Erro ao salvar: ' + err.message, 6000);
+    }finally{
+      alternarBotoes();
+    }
+  }
+
+  async function carregarParaEdicao(id){
+    try{
+      const reg = await buscarAcerto(id);
+      if(!reg || !reg.dados){ aviso('Registro não encontrado.'); return; }
+      editandoId = id;
+      modoEdicaoHistorico = true;
+      aplicarEstado(reg.dados);
+      const av = $('avisoEdicao');
+      av.innerHTML = `Editando registro do histórico: <strong>${esc(reg.dados.titulo || id)}</strong>. Alterações só são gravadas ao clicar em “Salvar no histórico”. Para reatualizar, altere a data e clique em “Atualizar valores pelo SINDEC”.`;
+      av.hidden = false;
+      el.indicadorRascunho.textContent = 'Modo edição — o rascunho automático está pausado.';
+    }catch(err){
+      aviso('Erro ao carregar registro: ' + err.message, 6000);
+    }
+  }
+
+  async function carregarRascunho(){
+    try{
+      const s = await obterEstadoModulo(CHAVE_RASCUNHO);
+      const temDados = s && ((s.linhas && s.linhas.length) || (s.lote && s.lote.linhas && s.lote.linhas.length) ||
+        (s.individual && ((s.individual.linhas && s.individual.linhas.length) || (s.individual.servidor && s.individual.servidor.nome))));
+      if(temDados){
+        aplicarEstado(s);
+        el.indicadorRascunho.textContent = 'Rascunho carregado — os dados ficam salvos automaticamente.';
+        return;
+      }
+    }catch(err){
+      el.indicadorRascunho.textContent = 'Não foi possível carregar o rascunho: ' + err.message;
+    }
+    renderizar();
+  }
+
+  // =====================================================================
+  // Disponibilidade do SINDEC
+  // =====================================================================
+  async function verificarSindec(){
+    const dot = $('sindec-dot'), txt = $('sindec-text');
+    try{
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 12000);
+      const r = await fetch(`${API_SINDEC}/moeda?data=${encodeURIComponent(dataBR(hojeISO()))}`, { signal: ctrl.signal });
+      clearTimeout(t);
+      const j = await r.json();
+      if(r.ok && j && j.sucesso){ dot.className = 'dot ok'; txt.textContent = 'SINDEC/TCDF disponível'; return; }
+      throw new Error('HTTP ' + r.status);
+    }catch(err){
+      dot.className = 'dot';
+      txt.textContent = 'SINDEC/TCDF inacessível (rede/firewall)';
+      txt.title = 'Verifique se o domínio api-sindec.tc.df.gov.br está liberado na rede. ' + (err.message || '');
+    }
+  }
+
+  // =====================================================================
+  // Eventos
+  // =====================================================================
+  const dz = $('dropzone'), inputArquivo = $('inputArquivo');
+  dz.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); inputArquivo.click(); } });
+  inputArquivo.addEventListener('change', () => { importarArquivo(inputArquivo.files[0]); inputArquivo.value = ''; });
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('arrastando'); }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('arrastando'); }));
+  dz.addEventListener('drop', (e) => { const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) importarArquivo(f); });
+
+  $('btnAdicionar').addEventListener('click', () => abrirFormLinha(null));
+  $('btnModelo').addEventListener('click', baixarModelo);
+  $('btnLimpar').addEventListener('click', () => {
+    if(!estado.linhas.length) return;
+    if(!window.confirm('Remover todas as linhas da relação?')) return;
+    estado.linhas = []; estado.arquivo = ''; el.infoArquivo.textContent = ''; el.avisoImportacao.hidden = true;
+    renderizar(); agendarRascunho();
+  });
+  document.querySelectorAll('.aba').forEach(b => b.addEventListener('click', () => { definirModo(b.dataset.modo); agendarRascunho(); }));
+  $('btnAddLanc').addEventListener('click', adicionarLancamento);
+  $('btnLimparInd').addEventListener('click', () => {
+    if(!window.confirm('Limpar os dados do servidor e todos os lançamentos da aba Individual?')) return;
+    estado.individual.servidor = { matricula: '', nome: '', cpf: '', processo: '' };
+    estado.individual.linhas = [];
+    preencherServidor(); renderizarIndividual(); renderizar(); agendarRascunho();
+  });
+  $('tbodyInd').addEventListener('input', aoEditarLancamento);
+  $('tbodyInd').addEventListener('change', aoEditarLancamento);
+  $('tbodyInd').addEventListener('focusout', (e) => {
+    const inp = e.target.closest('input[data-campo="valor"]');
+    if(!inp) return;
+    const v = parseValor(inp.value);
+    if(v != null) inp.value = valorParaCampo(v);
+  });
+  $('tbodyInd').addEventListener('keydown', (e) => {
+    // Enter no último campo de valor/observação cria novo lançamento
+    if(e.key === 'Enter' && e.target.matches('input[data-campo="obs"], input[data-campo="valor"]')){
+      const tr = e.target.closest('tr');
+      if(!tr.nextElementSibling){ e.preventDefault(); adicionarLancamento(); }
+    }
+  });
+  $('tbodyInd').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-remover]');
+    if(!btn) return;
+    const id = btn.closest('tr').dataset.id;
+    estado.individual.linhas = estado.individual.linhas.filter(x => x.id !== id);
+    renderizarIndividual(); renderizar(); agendarRascunho();
+  });
+  CAMPOS_SERVIDOR.forEach(c => {
+    $('i-' + c).addEventListener('input', () => { sincronizarServidor(); clearTimeout(timerRenderInd); timerRenderInd = setTimeout(renderizar, 300); agendarRascunho(); });
+  });
+  $('i-nome').addEventListener('blur', () => { $('i-nome').value = $('i-nome').value.toUpperCase(); sincronizarServidor(); });
+  el.btnAtualizar.addEventListener('click', () => atualizarTodos(false));
+  el.btnReprocessar.addEventListener('click', () => atualizarTodos(true));
+  el.btnExcel.addEventListener('click', exportarExcel);
+  el.btnImprimir.addEventListener('click', imprimir);
+  el.btnSalvar.addEventListener('click', salvarHistorico);
+
+  el.modoJuros.addEventListener('change', () => {
+    el.campoDataJurosUnica.hidden = el.modoJuros.value !== 'unica';
+    if(invalidarResultados('critério de juros alterado')) aviso('Critério de juros alterado — clique em “Atualizar valores” para recalcular.');
+    renderizar(); agendarRascunho();
+  });
+  [el.dataAtualizacao, el.dataJurosUnica, el.criterioArred].forEach(inp => inp.addEventListener('change', () => {
+    const motivo = inp === el.dataAtualizacao ? 'data de atualização alterada' : inp === el.criterioArred ? 'critério de arredondamento alterado' : 'data de juros alterada';
+    if(invalidarResultados(motivo)) aviso('Parâmetro alterado — clique em “Atualizar valores” para recalcular.');
+    renderizar(); agendarRascunho();
+  }));
+  el.referencia.addEventListener('input', agendarRascunho);
+
+  el.tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-acao]');
+    if(!btn) return;
+    const id = btn.closest('tr').dataset.id;
+    const l = estado.linhas.find(x => x.id === id);
+    if(!l) return;
+    const acao = btn.dataset.acao;
+    if(acao === 'memoria') mostrarMemoria(l);
+    if(acao === 'editar') abrirFormLinha(l);
+    if(acao === 'excluir'){
+      if(!window.confirm(`Excluir a linha de ${l.nome} (${l.codigo} ${l.fato}, ${moeda(l.valor)})?`)) return;
+      estado.linhas = estado.linhas.filter(x => x.id !== id);
+      if(estado.modo === 'individual') renderizarIndividual();
+      renderizar(); agendarRascunho();
+    }
+  });
+
+  // =====================================================================
+  // Inicialização
+  // =====================================================================
+  el.dataAtualizacao.value = hojeISO();
+  if(location.protocol === 'file:') $('avisoArquivo').hidden = false;
+  renderizarIndividual();
+  renderizar();
+  verificarSindec();
+
+  (async () => {
+    const dot = $('conn-dot'), text = $('conn-text');
+    try{
+      fb = await import('../assets/firebase-init.js');
+    }catch(err){
+      console.error(err);
+      text.textContent = 'banco de dados indisponível — salvar/rascunho desativados';
+      el.indicadorRascunho.textContent = 'Sem conexão com o banco de dados: a importação e o cálculo funcionam, mas nada será salvo. (' + (err.message || err) + ')';
+      return;
+    }
+    fb.checkConnection().then((ok) => {
+      if(ok){ dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+      else{ text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+    });
+    fb.observarLogin((usuario) => {
+      if(usuario){
+        usuarioEmail = usuario.email || '';
+        $('login-info').style.display = 'flex';
+        $('login-text').textContent = usuario.email;
+      }
+    });
+    $('btn-sair').addEventListener('click', async (e) => { e.preventDefault(); await fb.logout(); window.location.reload(); });
+    fb.exigirLogin(async () => {
+      const id = new URLSearchParams(location.search).get('editar');
+      if(id) await carregarParaEdicao(id);
+      else await carregarRascunho();
+    });
+  })();
+
+  // Exposto apenas para testes automatizados (não interfere no uso)
+  window.__sindecDEA = { interpretarMatriz, parseData, parseValor, montarRequisicao, interpretarResposta, estado, totais, agrupar };
+</script>
+</body>
+</html>

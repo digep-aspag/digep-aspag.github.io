@@ -90,6 +90,7 @@
   table.lista tbody tr[data-tipo="correcao-folha"]{ border-left-color:#C1560C; }
   table.lista tbody tr[data-tipo="inss-patronal"]{ border-left-color:#B45309; }
   table.lista tbody tr[data-tipo="atualizacao-lpa"]{ border-left-color:#0F766E; }
+  table.lista tbody tr[data-tipo="atualizacao-sindec"]{ border-left-color:#4338CA; }
 
   .celula-nome{ max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .celula-sub{ display:block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); margin-top:0.1rem; }
@@ -211,6 +212,7 @@
       <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
       <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
       <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
       <div class="divisor"></div>
       <a href="historico.html" class="ativo"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
       <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
@@ -308,7 +310,8 @@
     efetivo: 'EFETIVO',
     'correcao-folha': 'CORREÇÃO DE FOLHA',
     'inss-patronal': 'INSS PATRONAL',
-    'atualizacao-lpa': 'ATUALIZAÇÃO LPA'
+    'atualizacao-lpa': 'ATUALIZAÇÃO LPA',
+    'atualizacao-sindec': 'ATUALIZAÇÃO SINDEC'
   };
   const TIPO_NOME = {
     brigadista: 'Brigadista (Grupo 54)',
@@ -317,7 +320,8 @@
     efetivo: 'Servidor efetivo',
     'correcao-folha': 'Correção de folha (SIGRH v09)',
     'inss-patronal': 'Memória de Cálculo — INSS Patronal',
-    'atualizacao-lpa': 'Atualização LPA'
+    'atualizacao-lpa': 'Atualização LPA',
+    'atualizacao-sindec': 'Atualização (SINDEC) - Passivo a Servidores'
   };
   const TIPO_ARQUIVO = {
     brigadista: 'brigadistas.html',
@@ -326,7 +330,8 @@
     efetivo: 'efetivos.html',
     'correcao-folha': 'correcao-folha-v09.html',
     'inss-patronal': 'inss.html',
-    'atualizacao-lpa': 'atualizacao-lpa.html'
+    'atualizacao-lpa': 'atualizacao-lpa.html',
+    'atualizacao-sindec': 'atualizacao-sindec.html'
   };
   const ICONE_TIPO = {
     brigadista: '🧯',
@@ -335,7 +340,8 @@
     efetivo: '🏛️',
     'correcao-folha': '📄',
     'inss-patronal': '🏢',
-    'atualizacao-lpa': '💰'
+    'atualizacao-lpa': '💰',
+    'atualizacao-sindec': '📈'
   };
 
   let todosAcertos = [];
@@ -563,6 +569,35 @@
             ? `${s.nome || ''} — parcela encerrada (mês fim: ${s.mesFim || '—'})`
             : `${s.nome || ''} (${labelIndiceHistorico(s.indice)}, ${s.periodo || ''})`,
           valor: s.status === 'encerrado' ? '—' : (s.valorAtualizado != null ? formatarMoedaSimples(s.valorAtualizado) : '')
+        }))
+      };
+    }
+
+    // Atualização (SINDEC) - Passivo a Servidores: registro em lote (relação DEA)
+    // ou individual (um servidor com vários lançamentos).
+    if (registro.tipo === 'atualizacao-sindec') {
+      const ind = d.modo === 'individual';
+      const sv = d.servidor || {};
+      const dataBR = (iso) => (iso || '').split('-').reverse().join('/');
+      return {
+        nome: ind ? (sv.nome || '(sem nome)') : (d.titulo || `${d.totalLinhas || 0} lançamento(s)`),
+        matricula: ind ? (sv.matricula || '—') : (d.competenciaLabel || '—'),
+        matriculaLabel: ind ? 'Matrícula' : 'Atualizado até',
+        cargo: ind
+          ? `Individual · atualizado até ${d.competenciaLabel || '—'}`
+          : `Lote · ${d.totalServidores || 0} servidor(es) · ${d.totalLinhas || 0} lançamento(s)`,
+        cargoLabel: 'Tipo',
+        processoSei: ind ? (sv.processo || '') : ((d.parametros && d.parametros.referencia) || ''),
+        nascimento: '',
+        admissao: '',
+        exoneracao: '',
+        total: d.totalFinal || (d.totalAtualizado != null ? formatarMoedaSimples(d.totalAtualizado) : '—'),
+        linhas: (d.linhas || []).map((l) => ({
+          codigo: l.codigo || '',
+          descricao: ind
+            ? `${l.fato || ''} (${dataBR(l.dataFG)})`
+            : `${l.matricula || ''} ${l.nome || ''} — ${l.fato || ''} (${dataBR(l.dataFG)})`,
+          valor: l.resultado && l.resultado.total != null ? formatarMoedaSimples(l.resultado.total) : '—'
         }))
       };
     }
