@@ -347,7 +347,7 @@
               <th>Data F.G.</th>
               <th>Início juros</th>
               <th class="num">Valor do débito</th>
-              <th class="num">Correção monetária<span class="cod">INPC</span></th>
+              <th class="num">Correção monetária<span class="cod">INPC (cód. 41099)</span></th>
               <th class="num">Juros até 2019<span class="cod">1% a.m.</span></th>
               <th class="num">Juros a partir de 2020<span class="cod">SELIC + 1%</span></th>
               <th class="num">Valor total atualizado</th>
@@ -831,7 +831,7 @@
     el.resumoGrid.innerHTML = `
       <div class="resumo-card"><div class="rot">Lançamentos</div><div class="num">${t.qtd}</div><div class="cod">${t.calculadas} atualizado(s)${erros ? ` · ${erros} erro(s)` : ''}</div></div>
       <div class="resumo-card"><div class="rot">Valor do débito</div><div class="num">${moeda(t.devido)}</div><div class="cod">valor original</div></div>
-      <div class="resumo-card"><div class="rot">Correção monetária</div><div class="num">${moeda(t.correcao)}</div><div class="cod">INPC</div></div>
+      <div class="resumo-card"><div class="rot">Correção monetária</div><div class="num">${moeda(t.correcao)}</div><div class="cod">INPC (cód. 41099)</div></div>
       <div class="resumo-card"><div class="rot">Juros</div><div class="num">${moeda(t.juros)}</div><div class="cod">até 2019: ${moeda(t.jurosPre)} · 2020+: ${moeda(t.jurosPos)}</div></div>
       <div class="resumo-card destaque"><div class="rot">Valor total atualizado</div><div class="num">${moeda(t.total)}</div><div class="cod">${el.dataAtualizacao.value ? 'até ' + dataBR(el.dataAtualizacao.value) : ''}</div></div>`;
   }
@@ -939,7 +939,7 @@
         <div><span class="lbl">Início dos juros</span>${r.dataJuros ? dataBR(r.dataJuros) : 'sem juros (boa-fé)'}</div>
         <div><span class="lbl">Data para atualização</span>${dataBR(r.dataAtualizacao)}</div>
         <div><span class="lbl">Valor do débito</span>${moeda(l.valor)}</div>
-        <div><span class="lbl">Correção monetária (INPC)</span>${moeda(r.correcao)}</div>
+        <div><span class="lbl">Correção monetária — INPC (cód. 41099)</span>${moeda(r.correcao)}</div>
         <div><span class="lbl">Juros até 2019 (1% a.m.)</span>${moeda(r.jurosPre)}</div>
         <div><span class="lbl">Juros a partir de 2020 (SELIC + 1%)</span>${moeda(r.jurosPos)}</div>
         ${r.multa ? `<div><span class="lbl">Multa</span>${moeda(r.multa)}</div>` : ''}
@@ -1005,7 +1005,7 @@
       ws.mergeCells('A3:K3'); ws.getCell('A3').value = `Servidor: ${sv.matricula} — ${sv.nome}${sv.cpf ? ' · CPF ' + sv.cpf : ''}${sv.processo ? ' · Processo ' + sv.processo : ''}`;
       ws.mergeCells('A4:K4'); ws.getCell('A4').value = `Juros: ${descricaoJuros()} · Arredondamento: ${el.criterioArred.selectedOptions[0].text}${el.referencia.value ? ' · Ref.: ' + el.referencia.value : ''}`;
       ws.getCell('A4').font = { size:9 };
-      const cab = ['#', 'CÓD. SIGRH', 'FATO GERADOR', 'DATA F.G.', 'INÍCIO JUROS', 'VALOR DO DÉBITO', 'CORREÇÃO MONETÁRIA (INPC)', 'JUROS ATÉ 2019 (1% a.m.)', 'JUROS A PARTIR DE 2020 (SELIC + 1%)', 'VALOR TOTAL ATUALIZADO', 'OBSERVAÇÃO'];
+      const cab = ['#', 'CÓD. SIGRH', 'FATO GERADOR', 'DATA F.G.', 'INÍCIO JUROS', 'VALOR DO DÉBITO', 'CORREÇÃO MONETÁRIA — INPC (CÓD. 41099)', 'JUROS ATÉ 2019 (1% a.m.)', 'JUROS A PARTIR DE 2020 (SELIC + 1%)', 'VALOR TOTAL ATUALIZADO', 'OBSERVAÇÃO'];
       const rc = ws.getRow(6);
       cab.forEach((h, i) => {
         const c = rc.getCell(i + 1); c.value = h;
@@ -1134,7 +1134,7 @@
 
       <div class="imp-secao">3. Demonstrativo dos valores atualizados</div>
       <table class="imp-tabela">
-        <thead><tr><th>#</th><th>Cód. SIGRH</th><th>Fato gerador</th><th>Data F.G.</th><th>Início juros</th><th>Valor do débito</th><th>Correção monetária (INPC)</th><th>Juros até 2019 (1% a.m.)</th><th>Juros a partir de 2020 (SELIC + 1%)</th><th>Total atualizado</th><th>Observação</th></tr></thead>
+        <thead><tr><th>#</th><th>Cód. SIGRH</th><th>Fato gerador</th><th>Data F.G.</th><th>Início juros</th><th>Valor do débito</th><th>Correção monetária — INPC (cód. 41099)</th><th>Juros até 2019 (1% a.m.)</th><th>Juros a partir de 2020 (SELIC + 1%)</th><th>Total atualizado</th><th>Observação</th></tr></thead>
         <tbody>${corpo}</tbody>
       </table>
 
