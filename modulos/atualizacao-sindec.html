@@ -142,6 +142,27 @@
   .icon-btn{ padding:0.3rem 0.5rem; font-size:0.8rem; line-height:1; border-radius:5px; margin-left:0.2rem; }
   .icon-btn.del:hover{ background:#FBEAE8; border-color:#E7B4AF; color:var(--red); }
 
+  .paginacao{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:space-between; padding:0.6rem 0.2rem; font-size:0.8rem; color:var(--ink-soft); }
+  .paginacao .nav{ display:flex; align-items:center; gap:0.35rem; }
+  .paginacao button{ padding:0.3rem 0.65rem; font-size:0.8rem; }
+  .paginacao select{ font-family:'IBM Plex Sans',sans-serif; font-size:0.8rem; padding:0.3rem 0.4rem; border:1px solid var(--line); border-radius:5px; }
+  .paginacao .info{ font-family:'IBM Plex Mono',monospace; }
+  .paginacao[hidden]{ display:none; }
+  .modal.largo{ max-width:1100px; }
+  .conf-resumo{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0.6rem; margin-bottom:0.9rem; }
+  .conf-resumo div{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:0.55rem 0.7rem; }
+  .conf-resumo .n{ font-family:'Fraunces',serif; font-size:1.25rem; font-weight:600; }
+  .conf-resumo .r{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); font-weight:600; }
+  .conf-resumo .ok{ border-color:#A7D7BC; background:#EEF8F2; }
+  .conf-resumo .alerta{ border-color:#F0C36D; background:#FFF8EA; }
+  .conf-bloco{ margin:0.8rem 0; }
+  .conf-bloco h5{ margin:0 0 0.35rem; font-size:0.85rem; }
+  .conf-tabela-wrap{ max-height:260px; overflow:auto; border:1px solid var(--line); border-radius:6px; }
+  .conf-tabela{ width:100%; border-collapse:collapse; font-size:0.76rem; }
+  .conf-tabela th{ position:sticky; top:0; background:var(--paper-dark); text-align:left; padding:0.35rem 0.45rem; font-size:0.66rem; text-transform:uppercase; }
+  .conf-tabela td{ padding:0.3rem 0.45rem; border-top:1px solid var(--line); }
+  .conf-tabela td.mono{ font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  .tag-ajuste{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:0.62rem; background:#FFF4E5; color:#8A5A00; border-radius:3px; padding:0 0.3rem; margin-left:0.25rem; cursor:help; }
   .tabela-resumo{ margin-top:1rem; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:auto; max-width:900px; }
   .tabela-resumo table{ border-collapse:collapse; width:100%; font-size:0.82rem; }
   .tabela-resumo th, .tabela-resumo td{ padding:0.45rem 0.7rem; border-bottom:1px solid var(--line); }
@@ -262,6 +283,7 @@
       <div class="aviso edicao" id="avisoEdicao" hidden></div>
       <div class="aviso" id="avisoImportacao" hidden></div>
       <div class="aviso" id="avisoIndices" hidden></div>
+      <div class="aviso" id="avisoRetomada" hidden></div>
 
       <p class="indicador-rascunho" id="indicadorRascunho">Os dados desta relação ficam salvos automaticamente na sua conta.</p>
 
@@ -294,10 +316,15 @@
           <h3><span class="num">1</span> Relação de valores</h3>
           <label class="dropzone" id="dropzone" for="inputArquivo" tabindex="0" aria-label="Importar planilha" style="display:block;">
             <strong>Clique para importar</strong> ou arraste a planilha aqui
-            <small>Planilha DEA (.xlsx / .xls / .csv) — o cabeçalho é localizado automaticamente pela linha que contém “MATRÍCULA”.</small>
+            <small>Planilha (.xlsx / .xls / .csv) ou <strong>PDF</strong> do levantamento DEA — o cabeçalho é localizado automaticamente pela linha que contém “MATRÍCULA”.</small>
           </label>
-          <input type="file" id="inputArquivo" accept=".xlsx,.xls,.csv" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+          <input type="file" id="inputArquivo" accept=".xlsx,.xls,.csv,.pdf" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
           <div class="info-arquivo" id="infoArquivo"></div>
+          <div class="campo" style="margin-top:0.7rem;">
+            <label for="codigosExcluidos">Não atualizar (juros/atualização já lançados)</label>
+            <input type="text" id="codigosExcluidos" value="20088, 20827" autocomplete="off">
+            <div class="ajuda">Linhas com estes códigos <strong>ou</strong> com descrição “JUROS DE MORA” / “ATUALIZAÇÃO MONETÁRIA” são desconsideradas na importação (não são atualizadas).</div>
+          </div>
           <div class="linha-botoes">
             <button type="button" id="btnAdicionar">+ Adicionar linha</button>
             <button type="button" id="btnModelo">⬇ Baixar modelo em branco</button>
@@ -344,6 +371,7 @@
 
       <div class="barra-acao">
         <button type="button" id="btnAtualizar" disabled>⟳ Atualizar valores pelo SINDEC</button>
+        <button type="button" id="btnPausar" hidden>⏸ Pausar</button>
         <button type="button" id="btnReprocessar" hidden title="Consulta novamente apenas as linhas com erro ou desatualizadas">↻ Reprocessar só as pendentes</button>
         <div class="progresso">
           <div class="trilho"><div class="preenchido" id="barraProgresso"></div></div>
@@ -382,6 +410,24 @@
         </table>
       </div>
 
+      <div class="paginacao" id="paginacao" hidden>
+        <div class="nav">
+          <label for="filtroTabela">Mostrar:</label>
+          <select id="filtroTabela">
+            <option value="todas">Todas as linhas</option>
+            <option value="pendentes">Pendentes / a recalcular</option>
+            <option value="erro">Com erro</option>
+            <option value="ajustadas">Datas ajustadas</option>
+          </select>
+        </div>
+        <div class="nav">
+          <button type="button" data-pag="primeira" title="Primeira página">«</button>
+          <button type="button" data-pag="anterior" title="Página anterior">‹</button>
+          <span class="info" id="infoPagina"></span>
+          <button type="button" data-pag="proxima" title="Próxima página">›</button>
+          <button type="button" data-pag="ultima" title="Última página">»</button>
+        </div>
+      </div>
       <div class="tabela-resumo" id="tabelaResumo" hidden></div>
     </div>
   </div>
@@ -418,6 +464,15 @@
     <header><h4 id="tituloMemoria">Memória de cálculo — SINDEC</h4><button type="button" class="icon-btn" data-fechar>✕</button></header>
     <div class="corpo" id="corpoMemoria"></div>
     <footer><button type="button" data-fechar>Fechar</button></footer>
+  </div>
+</div>
+
+<!-- Modal: conferência da importação -->
+<div class="modal-fundo" id="modalConferencia">
+  <div class="modal largo" role="dialog" aria-modal="true" aria-labelledby="tituloConferencia">
+    <header><h4 id="tituloConferencia">Conferência da importação</h4></header>
+    <div class="corpo" id="corpoConferencia"></div>
+    <footer><button type="button" id="btnConfCancelar">Cancelar</button><button type="button" class="salvar" id="btnConfConfirmar">Confirmar e carregar na relação</button></footer>
   </div>
 </div>
 
@@ -473,7 +528,7 @@
   // "estado.linhas" aponta sempre para o conjunto da aba ativa.
   const estado = {
     modo: 'lote',
-    lote: { linhas: [], arquivo: '', importadoEm: '' },
+    lote: { linhas: [], arquivo: '', importadoEm: '', orgao: null },
     individual: { servidor: { matricula: '', nome: '', cpf: '', processo: '' }, linhas: [] },
     get linhas(){ return this[this.modo].linhas; },
     set linhas(v){ this[this.modo].linhas = v; },
@@ -522,7 +577,7 @@
     tbody: $('tbody'), resumoGrid: $('resumoGrid'), tabelaResumo: $('tabelaResumo'),
     dataAtualizacao: $('dataAtualizacao'), modoJuros: $('modoJuros'), dataJurosUnica: $('dataJurosUnica'),
     campoDataJurosUnica: $('campoDataJurosUnica'), criterioArred: $('criterioArred'),
-    referencia: $('referencia'), btnReprocessar: $('btnReprocessar'),
+    referencia: $('referencia'), btnReprocessar: $('btnReprocessar'), codigosExcluidos: $('codigosExcluidos'),
     btnAtualizar: $('btnAtualizar'), btnExcel: $('btnExcel'), btnImprimir: $('btnImprimir'), btnSalvar: $('btnSalvar'),
     barra: $('barraProgresso'), textoProgresso: $('textoProgresso'),
     infoArquivo: $('infoArquivo'), avisoImportacao: $('avisoImportacao'), indicadorRascunho: $('indicadorRascunho'),
@@ -625,7 +680,8 @@
       codigo: d.codigo || '', fato: d.fato || '', dataFG: d.dataFG || '',
       exercicio: d.exercicio || '', valor: (d.valor == null ? null : Number(d.valor)),
       dataJuros: d.dataJuros || '', obs: d.obs || '',
-      resultado: d.resultado || null   // {status, ...}
+      dataOriginal: d.dataOriginal || '', ajusteData: d.ajusteData || '',
+      resultado: (d.resultado && d.resultado.status === 'calculando') ? null : (d.resultado || null)   // {status, ...}
     };
   }
   function exercicioDaLinha(l){
@@ -647,17 +703,17 @@
   // =====================================================================
   const MAPA_COLUNAS = [
     // [chave, teste(cabecalhoNormalizado)]
-    ['matricula', h => /^MATRICULA/.test(h)],
+    ['matricula', h => /^MATRIC/.test(h)],
     ['nome', h => /NOME/.test(h)],
     ['cpf', h => /^CPF/.test(h)],
     ['processo', h => /PROCESSO/.test(h)],
     ['paginas', h => /PAGINA/.test(h)],
     ['conta', h => /CONTA/.test(h)],
-    ['codigo', h => /SIGRH|^CODIGO$|^RUBRICA$|^COD\.?$/.test(h)],
+    ['codigo', h => /SIGRH|^CODIGO$|^RUBRICA$|^COD\.?$|^PROVENTO/.test(h)],
     ['dataJuros', h => /JUROS/.test(h) && /(DATA|INICIO)/.test(h)],
     ['dataFG', h => /DATA/.test(h) && /(FATO|VALOR ORIGINAL|BASE|COMPETENCIA)/.test(h)],
     ['fato', h => /FATO GERADOR/.test(h) && !/DATA/.test(h)],
-    ['exercicio', h => /^EXERCICIO/.test(h)],
+    ['exercicio', h => /^EXERCICIO|^ANO$/.test(h)],
     ['valor', h => /VALOR(ES)? DEVIDO|VALOR ORIGINAL|^VALOR$/.test(h) && !/DATA/.test(h)],
     ['obs', h => /OBSERV/.test(h)]
   ];
@@ -665,7 +721,7 @@
   function localizarCabecalho(matriz){
     for(let i = 0; i < Math.min(matriz.length, 60); i++){
       const linha = (matriz[i] || []).map(normalizarCabecalho);
-      if(linha.some(h => /^MATRICULA/.test(h)) && linha.some(h => /VALOR/.test(h))) return i;
+      if(linha.some(h => /^MATRIC/.test(h)) && linha.some(h => /VALOR/.test(h))) return i;
     }
     return -1;
   }
@@ -690,6 +746,15 @@
       if(!cab[c] && Object.values(col).indexOf(c) < 0){ colBloco = c; break; }
     }
 
+    // Órgão (ex.: "029 | INSTITUTO ... IBRAM-DF" ou "930 | DEPARTAMENTO ... DER-DF") nas linhas acima do cabeçalho
+    let orgao = null;
+    for(let i = 0; i < iCab && !orgao; i++){
+      const cel = (matriz[i] || []).map(textoCelula).filter(Boolean);
+      const cod = cel.find(c => /^\d{3}$/.test(c));
+      const nome = cel.find(c => c.length > 12 && /[A-ZÀ-Ü]{4}/.test(c) && !/LEVANTAMENTO|DESPESAS DE EXERC/i.test(c));
+      if(cod && nome) orgao = { codigo: cod, nome };
+    }
+
     const linhas = [];
     const problemas = [];
     let blocoAtual = '';
@@ -708,8 +773,10 @@
       if((valorBruto == null || valorBruto === '') && !matricula && !nome) continue;
       if(!matricula && !nome) continue;
       const valor = parseValor(valorBruto);
-      const dataFG = parseData(get('dataFG'));
-      const exercicio = textoCelula(get('exercicio')) || blocoAtual || (dataFG && /^\d{4}/.test(dataFG) ? dataFG.slice(0,4) : '');
+      const exercicioInformado = textoCelula(get('exercicio')) || blocoAtual;
+      const dt = corrigirDataImportada(get('dataFG'), exercicioInformado);
+      const dataFG = dt.iso || ('INVALIDA:' + dt.original);
+      const exercicio = exercicioInformado || (dt.iso ? dt.iso.slice(0, 4) : '');
       const linha = novaLinha({
         matricula, nome,
         cpf: textoCelula(get('cpf')),
@@ -725,20 +792,208 @@
         obs: textoCelula(get('obs'))
       });
       linha._linhaPlanilha = i + 1;
+      if(dt.ajuste){ linha.dataOriginal = dt.original; linha.ajusteData = dt.ajuste; }
       if(valor == null) problemas.push(`Linha ${i + 1} (${nome || matricula}): valor ausente ou inválido.`);
-      if(!dataFG || dataFG.startsWith('INVALIDA:')) problemas.push(`Linha ${i + 1} (${nome || matricula}): data do fato gerador ausente ou inválida.`);
+      if(!dt.iso) problemas.push(`Linha ${i + 1} (${nome || matricula}): data do fato gerador ausente ou inválida (“${dt.original || ''}”).`);
       linhas.push(linha);
     }
-    return { linhas, problemas, colunas: col };
+    return { linhas, problemas, colunas: col, orgao };
+  }
+
+  // ---------------------------------------------------------------------
+  // Correção de datas na importação (Excel e PDF)
+  //  · dia inexistente (29/02 em ano não bissexto, 30/02, 31/04…) → último dia do mês
+  //  · AAAAMM (201910) → dia 30 (ou último dia, em fevereiro)
+  //  · ano com 3 dígitos (01/06/215) → corrigido pela coluna ANO/EXERCÍCIO (2015)
+  //  · barra ausente (01/042016, 30/082023) → 01/04/2016, 30/08/2023
+  // ---------------------------------------------------------------------
+  function ultimoDiaMes(a, m){ return new Date(Date.UTC(a, m, 0)).getUTCDate(); }
+  function ehSubsequencia(curta, longa){ let i = 0; for(const c of longa){ if(c === curta[i]) i++; } return i === curta.length; }
+  function corrigirDataImportada(v, exercicio){
+    const original = (v == null) ? '' : (typeof v === 'number' ? String(v) : String(v).trim());
+    if(v == null || v === '') return { iso: '', original, ajuste: '' };
+    if(typeof v === 'number' && v > 59 && v < 80000) return { iso: parseData(v), original, ajuste: '' };
+    if(v instanceof Date) return { iso: parseData(v), original, ajuste: '' };
+    const s = original;
+    const ano4 = /^\d{4}$/.test(String(exercicio || '')) ? String(exercicio) : '';
+    let d, m, a, motivos = [];
+    let x = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(x){ a = +x[1]; m = +x[2]; d = +x[3]; }
+    else if((x = s.match(/^(\d{4})(\d{2})$/))){
+      a = +x[1]; m = +x[2]; d = 30; motivos.push('formato AAAAMM');
+    }else if((x = s.match(/^(\d{1,2})([\/\-.]?)(\d{1,2})([\/\-.]?)(\d{2,4})$/))){
+      d = +x[1]; m = +x[3];
+      if(!x[2] || !x[4]) motivos.push('separador ausente');
+      let ys = x[5];
+      if(ys.length === 3){
+        if(ano4 && ehSubsequencia(ys, ano4)){ ys = ano4; motivos.push('ano com 3 dígitos'); }
+        else return { iso: '', original, ajuste: '' };
+      }
+      a = +ys; if(a < 100) a += 2000;
+    }else{
+      return { iso: '', original, ajuste: '' };
+    }
+    if(!(m >= 1 && m <= 12) || !(d >= 1) || !(a > 1900 && a < 2200)) return { iso: '', original, ajuste: '' };
+    const ult = ultimoDiaMes(a, m);
+    if(d > ult){ if(!motivos.includes('formato AAAAMM')) motivos.push('dia inexistente'); d = ult; }
+    const iso = `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    return { iso, original, ajuste: motivos.join(', ') };
+  }
+
+  // ---------------------------------------------------------------------
+  // Leitura de PDF (relatório "Levantamento de Despesas de Exercícios Anteriores")
+  // PDF com texto (gerado a partir do Excel). Linhas montadas pela posição de cada palavra.
+  // ---------------------------------------------------------------------
+  const URL_PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  const URL_PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const RX_LINHA_DEA = /^\s*([0-9X]{5,9})\s+(.+?)\s+(\d{3}\.\d{3}\.\d{3}-\d{2})\s+(\S+)\s+(.*?)\s*(?<=\s|^)(\d{5})\s+(.+?)\s+(\S+)\s+(\d{4})\s+(-?)\s*R\$\s*(-?[\d.]+,\d{2})\s*$/;
+  const RX_TOTAL_EXERCICIO = /^\s*(\d{4})\s+Valor Total do Exerc\S*cio\s+(-?)\s*R\$\s*([\d.]+,\d{2})/i;
+  const RX_ORGAO_PDF = /^\s*(\d{3})\s+([A-ZÀ-Ü][A-ZÀ-Ü0-9 .,\-\/()]{10,})$/;
+  // Alguns PDFs (Ghostscript) trazem texto Windows-1252 lido como Mac Roman ("SUBSTITUI«√O" → "SUBSTITUIÇÃO")
+  const MAC_ROMAN_ALTO = 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ';
+  const CP1252_ALTO = '€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008DŽ\u008F\u0090‘’“”•–—˜™š›œ\u009DžŸ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ';
+  const MAPA_MAC_WIN = new Map([...MAC_ROMAN_ALTO].map((c, i) => [c, CP1252_ALTO[i]]));
+  const corrigirMacRoman = (t) => [...t].map(c => (c.charCodeAt(0) > 127 && MAPA_MAC_WIN.has(c)) ? MAPA_MAC_WIN.get(c) : c).join('');
+
+  function montarLinhasPagina(itens){
+    const pts = itens.filter(it => it.str && it.str.trim()).map(it => ({ x: it.transform[4], y: it.transform[5], w: it.width || 0, s: it.str }));
+    pts.sort((a, b) => (b.y - a.y) || (a.x - b.x));
+    const linhas = [];
+    for(const p of pts){
+      const l = linhas.length ? linhas[linhas.length - 1] : null;
+      const alvo = (l && Math.abs(l.y - p.y) <= 2.5) ? l : linhas.find(q => Math.abs(q.y - p.y) <= 2.5);
+      if(alvo) alvo.itens.push(p); else linhas.push({ y: p.y, itens: [p] });
+    }
+    linhas.sort((a, b) => b.y - a.y);
+    return linhas.map(l => {
+      l.itens.sort((a, b) => a.x - b.x);
+      let txt = '', fim = null;
+      for(const it of l.itens){
+        if(fim != null){ const gap = it.x - fim; txt += gap > 4 ? '   ' : (gap > 0.6 ? ' ' : ''); }
+        txt += it.s; fim = it.x + it.w;
+      }
+      return txt;
+    });
+  }
+
+  async function garantirPdfJs(){
+    if(window.pdfjsLib) return window.pdfjsLib;
+    await carregarScript(URL_PDFJS);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL_PDFJS_WORKER;
+    return window.pdfjsLib;
+  }
+
+  // Converte o PDF numa "matriz" no mesmo formato da planilha, reaproveitando a interpretação do Excel.
+  async function lerPdfComoMatriz(buffer, aoProgresso){
+    const pdfjsLib = await garantirPdfJs();
+    const doc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+    let textos = [];
+    for(let p = 1; p <= doc.numPages; p++){
+      const pg = await doc.getPage(p);
+      const c = await pg.getTextContent();
+      textos.push(...montarLinhasPagina(c.items));
+      if(aoProgresso && (p % 5 === 0 || p === doc.numPages)) aoProgresso(p, doc.numPages);
+      pg.cleanup();
+    }
+    if(textos.some(t => /Exerc[ÌÕ]cio|EXERC[ÌÕ]CIO|√|«/.test(t))) textos = textos.map(corrigirMacRoman);
+    if(!textos.some(t => /MATRIC/i.test(t) && /VALORES DEVIDOS/i.test(t))){
+      throw new Error(textos.join('').trim()
+        ? 'Layout de PDF não reconhecido: não foi encontrado o cabeçalho com “MATRIC.” e “VALORES DEVIDOS”.'
+        : 'O PDF não tem texto selecionável (provavelmente é digitalizado/imagem). Use o Excel original ou um PDF gerado pelo sistema.');
+    }
+    const cab = ['MATRÍCULA', 'NOME COMPLETO', 'CPF', 'PROCESSO DE ORIGEM DO CRÉDITO/DÉBITO', 'PÁGINAS DO DOCUMENTO', 'CÓDIGO SIGRH',
+      'FATO GERADOR (DESCRIÇÃO DO CÓDIGO)', 'DATA DO FATO GERADOR', 'EXERCÍCIO', 'VALORES DEVIDOS (R$)'];
+    const matriz = [], totais = {}, naoReconhecidas = [];
+    let orgao = null;
+    for(const t of textos){
+      let m = t.match(RX_LINHA_DEA);
+      if(m){
+        const valor = (m[10] === '-' || m[11].startsWith('-') ? -1 : 1) * parseFloat(m[11].replace('-', '').replace(/\./g, '').replace(',', '.'));
+        matriz.push([m[1], m[2].trim(), m[3], m[4], m[5].trim(), m[6], m[7].trim(), m[8], m[9], valor]);
+        continue;
+      }
+      m = t.match(RX_TOTAL_EXERCICIO);
+      if(m){ totais[m[1]] = r2((totais[m[1]] || 0) + (m[2] === '-' ? -1 : 1) * parseFloat(m[3].replace(/\./g, '').replace(',', '.'))); continue; }
+      if(!orgao && (m = t.match(RX_ORGAO_PDF))){ orgao = { codigo: m[1], nome: m[2].trim() }; continue; }
+      if(/^\s*[0-9X]{5,9}\s+\S/.test(t) && /R\$/.test(t)) naoReconhecidas.push(t.trim());
+    }
+    return { matriz: [cab, ...matriz], totais, naoReconhecidas, orgao, paginas: doc.numPages };
+  }
+
+  // Filtro: linhas de juros/atualização já lançados não são atualizadas
+  function codigosExcluidos(){
+    return (el.codigosExcluidos.value.match(/\d+/g) || []).map(String);
+  }
+  function linhaJaEhJurosOuAtualizacao(l, codigos){
+    if(l.codigo && codigos.includes(String(l.codigo).trim())) return true;
+    return /JUROS DE MORA|ATUALIZACAO MONETARIA/.test(normalizarCabecalho(l.fato));
+  }
+
+  // Tela de conferência — devolve true (confirmar) ou false (cancelar)
+  function abrirConferencia(info){
+    return new Promise((resolver) => {
+      const { nomeArquivo, origem, orgao, todas, aCalcular, desconsideradas, ajustadas, comErro, conferenciaTotais, naoReconhecidas, paginas } = info;
+      const tabela = (cabs, linhas, max) => `<div class="conf-tabela-wrap"><table class="conf-tabela"><thead><tr>${cabs.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${
+        linhas.slice(0, max || 300).map(cels => `<tr>${cels.map(c => `<td${/^[\d\/\-.,R$ ]+$/.test(String(c)) ? ' class="mono"' : ''}>${esc(c)}</td>`).join('')}</tr>`).join('')}${
+        linhas.length > (max || 300) ? `<tr><td colspan="${cabs.length}">… e mais ${linhas.length - (max || 300)} linha(s)</td></tr>` : ''}</tbody></table></div>`;
+      const porTipo = {};
+      desconsideradas.forEach(l => { const k = `${l.codigo || '—'} · ${l.fato || '—'}`; porTipo[k] = (porTipo[k] || 0) + 1; });
+      let html = `<p style="margin:0 0 0.8rem;font-size:0.85rem;">Arquivo <strong>${esc(nomeArquivo)}</strong> (${origem}${paginas ? `, ${paginas} página(s)` : ''})${orgao ? ` · órgão <strong>${esc(orgao.codigo)} – ${esc(orgao.nome)}</strong>` : ''}</p>
+        <div class="conf-resumo">
+          <div><div class="r">Lançamentos lidos</div><div class="n">${todas.length.toLocaleString('pt-BR')}</div></div>
+          <div class="${desconsideradas.length ? 'alerta' : ''}"><div class="r">Desconsiderados (juros/atualização)</div><div class="n">${desconsideradas.length.toLocaleString('pt-BR')}</div></div>
+          <div class="ok"><div class="r">A atualizar</div><div class="n">${aCalcular.length.toLocaleString('pt-BR')}</div></div>
+          <div class="${ajustadas.length ? 'alerta' : ''}"><div class="r">Datas ajustadas</div><div class="n">${ajustadas.length.toLocaleString('pt-BR')}</div></div>
+          <div class="${comErro.length ? 'alerta' : ''}"><div class="r">Com pendência</div><div class="n">${comErro.length.toLocaleString('pt-BR')}</div></div>
+        </div>`;
+      if(conferenciaTotais){
+        const c = conferenciaTotais;
+        html += `<div class="aviso ${c.divergentes.length ? '' : 'edicao'}" style="margin:0 0 0.6rem;">
+          <strong>Conferência com os totais impressos no PDF:</strong> ${c.batem}/${c.total} exercício(s) conferem ao centavo${c.semNegativos ? ` (o total impresso não abate os ${c.qtdNegativos} lançamento(s) negativo(s))` : ''}.
+          ${c.divergentes.length ? `<br>Divergências: ${c.divergentes.map(d => `${d.ano}: PDF ${moeda(d.pdf)} × lido ${moeda(d.lido)}`).join(' · ')}` : ''}</div>`;
+      }
+      if(naoReconhecidas && naoReconhecidas.length){
+        html += `<div class="conf-bloco"><h5>⚠ ${naoReconhecidas.length} linha(s) do PDF não reconhecida(s) — não serão importadas</h5>${tabela(['Texto da linha'], naoReconhecidas.map(t => [t]), 50)}</div>`;
+      }
+      if(desconsideradas.length){
+        html += `<div class="conf-bloco"><h5>Desconsiderados — não serão atualizados</h5>${tabela(['Código · descrição', 'Lançamentos'], Object.entries(porTipo).sort((a, b) => b[1] - a[1]))}</div>`;
+      }
+      if(ajustadas.length){
+        html += `<div class="conf-bloco"><h5>Datas ajustadas automaticamente (${ajustadas.length})</h5>${tabela(['Matrícula', 'Nome', 'Código', 'Data original', 'Data ajustada', 'Motivo'],
+          ajustadas.map(l => [l.matricula, l.nome, l.codigo, l.dataOriginal, dataBR(l.dataFG), l.ajusteData]))}</div>`;
+      }
+      if(comErro.length){
+        html += `<div class="conf-bloco"><h5>Com pendência — entram na relação marcadas para correção (✎)</h5>${tabela(['Matrícula', 'Nome', 'Código', 'Data', 'Valor', 'Pendência'],
+          comErro.map(l => [l.matricula, l.nome, l.codigo, dataBR(l.dataFG), l.valor == null ? '—' : moeda(l.valor), l.valor == null ? 'valor inválido' : 'data inválida']))}</div>`;
+      }
+      $('corpoConferencia').innerHTML = html;
+      const modal = $('modalConferencia');
+      modal.classList.add('aberto');
+      const fechar = (ok) => { modal.classList.remove('aberto'); $('btnConfConfirmar').onclick = null; $('btnConfCancelar').onclick = null; resolver(ok); };
+      $('btnConfConfirmar').onclick = () => fechar(true);
+      $('btnConfCancelar').onclick = () => fechar(false);
+    });
   }
 
   async function importarArquivo(arquivo){
     if(!arquivo) return;
-    if(typeof XLSX === 'undefined'){ aviso('Biblioteca de planilhas não carregou. Verifique a conexão e recarregue a página.'); return; }
+    const ehPdf = /\.pdf$/i.test(arquivo.name) || arquivo.type === 'application/pdf';
+    if(!ehPdf && typeof XLSX === 'undefined'){ aviso('Biblioteca de planilhas não carregou. Verifique a conexão e recarregue a página.'); return; }
     try{
       const buffer = await arquivo.arrayBuffer();
-      let wb;
-      if(/\.(csv|txt)$/i.test(arquivo.name)){
+      let wb = null, resultado = null, abaUsada = '', infoPdf = null;
+      if(ehPdf){
+        el.textoProgresso.textContent = 'Lendo PDF…';
+        infoPdf = await lerPdfComoMatriz(buffer, (p, n) => {
+          el.barra.style.width = Math.round(p / n * 100) + '%';
+          el.textoProgresso.textContent = `Lendo PDF… página ${p} de ${n}`;
+        });
+        el.barra.style.width = '0';
+        el.textoProgresso.textContent = '';
+        resultado = interpretarMatriz(infoPdf.matriz);
+        resultado.orgao = infoPdf.orgao;
+        abaUsada = 'PDF';
+      }else if(/\.(csv|txt)$/i.test(arquivo.name)){
         // CSV: decodifica UTF-8 (ou Windows-1252, padrão do Excel em português) e detecta o separador
         let texto = new TextDecoder('utf-8').decode(buffer);
         if(texto.includes('�')) texto = new TextDecoder('windows-1252').decode(buffer);
@@ -751,13 +1006,42 @@
       }else{
         wb = XLSX.read(buffer, { type:'array', cellDates:false });
       }
-      let resultado = null, abaUsada = '';
-      for(const nomeAba of wb.SheetNames){
+      if(wb) for(const nomeAba of wb.SheetNames){
         const matriz = XLSX.utils.sheet_to_json(wb.Sheets[nomeAba], { header:1, raw:true, defval:null, blankrows:true });
         if(localizarCabecalho(matriz) >= 0){ resultado = interpretarMatriz(matriz); abaUsada = nomeAba; break; }
       }
       if(!resultado) throw new Error('Nenhuma aba com o cabeçalho esperado (MATRÍCULA / VALORES DEVIDOS).');
       if(resultado.linhas.length === 0) throw new Error('Nenhuma linha de dados encontrada abaixo do cabeçalho.');
+
+      // Filtro de juros/atualização já lançados + conferência antes de carregar
+      const codigos = codigosExcluidos();
+      const todas = resultado.linhas;
+      const desconsideradas = todas.filter(l => linhaJaEhJurosOuAtualizacao(l, codigos));
+      const aCalcular = todas.filter(l => !linhaJaEhJurosOuAtualizacao(l, codigos));
+      const ajustadas = aCalcular.filter(l => l.ajusteData);
+      const comErro = aCalcular.filter(l => l.valor == null || !isoValida(l.dataFG));
+      let conferenciaTotais = null;
+      if(infoPdf && Object.keys(infoPdf.totais).length){
+        const soma = {}, somaPos = {};
+        todas.forEach(l => { const a = String(l.exercicio); soma[a] = (soma[a] || 0) + (l.valor || 0); if(l.valor > 0) somaPos[a] = (somaPos[a] || 0) + l.valor; });
+        const anos = Object.keys(infoPdf.totais);
+        const batemTotal = anos.filter(a => Math.abs(r2(soma[a] || 0) - infoPdf.totais[a]) < 0.005).length;
+        const batemPos = anos.filter(a => Math.abs(r2(somaPos[a] || 0) - infoPdf.totais[a]) < 0.005).length;
+        const semNegativos = batemPos > batemTotal;
+        const ref = semNegativos ? somaPos : soma;
+        conferenciaTotais = {
+          total: anos.length, batem: Math.max(batemTotal, batemPos), semNegativos,
+          qtdNegativos: todas.filter(l => l.valor < 0).length,
+          divergentes: anos.filter(a => Math.abs(r2(ref[a] || 0) - infoPdf.totais[a]) >= 0.005).map(a => ({ ano: a, pdf: infoPdf.totais[a], lido: r2(ref[a] || 0) }))
+        };
+      }
+      const confirmou = await abrirConferencia({
+        nomeArquivo: arquivo.name, origem: ehPdf ? 'PDF' : `planilha, aba “${abaUsada}”`, orgao: resultado.orgao,
+        todas, aCalcular, desconsideradas, ajustadas, comErro, conferenciaTotais,
+        naoReconhecidas: infoPdf ? infoPdf.naoReconhecidas : null, paginas: infoPdf ? infoPdf.paginas : null
+      });
+      if(!confirmou){ aviso('Importação cancelada.'); return; }
+      resultado.linhas = aCalcular;
 
       let substituir = true;
       if(estado.linhas.length > 0){
@@ -767,21 +1051,28 @@
       const totalFinal = estado.linhas.length + resultado.linhas.length;
       if(totalFinal > LIMITE_LINHAS_LOTE){
         const seguir = window.confirm(`A relação ficará com ${totalFinal} lançamentos.\n\n` +
-          `Acima de ${LIMITE_LINHAS_LOTE} lançamentos, o rascunho automático e o “Salvar no histórico” podem ultrapassar o limite de 1 MB por registro do banco de dados.\n` +
-          `Recomendado: dividir a planilha em blocos de até ${LIMITE_LINHAS_LOTE} linhas.\n\n` +
-          `OK = importar mesmo assim (use “Exportar Excel” ao final)\nCancelar = não importar`);
+          `O cálculo funciona normalmente e o progresso fica guardado neste navegador (se a página fechar, é possível continuar de onde parou).\n` +
+          `O “Salvar no histórico” aceita até ~${LIMITE_LINHAS_LOTE} lançamentos por registro — para relações maiores, use “Exportar Excel” ao final.\n\n` +
+          `OK = importar · Cancelar = não importar`);
         if(!seguir){ renderizar(); return; }
       }
       if(substituir) iniciarNovoRegistro('lote');
       estado.linhas.push(...resultado.linhas);
       estado.arquivo = arquivo.name;
       estado.importadoEm = new Date().toLocaleString('pt-BR');
+      if(substituir || !estado.lote.orgao) estado.lote.orgao = resultado.orgao || null;
+      paginaAtual = 1;
+      $('avisoRetomada').hidden = true;
 
       const exercicios = [...new Set(resultado.linhas.map(exercicioDaLinha))].filter(Boolean).sort();
-      el.infoArquivo.textContent = `${arquivo.name} · aba “${abaUsada}” · ${resultado.linhas.length} linha(s) · exercício(s): ${exercicios.join(', ') || '—'}`;
+      el.infoArquivo.textContent = `${arquivo.name} · ${ehPdf ? 'PDF' : `aba “${abaUsada}”`} · ${resultado.linhas.length} linha(s) a atualizar` +
+        (desconsideradas.length ? ` · ${desconsideradas.length} de juros/atualização desconsiderada(s)` : '') +
+        (ajustadas.length ? ` · ${ajustadas.length} data(s) ajustada(s)` : '') +
+        (estado.lote.orgao ? ` · órgão ${estado.lote.orgao.codigo}` : '') + ` · exercício(s): ${exercicios.length > 6 ? exercicios[0] + '–' + exercicios[exercicios.length - 1] : (exercicios.join(', ') || '—')}`;
       let htmlAviso = '';
       if(estado.linhas.length > LIMITE_LINHAS_LOTE){
-        htmlAviso += `<strong>Relação grande (${estado.linhas.length} lançamentos):</strong> o cálculo funciona normalmente, mas o rascunho automático não guardará os lançamentos e o histórico só aceita até ~${LIMITE_LINHAS_LOTE} por registro. Ao final, use <strong>Exportar Excel</strong>. Mantenha esta aba visível durante a atualização (estimativa: ~${Math.ceil(estado.linhas.length * 0.65 / 60)} min).<br>`;
+        const unicas = new Set(estado.linhas.map(l => `${l.dataFG}|${Math.abs(l.valor || 0)}|${l.dataJuros || ''}`)).size;
+        htmlAviso += `<strong>Relação grande (${estado.linhas.length.toLocaleString('pt-BR')} lançamentos; ${unicas.toLocaleString('pt-BR')} combinações distintas de data e valor):</strong> estimativa de ~${Math.max(1, Math.ceil(unicas * 0.65 / 60))} min de consultas ao SINDEC. O progresso fica guardado neste navegador — pode pausar, trocar de aba ou, se a página fechar, continuar de onde parou. O histórico aceita até ~${LIMITE_LINHAS_LOTE} lançamentos por registro: ao final, use <strong>Exportar Excel</strong>.<br>`;
       }
       if(resultado.problemas.length){
         htmlAviso += `<strong>Atenção — ${resultado.problemas.length} linha(s) com pendência</strong> (serão sinalizadas e não serão enviadas ao SINDEC até a correção):<ul>${resultado.problemas.slice(0, 12).map(p => `<li>${esc(p)}</li>`).join('')}</ul>${resultado.problemas.length > 12 ? '…' : ''}`;
@@ -790,11 +1081,13 @@
       el.avisoImportacao.hidden = !htmlAviso;
       renderizar();
       agendarRascunho();
+      salvarLocalAgora();
       aviso(`${resultado.linhas.length} linha(s) importada(s). Clique em “Atualizar valores pelo SINDEC”.`);
     }catch(err){
       console.error(err);
       el.avisoImportacao.innerHTML = '<strong>Não foi possível importar:</strong> ' + esc(err.message);
       el.avisoImportacao.hidden = false;
+      el.barra.style.width = '0';
     }
   }
 
@@ -834,7 +1127,18 @@
     return req;
   }
 
-  const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+  // Temporizador em Web Worker: não é desacelerado pelo navegador quando a aba fica em segundo plano
+  const dormir = (() => {
+    try{
+      const w = new Worker(URL.createObjectURL(new Blob(['onmessage=e=>setTimeout(()=>postMessage(e.data.id),e.data.ms)'], { type:'text/javascript' })));
+      const pendentes = new Map(); let seq = 0;
+      w.onmessage = (e) => { const f = pendentes.get(e.data); if(f){ pendentes.delete(e.data); f(); } };
+      return (ms) => new Promise(r => { const id = ++seq; pendentes.set(id, r); w.postMessage({ id, ms }); });
+    }catch(e){
+      return (ms) => new Promise(r => setTimeout(r, ms));
+    }
+  })();
+  let pausado = false;
   let ultimaConsulta = 0;
   let aoAguardar = null; // callback de progresso durante esperas por limite
   let linhasSemIndices = 0; // linhas recusadas por índices na rodada atual (reduz novas tentativas)
@@ -1011,8 +1315,10 @@
     }
 
     calculando = true;
+    pausado = false;
     linhasSemIndices = 0;
     $('avisoIndices').hidden = true;
+    $('avisoRetomada').hidden = true;
     alternarBotoes();
     const fila = [];
     estado.linhas.forEach(l => {
@@ -1025,11 +1331,11 @@
 
     let feitos = 0, falhas = 0;
     const totalFila = fila.length;
-    const inicio = Date.now();
+    let inicio = Date.now(), feitosNoInicio = 0;
     const progresso = (espera) => {
       const pct = totalFila ? Math.round(feitos / totalFila * 100) : 100;
       el.barra.style.width = pct + '%';
-      el.textoProgresso.textContent = `Consultando SINDEC… ${feitos}/${totalFila} linha(s)${falhas ? ` · ${falhas} com erro` : ''}${tempoRestante(inicio, feitos, totalFila)}` +
+      el.textoProgresso.textContent = `Consultando SINDEC… ${feitos.toLocaleString('pt-BR')}/${totalFila.toLocaleString('pt-BR')} linha(s)${falhas ? ` · ${falhas} com erro` : ''}${tempoRestante(inicio, feitos - feitosNoInicio, totalFila - feitosNoInicio)}` +
         (espera ? ` · limite de consultas do TCDF atingido, aguardando ${espera}s para continuar…` : '');
     };
     aoAguardar = (s) => progresso(s);
@@ -1038,6 +1344,12 @@
     let cursor = 0;
     async function trabalhador(){
       while(cursor < fila.length){
+        if(pausado){
+          salvarLocalAgora();
+          el.textoProgresso.textContent = `⏸ Pausado em ${feitos.toLocaleString('pt-BR')}/${totalFila.toLocaleString('pt-BR')} linha(s). Clique em “Continuar”.`;
+          while(pausado) await dormir(300);
+          inicio = Date.now(); feitosNoInicio = feitos;
+        }
         const l = fila[cursor++];
         const req = montarRequisicao(l, dataAtualizacao);
         try{
@@ -1052,12 +1364,16 @@
         feitos++;
         progresso();
         atualizarLinhaNaTabela(l);
+        if(feitos % 50 === 0) salvarLocalAgora();
+        if(feitos % 200 === 0) renderizarResumo(agrupar());
       }
     }
     await trabalhador(); // sequencial: uma consulta por vez (limite do servidor do TCDF)
     aoAguardar = null;
 
     calculando = false;
+    pausado = false;
+    salvarLocalAgora();
     const erros = estado.linhas.filter(l => l.resultado && l.resultado.status === 'erro').length;
     mostrarAvisoIndices(dataAtualizacao);
     el.textoProgresso.textContent = `Concluído em ${new Date().toLocaleTimeString('pt-BR')} · ${estado.linhas.length - erros} linha(s) atualizada(s) até ${dataBR(dataAtualizacao)}${erros ? ` · ${erros} com erro (passe o mouse sobre a situação)` : ''}.`;
@@ -1120,7 +1436,7 @@
       <td class="mono">${esc(l.processo)}</td>
       <td class="mono">${esc(l.codigo)}</td>
       <td class="fato" title="${esc(l.fato)}">${esc(l.fato)}</td>
-      <td class="mono">${esc(dataBR(l.dataFG))}</td>
+      <td class="mono">${esc(dataBR(l.dataFG))}${l.ajusteData ? `<span class="tag-ajuste" title="Data ajustada na importação — original: ${esc(l.dataOriginal)} (${esc(l.ajusteData)})">aj.</span>` : ''}</td>
       <td class="mono" title="${l.dataJuros ? 'definida na linha' : 'regra geral'}">${dj ? esc(dataBR(dj)) + (l.dataJuros ? '*' : '') : '—'}</td>
       ${celulaValor(l.valor)}
       ${temValores ? celulaValor(r.correcao) : '<td class="num">—</td>'}
@@ -1135,23 +1451,58 @@
     </tr>`;
   }
 
+  // Tabela paginada (lotes grandes) com filtro
+  const POR_PAGINA = 200;
+  let paginaAtual = 1;
+  function passaFiltroTabela(l){
+    const f = $('filtroTabela').value;
+    const r = l.resultado;
+    if(f === 'erro') return !!(r && r.status === 'erro');
+    if(f === 'pendentes') return !r || r.status === 'erro' || r.status === 'desatualizado' || r.status === 'calculando';
+    if(f === 'ajustadas') return !!l.ajusteData;
+    return true;
+  }
   function renderizar(){
     const grupos = agrupar();
     if(estado.linhas.length === 0){
       el.tbody.innerHTML = estado.modo === 'lote'
-        ? '<tr><td colspan="14" class="vazio">Nenhuma linha. Importe a planilha DEA ou adicione linhas manualmente.</td></tr>'
+        ? '<tr><td colspan="14" class="vazio">Nenhuma linha. Importe a planilha/PDF DEA ou adicione linhas manualmente.</td></tr>'
         : '<tr><td colspan="14" class="vazio">Nenhum lançamento. Preencha os dados do servidor e os lançamentos acima.</td></tr>';
+      $('paginacao').hidden = true;
     }else{
-      let html = '', n = 0;
-      grupos.forEach(g => {
-        html += `<tr class="grupo"><td colspan="14">Exercício ${g.exercicio || '(não informado)'} · ${g.tot.qtd} lançamento(s)</td></tr>`;
-        g.linhas.forEach(l => { html += linhaHtml(l, ++n); });
-        html += `<tr class="subtotal"><td colspan="8">Valores totais por exercício — ${g.exercicio || '—'}</td>
-          ${celulaValor(g.tot.devido)}${celulaValor(g.tot.correcao)}${celulaValor(g.tot.juros)}${celulaValor(g.tot.total)}<td colspan="2"></td></tr>`;
+      // sequência na ordem dos grupos, com numeração global
+      const seq = [];
+      let n = 0;
+      grupos.forEach((g, gi) => g.linhas.forEach((l, li) => { n++; if(passaFiltroTabela(l)) seq.push({ l, n, g, ultimoDoGrupo: li === g.linhas.length - 1 }); }));
+      const filtro = $('filtroTabela').value;
+      const paginas = Math.max(1, Math.ceil(seq.length / POR_PAGINA));
+      if(paginaAtual > paginas) paginaAtual = paginas;
+      if(paginaAtual < 1) paginaAtual = 1;
+      const ini = (paginaAtual - 1) * POR_PAGINA;
+      const pagina = seq.slice(ini, ini + POR_PAGINA);
+      let html = '', grupoAtual = null;
+      pagina.forEach((it, idx) => {
+        if(it.g !== grupoAtual){
+          grupoAtual = it.g;
+          const continua = idx === 0 && it.g.linhas[0] !== it.l && filtro === 'todas';
+          html += `<tr class="grupo"><td colspan="14">Exercício ${it.g.exercicio || '(não informado)'} · ${it.g.tot.qtd.toLocaleString('pt-BR')} lançamento(s)${continua ? ' (continuação)' : ''}</td></tr>`;
+        }
+        html += linhaHtml(it.l, it.n);
+        if(it.ultimoDoGrupo && filtro === 'todas'){
+          html += `<tr class="subtotal"><td colspan="8">Valores totais por exercício — ${it.g.exercicio || '—'}</td>
+            ${celulaValor(it.g.tot.devido)}${celulaValor(it.g.tot.correcao)}${celulaValor(it.g.tot.juros)}${celulaValor(it.g.tot.total)}<td colspan="2"></td></tr>`;
+        }
       });
-      const t = totais(estado.linhas);
-      html += `<tr class="total-geral"><td colspan="8">TOTAL GERAL</td>${celulaValor(t.devido)}${celulaValor(t.correcao)}${celulaValor(t.juros)}${celulaValor(t.total)}<td colspan="2"></td></tr>`;
+      if(!pagina.length) html = '<tr><td colspan="14" class="vazio">Nenhuma linha neste filtro.</td></tr>';
+      if(paginaAtual === paginas && filtro === 'todas'){
+        const t = totais(estado.linhas);
+        html += `<tr class="total-geral"><td colspan="8">TOTAL GERAL</td>${celulaValor(t.devido)}${celulaValor(t.correcao)}${celulaValor(t.juros)}${celulaValor(t.total)}<td colspan="2"></td></tr>`;
+      }
       el.tbody.innerHTML = html;
+      $('paginacao').hidden = estado.linhas.length <= POR_PAGINA && filtro === 'todas';
+      $('infoPagina').textContent = seq.length
+        ? `página ${paginaAtual} de ${paginas} · linhas ${(ini + 1).toLocaleString('pt-BR')}–${Math.min(ini + POR_PAGINA, seq.length).toLocaleString('pt-BR')} de ${seq.length.toLocaleString('pt-BR')}`
+        : 'nenhuma linha';
     }
     renderizarResumo(grupos);
     alternarBotoes();
@@ -1185,9 +1536,11 @@
     const temLinhas = estado.linhas.length > 0;
     const temCalculo = estado.linhas.some(l => l.resultado && (l.resultado.status === 'ok' || l.resultado.status === 'desatualizado'));
     el.btnAtualizar.disabled = calculando || !temLinhas;
-    const pendentes = estado.linhas.filter(l => l.resultado && (l.resultado.status === 'erro' || l.resultado.status === 'desatualizado')).length;
+    const pendentes = estado.linhas.filter(l => !l.resultado || l.resultado.status === 'erro' || l.resultado.status === 'desatualizado').length;
     el.btnReprocessar.hidden = calculando || !pendentes || !temCalculo;
-    el.btnReprocessar.textContent = `↻ Reprocessar só as pendentes (${pendentes})`;
+    el.btnReprocessar.textContent = `↻ Reprocessar só as pendentes (${pendentes.toLocaleString('pt-BR')})`;
+    $('btnPausar').hidden = !calculando;
+    $('btnPausar').textContent = pausado ? '▶ Continuar' : '⏸ Pausar';
     el.btnAtualizar.textContent = calculando ? '⏳ Atualizando…' : '⟳ Atualizar valores pelo SINDEC';
     el.btnExcel.disabled = calculando || !temLinhas;
     el.btnImprimir.disabled = calculando || !temCalculo;
@@ -1307,6 +1660,11 @@
   const CABECALHOS_MODELO = ['', 'MATRÍCULA', 'NOME DO SERVIDOR', 'CPF', 'PROCESSO DE ORIGEM DO CRÉDITO/DÉBITO', 'PÁGINAS DO DOCUMENTO', 'CONTA CONTÁBIL', 'CÓDIGO SIGRH', 'FATO GERADOR (DESCRIÇÃO DO CÓDIGO)', 'DATA DO FATO GERADOR', 'EXERCÍCIO', 'VALORES DEVIDOS (R$)', 'ATUALIZAÇÃO MONETÁRIA (CÓDIGO 20827)', 'JUROS DE MORA (CÓDIGO 20088)', 'VALOR TOTAL ATUALIZADO', 'OBSERVAÇÃO'];
   const LARGURAS_MODELO = [9, 14.75, 45, 17, 25.6, 14, 14, 12.25, 40, 13.4, 9.9, 19.25, 19, 17, 19, 30];
 
+  // Órgão: o lido do arquivo importado (aba Lote), ou o IBRAM-DF por padrão
+  function orgaoAtual(){
+    const o = estado.modo === 'lote' ? estado.lote.orgao : null;
+    return (o && o.codigo && o.nome) ? o : { codigo: ORGAO_CODIGO, nome: ORGAO_NOME };
+  }
   function prepararAbaModelo(ws, titulo){
     LARGURAS_MODELO.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
     const borda = { style:'thin', color:{ argb:'FF808080' } };
@@ -1314,9 +1672,10 @@
     ws.getCell('B8').value = titulo;
     ws.getCell('B8').font = { bold:true, size:13 };
     ws.getCell('B8').alignment = { horizontal:'center' };
-    ws.getCell('C9').value = ORGAO_CODIGO;
+    const org = orgaoAtual();
+    ws.getCell('C9').value = org.codigo;
     ws.mergeCells('D9:P9');
-    ws.getCell('D9').value = ORGAO_NOME;
+    ws.getCell('D9').value = org.nome;
     ['C9','D9'].forEach(c => { ws.getCell(c).font = { bold:true }; ws.getCell(c).alignment = { horizontal:'center' }; });
     const cab = ws.getRow(10);
     CABECALHOS_MODELO.forEach((h, i) => {
@@ -1364,6 +1723,7 @@
           if(ok && res.ajusteJuros) obs.push(`Ajuste arred. juros ${moeda(res.ajusteJuros)}`);
           if(ok && res.status === 'desatualizado') obs.push('Recalcular: ' + (res.motivo || 'parâmetros alterados'));
           if(ok && res.dataJuros && res.dataJuros !== l.dataFG) obs.push('Juros desde ' + dataBR(res.dataJuros));
+          if(l.ajusteData) obs.push(`Data ajustada na importação (original: ${l.dataOriginal} — ${l.ajusteData})`);
           const linha = ws.getRow(r);
           const matNum = /^\d+$/.test(l.matricula) ? Number(l.matricula) : l.matricula;
           const dt = isoValida(l.dataFG) ? new Date(Date.UTC(...l.dataFG.split('-').map((x, i) => i === 1 ? Number(x) - 1 : Number(x)))) : (l.dataFG || null);
@@ -1521,6 +1881,7 @@
 
   function imprimir(){
     if(estado.modo === 'individual') return imprimirIndividual();
+    if(estado.linhas.length > 500 && !window.confirm(`A relação tem ${estado.linhas.length.toLocaleString('pt-BR')} lançamentos — a impressão terá centenas de páginas.\nPara este volume, o recomendado é “Exportar Excel”.\n\nImprimir mesmo assim?`)) return;
     const incluirMemoria = window.confirm('Incluir a memória de cálculo detalhada (índices e etapas do SINDEC) na impressão?\n\nOK = incluir · Cancelar = somente o quadro');
     const grupos = agrupar();
     const tg = totais(estado.linhas);
@@ -1555,7 +1916,7 @@
 
     $('areaImpressao').innerHTML = `
       <div class="imp-cabecalho">
-        <div class="imp-orgao">${ORGAO_CODIGO} · ${ORGAO_NOME} — DIGEP/ASPAG</div>
+        <div class="imp-orgao">${esc(orgaoAtual().codigo)} · ${esc(orgaoAtual().nome)}${orgaoAtual().codigo === ORGAO_CODIGO ? ' — DIGEP/ASPAG' : ''}</div>
         <h1>Dívida de Exercícios Anteriores — DEA ${anoDea()}: atualização monetária e juros de mora</h1>
         <div class="imp-meta">
           ${el.referencia.value ? `<span>Referência: <strong>${esc(el.referencia.value)}</strong></span>` : ''}
@@ -1781,7 +2142,8 @@
     if(estado.modo === 'individual') sincronizarServidor();
     return {
       versao: 2, modo: estado.modo, parametros: parametrosAtuais(),
-      lote: { arquivo: estado.lote.arquivo, importadoEm: estado.lote.importadoEm, linhas: limparLinhas(estado.lote.linhas) },
+      salvoEm: Date.now(),
+      lote: { arquivo: estado.lote.arquivo, importadoEm: estado.lote.importadoEm, orgao: estado.lote.orgao || null, linhas: limparLinhas(estado.lote.linhas) },
       individual: { servidor: { ...estado.individual.servidor }, linhas: limparLinhas(estado.individual.linhas) }
     };
   }
@@ -1790,7 +2152,7 @@
     if(estado.modo === 'individual') sincronizarServidor();
     const base = { modo: estado.modo, parametros: parametrosAtuais(), linhas: limparLinhas(estado.linhas) };
     if(estado.modo === 'individual') base.servidor = { ...estado.individual.servidor };
-    else { base.arquivo = estado.lote.arquivo; base.importadoEm = estado.lote.importadoEm; }
+    else { base.arquivo = estado.lote.arquivo; base.importadoEm = estado.lote.importadoEm; base.orgao = estado.lote.orgao || null; }
     return base;
   }
   function aplicarEstado(s){
@@ -1805,7 +2167,7 @@
     if(s.lote || s.individual){
       // formato de rascunho (duas abas)
       const lt = s.lote || {};
-      estado.lote.arquivo = lt.arquivo || ''; estado.lote.importadoEm = lt.importadoEm || '';
+      estado.lote.arquivo = lt.arquivo || ''; estado.lote.importadoEm = lt.importadoEm || ''; estado.lote.orgao = lt.orgao || null;
       estado.lote.linhas = (lt.linhas || []).map(novaLinha);
       const ind = s.individual || {};
       estado.individual.servidor = { matricula: '', nome: '', cpf: '', processo: '', ...(ind.servidor || {}) };
@@ -1814,12 +2176,62 @@
       estado.individual.servidor = { matricula: '', nome: '', cpf: '', processo: '', ...(s.servidor || {}) };
       estado.individual.linhas = (s.linhas || []).map(novaLinha);
     }else{
-      estado.lote.arquivo = s.arquivo || ''; estado.lote.importadoEm = s.importadoEm || '';
+      estado.lote.arquivo = s.arquivo || ''; estado.lote.importadoEm = s.importadoEm || ''; estado.lote.orgao = s.orgao || null;
       estado.lote.linhas = (s.linhas || []).map(novaLinha);
     }
     if(estado.lote.arquivo) el.infoArquivo.textContent = `${estado.lote.arquivo} · importado em ${estado.lote.importadoEm} · ${estado.lote.linhas.length} linha(s)`;
     estado.modo = 'lote';
     definirModo(s.modo === 'individual' ? 'individual' : 'lote');
+  }
+
+  // ---------------------------------------------------------------------
+  // Cópia local no navegador (IndexedDB): sem limite prático de tamanho.
+  // Permite continuar de onde parou se a página fechar durante um lote grande.
+  // ---------------------------------------------------------------------
+  const IDB_NOME = 'portal-acertos', IDB_LOJA = 'rascunhos', IDB_CHAVE = 'atualizacao-sindec';
+  function idbAbrir(){
+    return new Promise((ok, falha) => {
+      try{
+        const req = indexedDB.open(IDB_NOME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(IDB_LOJA);
+        req.onsuccess = () => ok(req.result);
+        req.onerror = () => falha(req.error);
+      }catch(e){ falha(e); }
+    });
+  }
+  async function idbGravar(valor){
+    const db = await idbAbrir();
+    await new Promise((ok, falha) => { const tx = db.transaction(IDB_LOJA, 'readwrite'); tx.objectStore(IDB_LOJA).put(valor, IDB_CHAVE); tx.oncomplete = ok; tx.onerror = () => falha(tx.error); });
+    db.close();
+  }
+  async function idbLer(){
+    const db = await idbAbrir();
+    const v = await new Promise((ok, falha) => { const tx = db.transaction(IDB_LOJA, 'readonly'); const r = tx.objectStore(IDB_LOJA).get(IDB_CHAVE); r.onsuccess = () => ok(r.result); r.onerror = () => falha(r.error); });
+    db.close();
+    return v || null;
+  }
+  let gravandoLocal = false;
+  async function salvarLocalAgora(){
+    if(modoEdicaoHistorico || gravandoLocal) return;
+    gravandoLocal = true;
+    try{ await idbGravar(JSON.parse(JSON.stringify(serializarRascunho()))); }
+    catch(e){ console.warn('Não foi possível gravar a cópia local:', e); }
+    finally{ gravandoLocal = false; }
+  }
+  function verificarRetomada(){
+    const ls = estado.lote.linhas;
+    const feitos = ls.filter(l => l.resultado && l.resultado.status === 'ok').length;
+    const sem = ls.filter(l => !l.resultado).length;
+    const av = $('avisoRetomada');
+    if(ls.length && feitos && sem){
+      const dt = (ls.find(l => l.resultado && l.resultado.dataAtualizacao) || {}).resultado;
+      av.innerHTML = `<strong>Cálculo interrompido:</strong> ${feitos.toLocaleString('pt-BR')} de ${ls.length.toLocaleString('pt-BR')} lançamentos já atualizados${dt ? ` até ${dataBR(dt.dataAtualizacao)}` : ''}; faltam ${sem.toLocaleString('pt-BR')}.
+        <div style="margin-top:0.6rem;"><button type="button" class="salvar" id="btnRetomar">▶ Continuar de onde parou</button></div>`;
+      av.hidden = false;
+      $('btnRetomar').addEventListener('click', () => { if(estado.modo !== 'lote') definirModo('lote'); atualizarTodos(true); });
+    }else{
+      av.hidden = true;
+    }
   }
 
   let timerRascunho = null;
@@ -1828,6 +2240,8 @@
     el.indicadorRascunho.textContent = 'Salvando rascunho…';
     clearTimeout(timerRascunho);
     timerRascunho = setTimeout(async () => {
+      salvarLocalAgora();
+      if(!fb){ el.indicadorRascunho.textContent = 'Rascunho guardado neste navegador (banco de dados indisponível).'; return; }
       try{
         let dadosRascunho = limpoParaFirestore(serializarRascunho());
         let omitido = false;
@@ -1837,12 +2251,12 @@
           omitido = true;
         }
         if(tamanhoBytes(dadosRascunho) > LIMITE_BYTES_FIRESTORE){
-          el.indicadorRascunho.textContent = 'Rascunho não salvo: dados acima do limite de 1 MB do banco. Exporte o Excel ao final.';
+          el.indicadorRascunho.textContent = 'Dados acima do limite de 1 MB do banco: o rascunho ficou guardado só neste navegador. Exporte o Excel ao final.';
           return;
         }
         await salvarEstadoModulo(CHAVE_RASCUNHO, dadosRascunho);
         el.indicadorRascunho.textContent = omitido
-          ? `Relação grande (${estado.lote.linhas.length} lançamentos): o rascunho guardou só os parâmetros — os lançamentos não ficam salvos. Exporte o Excel ao final.`
+          ? `Relação grande (${estado.lote.linhas.length.toLocaleString('pt-BR')} lançamentos): os lançamentos ficam guardados neste navegador (o banco de dados guarda só os parâmetros). Exporte o Excel ao final.`
           : `Rascunho salvo automaticamente às ${new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}.`;
       }catch(err){
         el.indicadorRascunho.textContent = 'Não foi possível salvar o rascunho: ' + err.message;
@@ -1909,17 +2323,23 @@
   }
 
   async function carregarRascunho(){
-    try{
-      const s = await obterEstadoModulo(CHAVE_RASCUNHO);
-      const temDados = s && ((s.linhas && s.linhas.length) || (s.lote && s.lote.linhas && s.lote.linhas.length) ||
-        (s.individual && ((s.individual.linhas && s.individual.linhas.length) || (s.individual.servidor && s.individual.servidor.nome))));
-      if(temDados){
-        aplicarEstado(s);
-        el.indicadorRascunho.textContent = 'Rascunho carregado — os dados ficam salvos automaticamente.';
-        return;
-      }
-    }catch(err){
-      el.indicadorRascunho.textContent = 'Não foi possível carregar o rascunho: ' + err.message;
+    let doBanco = null, local = null;
+    try{ doBanco = await obterEstadoModulo(CHAVE_RASCUNHO); }catch(err){ /* sem banco: segue com a cópia local */ }
+    try{ local = await idbLer(); }catch(err){ /* navegador sem IndexedDB */ }
+    const temDados = (s) => s && ((s.linhas && s.linhas.length) || (s.lote && s.lote.linhas && s.lote.linhas.length) ||
+      (s.individual && ((s.individual.linhas && s.individual.linhas.length) || (s.individual.servidor && s.individual.servidor.nome))));
+    let escolhido = null, origem = '';
+    if(temDados(local) && (!temDados(doBanco) || (local.salvoEm || 0) >= (doBanco.salvoEm || 0) ||
+        ((local.lote && local.lote.linhas || []).length > (doBanco.lote && doBanco.lote.linhas || []).length))){
+      escolhido = local; origem = 'deste navegador';
+    }else if(temDados(doBanco)){
+      escolhido = doBanco; origem = 'da sua conta';
+    }
+    if(escolhido){
+      aplicarEstado(escolhido);
+      el.indicadorRascunho.textContent = `Rascunho ${origem} carregado — os dados ficam salvos automaticamente.`;
+      verificarRetomada();
+      return;
     }
     renderizar();
   }
@@ -1998,6 +2418,26 @@
     $('i-' + c).addEventListener('input', () => { sincronizarServidor(); clearTimeout(timerRenderInd); timerRenderInd = setTimeout(renderizar, 300); agendarRascunho(); });
   });
   $('i-nome').addEventListener('blur', () => { $('i-nome').value = $('i-nome').value.toUpperCase(); sincronizarServidor(); });
+  $('btnPausar').addEventListener('click', () => {
+    pausado = !pausado;
+    alternarBotoes();
+    if(pausado) aviso('Pausando após a consulta em andamento…');
+  });
+  $('filtroTabela').addEventListener('change', () => { paginaAtual = 1; renderizar(); });
+  $('paginacao').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-pag]');
+    if(!b) return;
+    const acao = b.dataset.pag;
+    if(acao === 'primeira') paginaAtual = 1;
+    if(acao === 'anterior') paginaAtual--;
+    if(acao === 'proxima') paginaAtual++;
+    if(acao === 'ultima') paginaAtual = 1e9;
+    renderizar();
+    document.querySelector('.tabela-wrapper').scrollTop = 0;
+  });
+  window.addEventListener('beforeunload', (e) => {
+    if(calculando){ salvarLocalAgora(); e.preventDefault(); e.returnValue = ''; }
+  });
   el.btnAtualizar.addEventListener('click', () => atualizarTodos(false));
   el.btnReprocessar.addEventListener('click', () => atualizarTodos(true));
   el.btnExcel.addEventListener('click', exportarExcel);
@@ -2048,7 +2488,8 @@
       fb = await import('../assets/firebase-init.js');
     }catch(err){
       console.error(err);
-      text.textContent = 'banco de dados indisponível — salvar/rascunho desativados';
+      text.textContent = 'banco de dados indisponível — salvar no histórico desativado';
+      carregarRascunho();
       el.indicadorRascunho.textContent = 'Sem conexão com o banco de dados: a importação e o cálculo funcionam, mas nada será salvo. (' + (err.message || err) + ')';
       return;
     }
