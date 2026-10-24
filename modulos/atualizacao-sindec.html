@@ -379,6 +379,7 @@
         </div>
         <div class="acoes-dir">
           <button type="button" id="btnExcel" disabled>Exportar Excel</button>
+          <button type="button" id="btnExcelServidor" disabled title="Todos os lançamentos agrupados por servidor (ordem crescente de matrícula), com o total a que cada servidor tem direito">Exportar Excel por servidor</button>
           <button type="button" id="btnImprimir" disabled>Imprimir</button>
           <button type="button" id="btnSalvar" class="salvar" disabled>Salvar no histórico</button>
         </div>
@@ -1543,6 +1544,8 @@
     $('btnPausar').textContent = pausado ? '▶ Continuar' : '⏸ Pausar';
     el.btnAtualizar.textContent = calculando ? '⏳ Atualizando…' : '⟳ Atualizar valores pelo SINDEC';
     el.btnExcel.disabled = calculando || !temLinhas;
+    $('btnExcelServidor').hidden = estado.modo !== 'lote';
+    $('btnExcelServidor').disabled = calculando || !temCalculo;
     el.btnImprimir.disabled = calculando || !temCalculo;
     el.btnSalvar.disabled = calculando || !temCalculo;
     if(!calculando && !temLinhas){ el.barra.style.width = '0'; el.textoProgresso.textContent = estado.modo === 'lote' ? 'Importe uma relação para começar.' : 'Informe o servidor e ao menos um lançamento.'; }
@@ -1834,6 +1837,225 @@
         : `DEA_${exercicioDea}${sufixo}.xlsx`;
       baixarBuffer(buffer, nomeArq);
       aviso('Planilha exportada no layout do modelo DEA.');
+    }catch(err){
+      console.error(err);
+      aviso('Erro ao exportar: ' + err.message, 6000);
+    }finally{
+      alternarBotoes();
+    }
+  }
+
+  // =====================================================================
+  // Exportação Excel POR SERVIDOR (aba Relação/lote)
+  //  · Aba "Por servidor": mesmo layout A–P do modelo, lançamentos agrupados por servidor
+  //    em ordem crescente de matrícula, + coluna Q "TOTAL DO SERVIDOR" (célula mesclada).
+  //  · Aba "Resumo por servidor": uma linha por servidor (devido, atualização, juros, total).
+  // =====================================================================
+  function chaveServidor(l){
+    const m = String(l.matricula || '').trim().toUpperCase().replace(/^0+(?=.)/, '');
+    return m || ('NOME:' + normalizarCabecalho(l.nome));
+  }
+  // Ordem crescente de matrícula: completa com zeros à esquerda e trata o "X" (dígito verificador) como após o 9
+  function compararMatricula(a, b){
+    if(a.startsWith('NOME:') || b.startsWith('NOME:')) return a.startsWith('NOME:') - b.startsWith('NOME:') || a.localeCompare(b, 'pt-BR');
+    const L = Math.max(a.length, b.length, 9);
+    const fa = a.padStart(L, '0').replace(/X/g, ':'), fb = b.padStart(L, '0').replace(/X/g, ':');
+    return fa < fb ? -1 : fa > fb ? 1 : 0;
+  }
+  // Matrícula no Excel: número quando não tem zero à esquerda; texto quando tem (preserva "00942219", "0092430X")
+  function matriculaParaExcel(m){ return /^[1-9]\d*$/.test(String(m || '')) ? Number(m) : (m || null); }
+  function agruparPorServidor(linhas){
+    const mapa = new Map();
+    linhas.forEach(l => {
+      const k = chaveServidor(l);
+      if(!mapa.has(k)) mapa.set(k, { chave: k, matricula: l.matricula, nome: l.nome, cpf: l.cpf, nomes: new Set(), matriculas: new Set(), linhas: [] });
+      const g = mapa.get(k);
+      if(l.nome) g.nomes.add(normalizarCabecalho(l.nome));
+      if(l.matricula) g.matriculas.add(String(l.matricula).trim());
+      if(!g.cpf && l.cpf) g.cpf = l.cpf;
+      g.linhas.push(l);
+    });
+    const grupos = [...mapa.values()].sort((a, b) => compararMatricula(a.chave, b.chave));
+    grupos.forEach(g => {
+      g.linhas.sort((a, b) => String(a.dataFG).localeCompare(String(b.dataFG)) || String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true }));
+      g.tot = totais(g.linhas);
+      g.pendentes = g.linhas.filter(l => !(l.resultado && l.resultado.status === 'ok')).length;
+    });
+    return grupos;
+  }
+
+  function notasServidor(g){
+    const n = [];
+    if(g.matriculas.size > 1) n.push(`matrícula grafada de formas diferentes (${[...g.matriculas].join(' / ')})`);
+    if(g.nomes.size > 1) n.push('nome com grafias diferentes');
+    if(g.pendentes) n.push(`${g.pendentes} lançamento(s) não atualizado(s) — total incompleto`);
+    return n;
+  }
+  async function exportarExcelPorServidor(){
+    if(estado.modo !== 'lote') return;
+    const pend = estado.linhas.filter(l => !(l.resultado && l.resultado.status === 'ok'));
+    if(pend.length && !window.confirm(
+      `${pend.length.toLocaleString('pt-BR')} lançamento(s) estão com erro, pendentes ou desatualizados.\n` +
+      `Neles a atualização e os juros ficam em branco — o total desses servidores sairá MENOR que o devido.\n\n` +
+      `Recomendado: “Reprocessar só as pendentes” antes de exportar.\n\nExportar mesmo assim?`)) return;
+    const btn = $('btnExcelServidor');
+    try{
+      btn.disabled = true;
+      const ExcelJS = await garantirExcelJS();
+      const wb = new ExcelJS.Workbook();
+      wb.creator = usuarioEmail || 'Portal de Acertos';
+      wb.created = new Date();
+      const grupos = agruparPorServidor(estado.linhas);
+      const ate = el.dataAtualizacao.value ? ` · valores atualizados pelo SINDEC/TCDF até ${dataBR(el.dataAtualizacao.value)}` : '';
+
+      // ---------------- Aba 1: Por servidor ----------------
+      const ws = wb.addWorksheet('Por servidor');
+      const borda = prepararAbaModelo(ws, `DÍVIDA DE EXERCÍCIOS ANTERIORES — DEA ${anoDea()} — POR SERVIDOR${ate}`);
+      const todasBordas = { top:borda, left:borda, bottom:borda, right:borda };
+      ws.getColumn(17).width = 20;
+      const cq = ws.getCell('Q10');
+      cq.value = 'TOTAL DO SERVIDOR (R$)';
+      cq.font = { bold:true, size:9, color:{ argb:'FFFFFFFF' } };
+      cq.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF4338CA' } };
+      cq.alignment = { wrapText:true, vertical:'middle', horizontal:'center' };
+      cq.border = todasBordas;
+      ws.getCell('A10').value = 'Nº';
+      ws.getCell('A10').font = { bold:true, size:9 };
+      ws.getCell('A10').alignment = { horizontal:'center', vertical:'middle' };
+
+      let r = 11;
+      const linhaTotalServidor = [];
+      grupos.forEach((g, gi) => {
+        const inicio = r;
+        g.linhas.forEach(l => {
+          const res = l.resultado;
+          const ok = res && (res.status === 'ok' || res.status === 'desatualizado');
+          const obs = [l.obs];
+          if(res && res.status === 'erro') obs.push('ERRO SINDEC: ' + res.erro);
+          if(!res) obs.push('NÃO ATUALIZADO (pendente)');
+          if(ok && res.ajusteJuros) obs.push(`Ajuste arred. juros ${moeda(res.ajusteJuros)}`);
+          if(ok && res.status === 'desatualizado') obs.push('Recalcular: ' + (res.motivo || 'parâmetros alterados'));
+          if(ok && res.dataJuros && res.dataJuros !== l.dataFG) obs.push('Juros desde ' + dataBR(res.dataJuros));
+          if(l.ajusteData) obs.push(`Data ajustada na importação (original: ${l.dataOriginal} — ${l.ajusteData})`);
+          const linha = ws.getRow(r);
+          const dt = isoValida(l.dataFG) ? new Date(Date.UTC(...l.dataFG.split('-').map((x, i) => i === 1 ? Number(x) - 1 : Number(x)))) : (l.dataFG || null);
+          linha.values = [null, matriculaParaExcel(l.matricula), l.nome, l.cpf, l.processo, /^\d+$/.test(l.paginas) ? Number(l.paginas) : l.paginas, l.conta,
+            /^\d+$/.test(l.codigo) ? Number(l.codigo) : l.codigo, l.fato, dt, exercicioDaLinha(l) || null, l.valor,
+            ok ? res.correcao : null, ok ? res.juros : null,
+            ok ? { formula:`L${r}+M${r}+N${r}`, result: res.total } : { formula:`L${r}`, result: l.valor || 0 },
+            obs.filter(Boolean).join(' | ') || null].map(x => x === '' ? null : x);
+          for(let c = 2; c <= 17; c++){
+            const cel = linha.getCell(c);
+            cel.border = todasBordas;
+            cel.font = { size:9 };
+            cel.alignment = { vertical:'middle', wrapText: c === 3 || c === 9 || c === 16 };
+          }
+          linha.getCell(10).numFmt = 'dd/mm/yyyy';
+          [12,13,14,15].forEach(c => { linha.getCell(c).numFmt = FMT_MOEDA; });
+          if(!ok) linha.getCell(16).font = { size:9, color:{ argb:'FFC1443B' } };
+          r++;
+        });
+        const fim = r - 1;
+        // coluna A: nº do servidor (mesclada)
+        ws.getCell(`A${inicio}`).value = gi + 1;
+        if(fim > inicio) ws.mergeCells(`A${inicio}:A${fim}`);
+        ws.getCell(`A${inicio}`).alignment = { vertical:'middle', horizontal:'center' };
+        ws.getCell(`A${inicio}`).font = { bold:true, size:10 };
+        // coluna Q: total do servidor (mesclada) = soma da coluna O do servidor
+        const totalServidor = r2(g.linhas.reduce((a, l) => a + ((l.resultado && (l.resultado.status === 'ok' || l.resultado.status === 'desatualizado')) ? l.resultado.total : (l.valor || 0)), 0));
+        const q = ws.getCell(`Q${inicio}`);
+        q.value = { formula:`SUM(O${inicio}:O${fim})`, result: totalServidor };
+        if(fim > inicio) ws.mergeCells(`Q${inicio}:Q${fim}`);
+        q.numFmt = FMT_MOEDA;
+        q.font = { bold:true, size:10, color:{ argb:'FF3730A3' } };
+        q.alignment = { vertical:'middle', horizontal:'center' };
+        q.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEEF0FB' } };
+        q.border = todasBordas;
+        const notas = notasServidor(g);
+        if(notas.length) q.note = notas.join('; ');
+        // linha separadora fina entre servidores
+        for(let c = 1; c <= 17; c++){
+          const cel = ws.getRow(fim).getCell(c);
+          cel.border = { ...todasBordas, bottom:{ style:'medium', color:{ argb:'FF0F2A3D' } } };
+        }
+        linhaTotalServidor.push({ g, inicio, fim, total: totalServidor });
+      });
+
+      // TOTAL GERAL
+      ws.mergeCells(`B${r}:K${r}`);
+      ws.getCell(`B${r}`).value = `TOTAL GERAL — ${grupos.length} servidor(es) · ${estado.linhas.length} lançamento(s)`;
+      ws.getCell(`B${r}`).alignment = { horizontal:'center' };
+      const tg = totais(estado.linhas);
+      const totalGeralQ = r2(linhaTotalServidor.reduce((a, x) => a + x.total, 0));
+      [['L', tg.devido], ['M', tg.correcao], ['N', tg.juros], ['O', totalGeralQ], ['Q', totalGeralQ]].forEach(([c, v]) => {
+        const cel = ws.getCell(`${c}${r}`);
+        cel.value = { formula:`SUM(${c}11:${c}${r - 1})`, result: v };
+        cel.numFmt = FMT_MOEDA;
+      });
+      for(let c = 1; c <= 17; c++){
+        const cel = ws.getRow(r).getCell(c);
+        cel.font = { bold:true, size:9 };
+        cel.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEAE6DC' } };
+        cel.border = todasBordas;
+      }
+      r += 2;
+      ws.mergeCells(`B${r}:Q${r}`);
+      ws.getCell(`B${r}`).value = `Fonte: SINDEC/TCDF — Passivos a Servidores. Lançamentos agrupados por matrícula (ordem crescente). ` +
+        `“TOTAL DO SERVIDOR” = soma de valores devidos + atualização monetária (cód. 20827) + juros de mora (cód. 20088) de todos os lançamentos do servidor. ` +
+        `Juros: ${descricaoJuros()}. Arredondamento: ${el.criterioArred.selectedOptions[0].text}.`;
+      ws.getCell(`B${r}`).font = { italic:true, size:8 };
+      ws.getCell(`B${r}`).alignment = { wrapText:true };
+      ws.getRow(r).height = 30;
+      ws.pageSetup.printArea = `A8:Q${r}`;
+
+      // ---------------- Aba 2: Resumo por servidor ----------------
+      const wr = wb.addWorksheet('Resumo por servidor');
+      const org = orgaoAtual();
+      wr.mergeCells('A1:I1'); wr.getCell('A1').value = `${org.codigo} · ${org.nome}`; wr.getCell('A1').font = { bold:true, size:10 };
+      wr.mergeCells('A2:I2'); wr.getCell('A2').value = `DEA ${anoDea()} — RESUMO POR SERVIDOR${ate}`; wr.getCell('A2').font = { bold:true, size:12 };
+      const cabR = ['Nº', 'MATRÍCULA', 'NOME DO SERVIDOR', 'CPF', 'QTD. LANÇAMENTOS', 'VALORES DEVIDOS (R$)', 'ATUALIZAÇÃO MONETÁRIA (CÓD. 20827)', 'JUROS DE MORA (CÓD. 20088)', 'TOTAL DO SERVIDOR (R$)', 'OBSERVAÇÃO'];
+      [6, 13, 42, 16, 12, 18, 20, 18, 20, 34].forEach((w, i) => { wr.getColumn(i + 1).width = w; });
+      const rc = wr.getRow(4);
+      cabR.forEach((h, i) => {
+        const c = rc.getCell(i + 1); c.value = h;
+        c.font = { bold:true, size:9, color:{ argb:'FFFFFFFF' } };
+        c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: i === 8 ? 'FF4338CA' : 'FF0F2A3D' } };
+        c.alignment = { wrapText:true, vertical:'middle', horizontal:'center' }; c.border = todasBordas;
+      });
+      rc.height = 36;
+      let rr = 5;
+      linhaTotalServidor.forEach((x, i) => {
+        const g = x.g;
+        const obs = notasServidor(g);
+        const row = wr.getRow(rr);
+        row.values = [i + 1, matriculaParaExcel(g.matricula), g.nome, g.cpf || null, g.linhas.length,
+          { formula:`SUM('Por servidor'!L${x.inicio}:L${x.fim})`, result: g.tot.devido },
+          { formula:`SUM('Por servidor'!M${x.inicio}:M${x.fim})`, result: g.tot.correcao },
+          { formula:`SUM('Por servidor'!N${x.inicio}:N${x.fim})`, result: g.tot.juros },
+          { formula:`'Por servidor'!Q${x.inicio}`, result: x.total },
+          obs.join(' | ') || null];
+        for(let c = 1; c <= 10; c++){ const cel = row.getCell(c); cel.border = todasBordas; cel.font = { size:9, bold: c === 9 }; cel.alignment = { vertical:'middle', wrapText: c === 3 || c === 10 }; }
+        [6, 7, 8, 9].forEach(c => { row.getCell(c).numFmt = FMT_MOEDA; });
+        if(obs.length) row.getCell(10).font = { size:9, color:{ argb:'FFC1443B' } };
+        rr++;
+      });
+      const rowT = wr.getRow(rr);
+      wr.mergeCells(`A${rr}:D${rr}`);
+      rowT.getCell(1).value = 'TOTAL GERAL';
+      rowT.getCell(5).value = { formula:`SUM(E5:E${rr - 1})`, result: estado.linhas.length };
+      [['F', tg.devido], ['G', tg.correcao], ['H', tg.juros], ['I', totalGeralQ]].forEach(([c, v]) => {
+        wr.getCell(`${c}${rr}`).value = { formula:`SUM(${c}5:${c}${rr - 1})`, result: v };
+        wr.getCell(`${c}${rr}`).numFmt = FMT_MOEDA;
+      });
+      for(let c = 1; c <= 10; c++){ const cel = rowT.getCell(c); cel.font = { bold:true, size:9 }; cel.border = todasBordas; cel.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEAE6DC' } }; }
+      wr.views = [{ state:'frozen', ySplit:4 }];
+      wr.pageSetup = { orientation:'landscape', paperSize:9, fitToPage:true, fitToWidth:1, fitToHeight:0, printTitlesRow:'4:4',
+        margins:{ left:0.3, right:0.3, top:0.4, bottom:0.4, header:0.2, footer:0.2 } };
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const sufixo = el.dataAtualizacao.value ? '_atualizado_' + el.dataAtualizacao.value : '';
+      baixarBuffer(buffer, `DEA_${anoDea()}_por_servidor${sufixo}.xlsx`);
+      aviso(`Planilha por servidor exportada (${grupos.length} servidor(es)).`);
     }catch(err){
       console.error(err);
       aviso('Erro ao exportar: ' + err.message, 6000);
@@ -2441,6 +2663,7 @@
   el.btnAtualizar.addEventListener('click', () => atualizarTodos(false));
   el.btnReprocessar.addEventListener('click', () => atualizarTodos(true));
   el.btnExcel.addEventListener('click', exportarExcel);
+  $('btnExcelServidor').addEventListener('click', exportarExcelPorServidor);
   el.btnImprimir.addEventListener('click', imprimir);
   el.btnSalvar.addEventListener('click', salvarHistorico);
 
