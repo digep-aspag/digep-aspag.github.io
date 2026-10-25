@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Atualização SINDEC - Débito em Apuração</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --inss:#BE185D; --inss-claro:#FCE7F0; --inss-borda:#F3B6CF;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  /* Cabeçalho da página */
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--inss); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--inss); margin:0 0 1.6rem; }
+
+  /* Sumário */
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--inss); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--inss); text-decoration:underline; }
+
+  /* Seções */
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--inss);
+    border-bottom:2px solid var(--inss-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--inss); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--inss-claro); color:var(--inss); border:1px solid var(--inss-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  /* Caixas de destaque */
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box > strong:first-child{ display:block; margin-bottom:.2rem; }
+
+  /* Tabelas */
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--inss-claro); color:#831843; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl td.num{ text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+  table.tbl tfoot td{ font-weight:700; background:var(--inss-claro); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0 0 1rem; padding:0; font-size:.95rem; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; margin-bottom:.6rem; padding:.6rem .8rem;
+    background:#fff; border:1px solid var(--line); border-radius:7px;
+  }
+  .checklist li::before{
+    content:"☐"; font-size:1.1rem; color:var(--inss); flex-shrink:0; line-height:1.3;
+  }
+
+  .glossario dt{ font-weight:600; color:var(--inss); font-family:'IBM Plex Mono',monospace; font-size:.85rem; margin-top:.9rem; }
+  .glossario dd{ margin:.2rem 0 0; font-size:.92rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--inss); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
+      <a href="atualizacao-sindec-debito.html"><span class="selo" style="background:#BE185D;">DEB</span> Atualização SINDEC - Débito em Apuração</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="atualizacao-sindec-debito.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Atualização SINDEC - Débito em Apuração</div>
+      <div class="page-sub">Passo a passo para atualizar, pelo SINDEC/TCDF, o débito de um servidor com o GDF (reposição ao erário), com ou sem juros conforme o reconhecimento de boa-fé, e gerar a memória de cálculo no padrão SEI. Escrito para quem nunca usou este módulo.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#visao-geral">O que é esta atualização e para que serve</a></li>
+          <li><a href="#glossario">Glossário — termos que você vai encontrar</a></li>
+          <li><a href="#regras">Regras de cálculo do SINDEC (Débitos em Apuração)</a></li>
+          <li><a href="#servidor">Servidor e lançamentos</a></li>
+          <li><a href="#parametros">Parâmetros do cálculo</a></li>
+          <li><a href="#atualizar">Atualizando pelo SINDEC</a></li>
+          <li><a href="#tabela">Lendo a tabela de resultados</a></li>
+          <li><a href="#salvar">Exportar, imprimir e salvar no histórico</a></li>
+          <li><a href="#exemplo">Exemplos completos, do início ao fim</a></li>
+          <li><a href="#erros">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">1</span>O que é esta atualização e para que serve</h2>
+        <p>Quando se apura que um servidor recebeu valores <strong>a maior</strong> ou indevidamente, o valor a ser devolvido ao GDF precisa ser <strong>atualizado</strong> até a data da cobrança: com <strong>correção monetária</strong> e, quando não houver reconhecimento de boa-fé, com <strong>juros</strong>. O cálculo oficial é feito pelo sistema <strong>SINDEC</strong>, do Tribunal de Contas do DF, na tela <strong>“Débitos em Apuração”</strong>.</p>
+        <p>Este módulo envia cada lançamento do débito ao SINDEC, recebe o resultado oficial e monta a tabela, a planilha e a memória de cálculo no padrão do SEI. É o caminho inverso do módulo de Passivo a Servidores: aqui é o <strong>servidor que deve ao GDF</strong>.</p>
+        <div class="box box-info">
+          <strong>Quando isso é feito</strong>
+          Na instrução de processos de reposição ao erário, de apuração de débito e de acerto de contas em desfavor do servidor — sempre de <strong>um servidor por vez</strong> (o módulo tem apenas a atualização individual).
+        </div>
+        <h3 class="sub-title">O caminho em uma olhada</h3>
+        <ol class="passos">
+          <li>Preencha os dados do <strong>servidor</strong> e os <strong>lançamentos</strong> do débito (seção 4).</li>
+          <li>Escolha a <strong>Data para atualização</strong> e a <strong>Incidência de juros</strong> — com ou sem boa-fé (seção 5).</li>
+          <li>Clique em <strong>“⟳ Atualizar valores pelo SINDEC”</strong> (seção 6).</li>
+          <li>Confira a tabela e a memória de cada lançamento (seção 7).</li>
+          <li>Use <strong>Exportar Excel</strong>, <strong>Imprimir</strong> (memória no padrão SEI) e <strong>Salvar no histórico</strong> (seção 8).</li>
+        </ol>
+        <p>No final deste manual, a seção <a href="#exemplo">Exemplos completos</a> mostra o processo inteiro, para você comparar com o que estiver fazendo.</p>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário — termos que você vai encontrar</h2>
+        <dl class="glossario">
+          <dt>SINDEC</dt>
+          <dd>Sistema de cálculo do <strong>Tribunal de Contas do Distrito Federal (TCDF)</strong>. O módulo consulta o SINDEC diretamente; o resultado é o mesmo que você obteria digitando no site do TCDF, na tela “Débitos em Apuração”.</dd>
+
+          <dt>Débito em apuração</dt>
+          <dd>Valor que o <strong>servidor deve ao GDF</strong> (recebeu a maior, recebeu indevidamente). É o oposto do passivo a servidor, tratado no módulo “Atualização (SINDEC) - Passivo a Servidores”.</dd>
+
+          <dt>Data do fato gerador (Data F.G.)</dt>
+          <dd>A data em que o valor foi <strong>pago indevidamente</strong> ao servidor. É a partir dela que começa a correção.</dd>
+
+          <dt>Data para atualização</dt>
+          <dd>A data <strong>até a qual</strong> o débito é atualizado — normalmente a data do cálculo ou da notificação ao servidor.</dd>
+
+          <dt>Boa-fé reconhecida</dt>
+          <dd>Quando o processo reconhece que o servidor recebeu o valor <strong>de boa-fé</strong> (sem ter dado causa ao erro), não há juros: o débito é apenas corrigido pelo INPC anual. É a opção padrão do módulo.</dd>
+
+          <dt>Correção monetária — INPC (cód. 41099)</dt>
+          <dd>A parcela que repõe a inflação, calculada pelo SINDEC com o INPC. No SIGRH, é lançada no código <strong>41099</strong>.</dd>
+
+          <dt>Juros até 2019 (1% a.m.)</dt>
+          <dd>Juros de 1% ao mês aplicados até 01/01/2020, quando há incidência de juros.</dd>
+
+          <dt>Juros a partir de 2020 (SELIC + 1%)</dt>
+          <dd>Juros pela taxa SELIC acrescida de 1%, aplicados a partir de 2020, quando há incidência de juros.</dd>
+
+          <dt>Valor total atualizado</dt>
+          <dd>Valor do débito + correção monetária + juros. É o valor a ser restituído pelo servidor naquele lançamento.</dd>
+
+          <dt>Memória de cálculo</dt>
+          <dd>O passo a passo devolvido pelo SINDEC (índices, períodos, valores antes e depois). Aparece ao clicar na lupa <span class="campo">🔍</span>, numa aba própria do Excel e na impressão.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="regras">
+        <h2 class="sec-title"><span class="num">3</span>Regras de cálculo do SINDEC (Débitos em Apuração)</h2>
+        <p>Estas são as regras aplicadas pelo próprio SINDEC. O módulo só escolhe, conforme o parâmetro de juros, qual delas usar.</p>
+        <table class="tbl">
+          <thead><tr><th>Situação</th><th>Correção monetária</th><th>Juros</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Sem juros — boa-fé reconhecida</strong></td><td>INPC <strong>anual</strong>, aplicado sempre em <strong>1º de janeiro</strong> de cada ano (variação de 12 meses até novembro do ano anterior)</td><td>Não incidem</td></tr>
+            <tr><td rowspan="2"><strong>Com juros</strong></td><td rowspan="2">INPC</td><td>Até 01/01/2020: <strong>1% ao mês</strong></td></tr>
+            <tr><td>A partir de 2020: <strong>SELIC + 1%</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>Consequência prática da boa-fé</strong>
+          Como o INPC anual só é aplicado em 1º de janeiro, um débito de um ano corrente, atualizado no mesmo ano, pode ficar <strong>sem correção alguma</strong>. Isso é a regra do SINDEC, não um erro do módulo.
+        </div>
+        <h3 class="sub-title">Base legal citada na memória de cálculo</h3>
+        <ul>
+          <li>Resolução TCDF nº 387/2024, combinada com a Emenda Regimental nº 8/2024.</li>
+        </ul>
+        <p>A fundamentação impressa muda conforme a opção: com boa-fé, descreve a correção pelo INPC anual sem juros; com juros, descreve o INPC com juros de 1% a.m. até 2019 e SELIC + 1% a partir de 2020.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="servidor">
+        <h2 class="sec-title"><span class="num">4</span>Servidor e lançamentos</h2>
+        <ol class="passos">
+          <li>Preencha <span class="campo">Matrícula *</span> e <span class="campo">Nome do servidor *</span> (obrigatórios). <span class="campo">CPF</span> e <span class="campo">Processo SEI de origem do débito</span> são opcionais, mas saem na memória impressa.</li>
+          <li>Clique em <strong>“+ Adicionar lançamento”</strong> para cada parcela do débito e preencha: <span class="campo">Cód. SIGRH</span>, <span class="campo">Fato gerador (descrição)</span>, <span class="campo">Data do fato gerador *</span>, <span class="campo">Valor do débito (R$) *</span> e, se for o caso, <span class="campo">Início dos juros (opcional)</span> e <span class="campo">Observação</span>.</li>
+          <li>Repita para todos os meses/rubricas do débito.</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Valores negativos</strong>
+          São aceitos (ex.: um valor já devolvido que reduz o débito). O SINDEC só calcula valores positivos; o módulo envia sem o sinal e o reaplica na correção, nos juros e no total.
+        </div>
+        <p><strong>“Limpar servidor”</strong> apaga os dados e os lançamentos da tela, depois de confirmação, e inicia um registro novo. Não afeta o que já foi salvo.</p>
+      </section>
+
+      <!-- 5 -->
+      <section id="parametros">
+        <h2 class="sec-title"><span class="num">5</span>Parâmetros do cálculo</h2>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>Opção</th><th>Quando usar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Data para atualização</span></td><td>Vem com a data de hoje.</td><td>Termo final da correção e dos juros. Se o índice do período ainda não saiu, use a véspera ou o botão “Encontrar a última data disponível” (seção 6).</td></tr>
+            <tr><td rowspan="3"><span class="campo">Incidência de juros</span></td><td><strong>Sem juros — boa-fé reconhecida (somente INPC anual)</strong> — padrão</td><td>O processo reconheceu a boa-fé do servidor.</td></tr>
+            <tr><td><strong>Com juros a partir da data do fato gerador</strong></td><td>Não há boa-fé; os juros correm desde cada pagamento indevido.</td></tr>
+            <tr><td><strong>Com juros a partir de uma data única</strong></td><td>Abre <span class="campo">Data de início dos juros</span> — ex.: data da notificação ou da ciência do servidor.</td></tr>
+            <tr><td rowspan="2"><span class="campo">Arredondamento</span></td><td><strong>Preservar parcelas do SINDEC</strong> (padrão)</td><td>Total = débito + correção + juros.</td></tr>
+            <tr><td><strong>Preservar total do SINDEC</strong></td><td>Mantém o total do SINDEC; a diferença de centavo vai para os juros.</td></tr>
+            <tr><td><span class="campo">Referência / Processo SEI (opcional)</span></td><td>Número do processo.</td><td>Sai no Excel, na impressão e no histórico.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>A escolha da incidência de juros depende do processo</strong>
+          Não presuma: confira na decisão/parecer se a boa-fé foi reconhecida. A diferença entre as opções costuma ser grande. Um lançamento com <span class="campo">Início dos juros</span> preenchido usa essa data própria.
+        </div>
+        <p>Alterar qualquer parâmetro depois do cálculo marca os lançamentos como <strong>“↻ recalcular”</strong>.</p>
+      </section>
+
+      <!-- 6 -->
+      <section id="atualizar">
+        <h2 class="sec-title"><span class="num">6</span>Atualizando pelo SINDEC</h2>
+        <ol class="passos">
+          <li>Confira, no topo, a indicação <strong>“SINDEC/TCDF”</strong> com ponto verde.</li>
+          <li>Clique em <strong>“⟳ Atualizar valores pelo SINDEC”</strong>. A barra mostra o andamento e o tempo restante estimado.</li>
+          <li>Se algum lançamento ficar com erro, clique em <strong>“↻ Reprocessar só as pendentes”</strong>.</li>
+        </ol>
+        <h3 class="sub-title">Aviso “Indicadores carecem de atualização”</h3>
+        <p>O TCDF ainda não publicou o índice até a data escolhida (comum no início do mês). O módulo tenta algumas vezes e, persistindo, mostra o botão <strong>“Encontrar a última data disponível e recalcular tudo”</strong>, que recua a data até a última aceita e refaz todos os lançamentos.</p>
+      </section>
+
+      <!-- 7 -->
+      <section id="tabela">
+        <h2 class="sec-title"><span class="num">7</span>Lendo a tabela de resultados</h2>
+        <table class="tbl">
+          <thead><tr><th>Coluna</th><th>Conteúdo</th></tr></thead>
+          <tbody>
+            <tr><td>Fato gerador / Data F.G. / Início juros</td><td>Descrição e datas usadas no lançamento.</td></tr>
+            <tr><td>Valor do débito</td><td>Valor original.</td></tr>
+            <tr><td>Correção monetária — INPC (cód. 41099)</td><td>Parcela de correção.</td></tr>
+            <tr><td>Juros até 2019</td><td>1% a.m. (só quando há juros).</td></tr>
+            <tr><td>Juros a partir de 2020</td><td>SELIC + 1% (só quando há juros).</td></tr>
+            <tr><td>Valor total atualizado</td><td>Soma das parcelas.</td></tr>
+            <tr><td>Situação</td><td><span class="campo">pendente</span>, <span class="campo">✓ dd/mm/aaaa</span>, <span class="campo">⚠ erro</span> ou <span class="campo">↻ recalcular</span>.</td></tr>
+          </tbody>
+        </table>
+        <p>Acima da tabela, os cartões de resumo mostram o total do débito, da correção (INPC, cód. 41099), dos juros e o total atualizado. Em cada linha, <span class="campo">🔍</span> abre a memória de cálculo do SINDEC e <span class="campo">🗑</span> exclui o lançamento.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">8</span>Exportar, imprimir e salvar no histórico</h2>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Exportar Excel</span></td><td>Planilha com a aba <strong>“Débito”</strong> (dados do servidor, parâmetros, lançamentos e totais) e a aba <strong>“Memória SINDEC”</strong> (passo a passo de cada lançamento).</td></tr>
+            <tr><td><span class="campo">Imprimir</span></td><td>Memória de cálculo no <strong>padrão SEI</strong>: identificação do servidor, parâmetros, fundamentação (conforme haja ou não juros), quadro dos lançamentos, memória detalhada e campos de assinatura. Use “Salvar como PDF” para juntar ao processo.</td></tr>
+            <tr><td><span class="campo">Salvar no histórico</span></td><td>Grava o cálculo no Histórico de acertos, vinculado à sua conta. Após “Limpar servidor”, o próximo salvamento cria um registro novo.</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">Reabrir e corrigir um cálculo salvo</h3>
+        <p>Abra o registro pelo <strong>Histórico de acertos</strong>. Ao salvar, ele é <strong>atualizado</strong>, sem duplicar. Se abrir o módulo direto pelo menu, é um cálculo novo.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">9</span>Exemplos completos, do início ao fim</h2>
+        <p><em>Os valores de correção e juros abaixo são ilustrativos — no uso real, vêm do SINDEC.</em></p>
+
+        <h3 class="sub-title">Exemplo A — recebimento indevido com boa-fé reconhecida</h3>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Servidor recebeu gratificação indevida em 30/06/2023 e 31/07/2023 (R$ 500,00 cada). O processo reconheceu a boa-fé. Data para atualização: 22/10/2026.
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Data F.G.</th><th>Débito</th><th>Correção — INPC (41099)</th><th>Juros até 2019</th><th>Juros a partir de 2020</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>30/06/2023</td><td class="num">500,00</td><td class="num">60,00</td><td class="num">0,00</td><td class="num">0,00</td><td class="num">560,00</td></tr>
+            <tr><td>31/07/2023</td><td class="num">500,00</td><td class="num">60,00</td><td class="num">0,00</td><td class="num">0,00</td><td class="num">560,00</td></tr>
+          </tbody>
+          <tfoot><tr><td>Total</td><td class="num">1.000,00</td><td class="num">120,00</td><td class="num">0,00</td><td class="num">0,00</td><td class="num">1.120,00</td></tr></tfoot>
+        </table>
+        <p>Os dois lançamentos têm a mesma correção porque, na boa-fé, o INPC é aplicado em 1º/01/2024, 1º/01/2025 e 1º/01/2026 — o mês do pagamento dentro de 2023 não muda o resultado.</p>
+
+        <h3 class="sub-title">Exemplo B — o mesmo débito, sem boa-fé</h3>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Mesmos lançamentos, mas a decisão afastou a boa-fé: <strong>Incidência de juros = Com juros a partir da data do fato gerador</strong>.
+        </div>
+        <p>Agora a correção é pelo INPC mensal e há juros pela <strong>SELIC + 1%</strong> (os fatos são posteriores a 2020, então a coluna “Juros até 2019” fica zerada). Os totais passam a ser diferentes entre os dois lançamentos, porque cada um tem juros desde a sua data. A memória impressa traz a fundamentação com juros.</p>
+
+        <h3 class="sub-title">Exemplo C — débito antigo, com juros</h3>
+        <p>Para um pagamento indevido em 2018, com juros, aparecem as duas colunas: <strong>juros de 1% a.m.</strong> de 2018 até 01/01/2020 e <strong>SELIC + 1%</strong> de 2020 até a data para atualização.</p>
+      </section>
+
+      <!-- 10 -->
+      <section id="erros">
+        <h2 class="sec-title"><span class="num">10</span>Erros comuns e perguntas frequentes</h2>
+
+        <h3 class="sub-title">A correção ficou zerada</h3>
+        <p>Com boa-fé, é esperado quando entre a data do fato gerador e a data para atualização não houve nenhum 1º de janeiro (seção 3).</p>
+
+        <h3 class="sub-title">Apareceu “Indicadores carecem de atualização”</h3>
+        <p>O índice ainda não foi publicado. Use “Encontrar a última data disponível e recalcular tudo” ou informe a véspera/último dia do mês anterior.</p>
+
+        <h3 class="sub-title">Um lançamento ficou com “⚠ erro”</h3>
+        <p>Pode ser instabilidade do site do TCDF: aguarde e use “Reprocessar só as pendentes”. Se o motivo indicar dado inválido, corrija o lançamento (data ou valor).</p>
+
+        <h3 class="sub-title">O total difere R$ 0,01 da soma das parcelas</h3>
+        <p>É o arredondamento do SINDEC. Escolha o critério em “Arredondamento” e mantenha-o em todo o processo.</p>
+
+        <h3 class="sub-title">Posso calcular vários servidores de uma vez?</h3>
+        <p>Não neste módulo — ele é individual. Faça um cálculo por servidor e salve cada um no histórico.</p>
+
+        <h3 class="sub-title">Salvei duas vezes e ficaram dois registros</h3>
+        <p>Isso ocorre se você usou “Limpar servidor” entre os salvamentos ou abriu o módulo pelo menu. Para alterar um cálculo, reabra-o pelo Histórico.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">11</span>Checklist antes de salvar</h2>
+        <ul class="checklist">
+          <li>Matrícula e nome do servidor preenchidos; processo SEI de origem informado.</li>
+          <li>Todos os lançamentos do débito incluídos, com data do fato gerador e valor corretos.</li>
+          <li>A <strong>Incidência de juros</strong> corresponde ao que o processo decidiu sobre a <strong>boa-fé</strong>.</li>
+          <li>A <strong>Data para atualização</strong> está correta.</li>
+          <li>Nenhum lançamento ficou como <strong>pendente</strong>, <strong>⚠ erro</strong> ou <strong>↻ recalcular</strong>.</li>
+          <li>A memória (🔍) de pelo menos um lançamento foi conferida.</li>
+          <li>A memória impressa foi gerada (Salvar como PDF) para o processo SEI.</li>
+          <li>Clicou em <strong>“Salvar no histórico”</strong> e viu a confirmação de sucesso.</li>
+        </ul>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Atualização SINDEC - Débito em Apuração · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>

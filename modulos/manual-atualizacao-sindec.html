@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual — Atualização (SINDEC) - Passivo a Servidores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#0F2A3D; --sidebar-hover:#17415C; --accent:#E8A33D; --teal:#1F6F62;
+    --paper:#F6F4EF; --ink:#1C2530; --ink-soft:#62707C; --line:#E4E0D6; --green:#2F8F5B; --red:#C1443B;
+    --inss:#4338CA; --inss-claro:#EEF0FC; --inss-borda:#C9CDF3;
+  }
+  *{box-sizing:border-box}
+  html, body{ background:var(--paper); padding:0; margin:0; color:var(--ink); font-family:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6; }
+  strong{font-weight:600}
+  a{color:var(--teal)}
+  .shell{ display:flex; min-height:100vh; align-items:flex-start; }
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar); color:#EAF0F4;
+    display:flex; flex-direction:column; padding:1.6rem 1.1rem; min-height:100vh; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar .brand{ padding:0 0.5rem 1rem; }
+  .sidebar .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#8FA6B5; }
+  .sidebar h1.brand-title{ font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:#fff; margin:0.3rem 0 0; text-align:left; }
+  .sidebar nav.menu{ display:flex; flex-direction:column; gap:0.25rem; margin-top:1rem; }
+  .sidebar nav.menu a{
+    display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:#C9D6DE;
+    padding:0.55rem 0.6rem; border-radius:7px; font-size:0.84rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .sidebar nav.menu a:hover{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar nav.menu a.ativo{ background:var(--sidebar-hover); color:#fff; }
+  .sidebar .selo{
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.6rem; font-weight:600; color:#fff; flex-shrink:0;
+  }
+  .sidebar .divisor{ height:1px; background:rgba(255,255,255,0.1); margin:0.6rem 0.5rem; }
+  .sidebar-footer{ margin-top:auto; padding:0.6rem; font-size:0.68rem; color:#7C93A2; line-height:1.5; }
+
+  .main-area{ flex:1; min-width:0; }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;
+    padding:0.85rem 1.6rem; border-bottom:1px solid var(--line); background:#fff; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .status-pill{ display:flex; align-items:center; gap:0.5rem; font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--ink-soft); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); }
+  .dot.ok{ background:var(--green); }
+  .login-info{ display:none; align-items:center; gap:0.9rem; font-size:0.8rem; color:var(--ink-soft); }
+  .login-info a{ color:var(--teal); text-decoration:underline; font-weight:500; }
+
+  .conteudo{ padding:1.8rem 2.2rem 4rem; max-width:980px; }
+
+  /* Cabeçalho da página */
+  .page-title{ font-family:'Fraunces',serif; font-weight:600; color:var(--inss); font-size:2rem; margin:0 0 .3rem; }
+  .page-sub{ color:var(--ink-soft); font-size:.95rem; margin:0 0 1rem; }
+  .rule{ border-top:2px solid var(--inss); margin:0 0 1.6rem; }
+
+  /* Sumário */
+  .toc{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+  .toc h2{ font-size:1rem; margin:0 0 .6rem; font-family:'Fraunces',serif; color:var(--inss); }
+  .toc ol{ margin:0; padding-left:1.2rem; columns:2; column-gap:2rem; }
+  .toc li{ font-size:.88rem; margin-bottom:.35rem; break-inside:avoid; }
+  .toc a{ text-decoration:none; color:var(--ink); }
+  .toc a:hover{ color:var(--inss); text-decoration:underline; }
+
+  /* Seções */
+  section{ margin-bottom:2.6rem; scroll-margin-top:1rem; }
+  h2.sec-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; color:var(--inss);
+    border-bottom:2px solid var(--inss-borda); padding-bottom:.4rem; margin:0 0 1rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  h2.sec-title .num{
+    display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem;
+    background:var(--inss); color:#fff; border-radius:50%; font-family:'IBM Plex Mono',monospace; font-size:.85rem; flex-shrink:0;
+  }
+  h3.sub-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.08rem; color:var(--ink); margin:1.4rem 0 .6rem; }
+  p{ margin:0 0 .9rem; font-size:.95rem; }
+  ul, ol.passos{ margin:0 0 1rem; padding-left:1.4rem; font-size:.95rem; }
+  ul li, ol.passos li{ margin-bottom:.4rem; }
+  ol.passos{ counter-reset:passo; list-style:none; padding-left:0; }
+  ol.passos li{
+    counter-increment:passo; position:relative; padding-left:2.4rem; margin-bottom:.8rem;
+  }
+  ol.passos li::before{
+    content:counter(passo); position:absolute; left:0; top:0; width:1.7rem; height:1.7rem;
+    background:var(--inss-claro); color:var(--inss); border:1px solid var(--inss-borda);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600;
+  }
+
+  code, .campo{
+    font-family:'IBM Plex Mono',monospace; font-size:.82em; background:#F1EEE7; color:#3D3020;
+    padding:.1rem .4rem; border-radius:4px; border:1px solid #E3DDCE;
+  }
+
+  /* Caixas de destaque */
+  .box{ border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; font-size:.9rem; }
+  .box-dica{ background:#EAF6F0; border:1px solid #BFE3CE; color:#1F5A3C; }
+  .box-atencao{ background:#FFF3CD; border:1px solid #FFECB5; color:#664D03; }
+  .box-info{ background:#EAF1FB; border:1px solid #C7DBF3; color:#1E4470; }
+  .box > strong:first-child{ display:block; margin-bottom:.2rem; }
+
+  /* Tabelas */
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; background:#fff; }
+  table.tbl caption{ caption-side:top; text-align:left; font-weight:600; margin-bottom:.4rem; color:var(--ink-soft); font-size:.8rem; }
+  table.tbl th, table.tbl td{ border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top; }
+  table.tbl thead th{ background:var(--inss-claro); color:#312E81; font-weight:700; }
+  table.tbl td.codigo{ font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+  table.tbl td.num{ text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  table.tbl tr:nth-child(even) td{ background:#FBFAF7; }
+  table.tbl tfoot td{ font-weight:700; background:var(--inss-claro); }
+
+  .card-mock{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-mock .rot{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-bottom:.3rem; }
+
+  .checklist{ list-style:none; margin:0 0 1rem; padding:0; font-size:.95rem; }
+  .checklist li{
+    display:flex; align-items:flex-start; gap:.6rem; margin-bottom:.6rem; padding:.6rem .8rem;
+    background:#fff; border:1px solid var(--line); border-radius:7px;
+  }
+  .checklist li::before{
+    content:"☐"; font-size:1.1rem; color:var(--inss); flex-shrink:0; line-height:1.3;
+  }
+
+  .glossario dt{ font-weight:600; color:var(--inss); font-family:'IBM Plex Mono',monospace; font-size:.85rem; margin-top:.9rem; }
+  .glossario dd{ margin:.2rem 0 0; font-size:.92rem; }
+
+  .voltar-topo{ position:fixed; right:1.6rem; bottom:1.6rem; background:var(--inss); color:#fff; border-radius:50%;
+    width:2.6rem; height:2.6rem; display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:1.1rem; box-shadow:0 3px 10px rgba(0,0,0,.25); }
+
+  @media(max-width:840px){
+    .shell{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; }
+    .toc ol{ columns:1; }
+  }
+  @media print{
+    .sidebar,.topbar,.voltar-topo{ display:none !important; }
+    .conteudo{ padding:0; max-width:none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="../index.html">
+      <img src="../assets/logo-ibram-h.png" alt="Brasília Ambiental" style="display:block;margin:0 auto 0.8rem;width:100%;max-width:170px;height:auto;background:#fff;border-radius:12px;padding:8px 12px;border:1.5px solid rgba(31,111,98,0.4);box-shadow:0 4px 14px -6px rgba(0,0,0,0.35);">
+      </a>
+      <div class="eyebrow">DIGEP · ASPAG — IBRAM-DF</div>
+      <h1 class="brand-title">Portal de Acertos</h1>
+    </div>
+    <nav class="menu">
+      <a href="brigadistas.html"><span class="selo" style="background:#8B0000;">G54</span> Brigadistas</a>
+      <a href="comissionado-sem-vinculo.html"><span class="selo" style="background:#6B21A8;">SV</span> Comissionado sem vínculo</a>
+      <a href="comissionado-com-vinculo.html"><span class="selo" style="background:#556B2F;">CV</span> Comissionado com vínculo</a>
+      <a href="efetivos.html"><span class="selo" style="background:#0B5394;">EF</span> Servidores efetivos</a>
+      <a href="substituicoes.html"><span class="selo" style="background:#2F6FA5;">SUB</span> Substituições</a>
+      <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
+      <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
+      <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
+      <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
+      <a href="atualizacao-sindec-debito.html"><span class="selo" style="background:#BE185D;">DEB</span> Atualização SINDEC - Débito em Apuração</a>
+      <div class="divisor"></div>
+      <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
+      <a href="manual-instrucao.html" class="ativo"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
+      <a href="legislacao.html"><span class="selo" style="background:#3D5A73;">§</span> Legislação</a>
+    </nav>
+    <div class="sidebar-footer">Uso interno — IBRAM-DF.<br>Os dados salvos ficam vinculados à sua conta de acesso.</div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="status-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">verificando conexão…</span></div>
+      <div class="login-info" id="login-info"><span id="login-text"></span><a href="#" id="btn-sair">Sair</a></div>
+    </div>
+    <div style="padding:.6rem 1.6rem 0"><a href="manual-instrucao.html">← Todos os manuais</a> &nbsp;·&nbsp; <a href="atualizacao-sindec.html">Ir para o módulo →</a></div>
+
+    <div class="conteudo">
+      <div class="page-title">Manual — Atualização (SINDEC) - Passivo a Servidores</div>
+      <div class="page-sub">Passo a passo para atualizar, pelo SINDEC/TCDF, os valores devidos a servidores (DEA) — em lote, a partir de planilha Excel ou PDF, ou de um servidor só — e gerar a planilha, a memória de cálculo e o registro no histórico. Escrito para quem nunca usou este módulo.</div>
+      <div class="rule"></div>
+
+      <div class="toc">
+        <h2>Neste manual</h2>
+        <ol>
+          <li><a href="#visao-geral">O que é esta atualização e para que serve</a></li>
+          <li><a href="#glossario">Glossário — termos que você vai encontrar</a></li>
+          <li><a href="#regras">Regras de cálculo do SINDEC (Passivos a Servidores)</a></li>
+          <li><a href="#abas">Escolhendo a aba: Relação (lote) ou Individual</a></li>
+          <li><a href="#arquivo">Preparando e importando o arquivo (Excel ou PDF)</a></li>
+          <li><a href="#conferencia">Tela de conferência da importação</a></li>
+          <li><a href="#individual">Aba Individual — um servidor</a></li>
+          <li><a href="#parametros">Parâmetros do cálculo</a></li>
+          <li><a href="#atualizar">Atualizando pelo SINDEC (pausar, continuar, pendentes)</a></li>
+          <li><a href="#tabela">Lendo a tabela de resultados</a></li>
+          <li><a href="#salvar">Exportar, imprimir e salvar no histórico</a></li>
+          <li><a href="#exemplo">Exemplos completos, do início ao fim</a></li>
+          <li><a href="#erros">Erros comuns e perguntas frequentes</a></li>
+          <li><a href="#checklist">Checklist antes de salvar</a></li>
+        </ol>
+      </div>
+
+      <!-- 1 -->
+      <section id="visao-geral">
+        <h2 class="sec-title"><span class="num">1</span>O que é esta atualização e para que serve</h2>
+        <p>Quando o IBRAM reconhece que deve um valor a um servidor referente a exercícios anteriores (Dívida de Exercícios Anteriores — <strong>DEA</strong>), esse valor precisa ser pago <strong>corrigido</strong>: com <strong>atualização monetária</strong> (para repor a inflação do período) e, quando cabível, com <strong>juros de mora</strong> (pelo atraso). O cálculo oficial no Distrito Federal é feito pelo sistema <strong>SINDEC</strong>, do Tribunal de Contas do DF, na tela <strong>“Passivos a Servidores”</strong>.</p>
+        <p>Este módulo <strong>não faz a conta por conta própria</strong>: ele envia cada lançamento ao SINDEC, recebe o resultado oficial e organiza tudo numa tabela, numa planilha e numa memória de cálculo. Na prática, substitui o trabalho de digitar lançamento por lançamento no site do TCDF — com uma relação inteira, basta um clique.</p>
+        <div class="box box-info">
+          <strong>Quando isso é feito</strong>
+          Sempre que houver um passivo (crédito do servidor) a ser pago: na instrução de processos de DEA, de reconhecimento de dívida ou de acerto de contas em favor do servidor. Pode ser uma relação com milhares de lançamentos (aba <strong>Relação (lote)</strong>) ou um único servidor (aba <strong>Individual</strong>).
+        </div>
+        <h3 class="sub-title">O caminho em uma olhada</h3>
+        <ol class="passos">
+          <li>Escolha a aba: <strong>Relação (lote)</strong> para planilha/PDF com vários servidores, ou <strong>Individual</strong> para um servidor (seção 4).</li>
+          <li>No lote, <strong>importe o Excel ou o PDF</strong> e confira a tela de conferência (seções 5 e 6). No individual, digite os lançamentos (seção 7).</li>
+          <li>Confira a <strong>Data para atualização</strong> e a regra de <strong>juros</strong> (seção 8).</li>
+          <li>Clique em <strong>“⟳ Atualizar valores pelo SINDEC”</strong> e aguarde — dá para pausar e continuar (seção 9).</li>
+          <li>Confira a tabela (seção 10) e use <strong>Exportar Excel</strong>, <strong>Exportar Excel por servidor</strong>, <strong>Imprimir</strong> ou <strong>Salvar no histórico</strong> (seção 11).</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Recursos principais do módulo</strong>
+          Importação de <strong>Excel (.xlsx/.xls/.csv) ou PDF</strong> · cabeçalho localizado sozinho · exclusão automática dos códigos <strong>20088 e 20827</strong> · <strong>correção automática de datas</strong> digitadas errado · tela de <strong>conferência</strong> antes de carregar · <strong>pausar/continuar</strong> e retomada após fechar o navegador · tempo restante estimado · filtros e paginação · memória de cálculo por linha (🔍) · <strong>Excel por servidor</strong> com total por matrícula · impressão no padrão do SEI.
+        </div>
+        <p>No final deste manual, a seção <a href="#exemplo">Exemplos completos</a> mostra o processo inteiro, para você comparar com o que estiver fazendo.</p>
+      </section>
+
+      <!-- 2 -->
+      <section id="glossario">
+        <h2 class="sec-title"><span class="num">2</span>Glossário — termos que você vai encontrar</h2>
+        <p>Esta lista explica, em português simples, os termos usados nos campos, na tabela e nos relatórios deste módulo.</p>
+        <dl class="glossario">
+          <dt>SINDEC</dt>
+          <dd>Sistema de cálculo do <strong>Tribunal de Contas do Distrito Federal (TCDF)</strong> que atualiza valores devidos pela Administração. O módulo consulta o SINDEC diretamente pela internet; por isso o resultado é o mesmo que você obteria digitando no site do TCDF.</dd>
+
+          <dt>Passivo a servidor</dt>
+          <dd>Valor que o <strong>órgão deve ao servidor</strong> (o servidor vai receber). É o oposto do <em>débito em apuração</em>, em que o servidor deve ao GDF — tratado em outro módulo (Atualização SINDEC - Débito em Apuração).</dd>
+
+          <dt>DEA — Dívida de Exercícios Anteriores</dt>
+          <dd>Despesa de um ano que já passou e que só é paga num ano posterior. O levantamento DEA é a relação (planilha ou PDF) com os valores devidos a cada servidor, por exercício.</dd>
+
+          <dt>Data do fato gerador (Data F.G.)</dt>
+          <dd>A data em que o valor <strong>deveria ter sido pago</strong>. É a partir dela que começa a correção monetária e, em regra, os juros. Também é por ela que o módulo separa os lançamentos por <strong>exercício (ano)</strong>.</dd>
+
+          <dt>Data para atualização</dt>
+          <dd>A data <strong>até a qual</strong> o valor será corrigido (o “termo final”). Normalmente a data de hoje ou a data prevista do pagamento.</dd>
+
+          <dt>Valores devidos</dt>
+          <dd>O valor original, sem correção, que consta da relação. Pode ser negativo quando se trata de devolução/estorno (ex.: <span class="campo">-277,77</span>).</dd>
+
+          <dt>Atualização monetária (cód. 20827)</dt>
+          <dd>A parcela que repõe a inflação do período, calculada pelo SINDEC. No SIGRH é lançada no código <strong>20827 — DIF. ATUALIZAÇÃO MONETÁRIA</strong>.</dd>
+
+          <dt>Juros de mora (cód. 20088)</dt>
+          <dd>A parcela pelo atraso no pagamento. No SIGRH é lançada no código <strong>20088 — DIF. JUROS DE MORA</strong>.</dd>
+
+          <dt>Valor total atualizado</dt>
+          <dd>Valores devidos + atualização monetária + juros de mora. É o valor a pagar ao servidor naquela linha.</dd>
+
+          <dt>INPC / IPCA-E / IPCA-15</dt>
+          <dd>Índices de inflação do IBGE usados pelo SINDEC na correção monetária (veja a seção 3). Você não precisa consultá-los — o SINDEC aplica sozinho.</dd>
+
+          <dt>Poupança (remuneração da caderneta)</dt>
+          <dd>Taxa usada como juros de mora a partir de 30/06/2009: 70% da meta da SELIC quando ela estiver em até 8,5% ao ano; acima disso, 0,5% ao mês.</dd>
+
+          <dt>Memória de cálculo</dt>
+          <dd>O passo a passo que o SINDEC devolve para cada linha: período, índice aplicado, valor antes e depois. No módulo, aparece ao clicar na lupa <span class="campo">🔍</span> da linha, sai numa aba própria do Excel e na impressão individual.</dd>
+
+          <dt>Histórico de acertos</dt>
+          <dd>O banco de dados do Portal onde os cálculos ficam salvos, vinculados à sua conta, para reabrir depois.</dd>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="regras">
+        <h2 class="sec-title"><span class="num">3</span>Regras de cálculo do SINDEC (Passivos a Servidores)</h2>
+        <p>Estas são as regras que o próprio SINDEC aplica na tela “Passivos a Servidores”. O módulo apenas as utiliza; não há como alterá-las aqui. Elas estão reproduzidas para que você saiba explicar o resultado num processo.</p>
+        <table class="tbl">
+          <thead><tr><th>Parcela</th><th>Período</th><th>Regra aplicada</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2">Atualização monetária</td><td>Até 29/06/2009</td><td>INPC</td></tr>
+            <tr><td>A partir de 30/06/2009</td><td>IPCA-E / IPCA-15</td></tr>
+            <tr><td rowspan="3">Juros de mora</td><td>Até 31/08/2001</td><td>1% ao mês</td></tr>
+            <tr><td>De 01/09/2001 a 29/06/2009</td><td>0,5% ao mês</td></tr>
+            <tr><td>A partir de 30/06/2009</td><td>Remuneração da poupança (70% da meta SELIC, se ≤ 8,5% a.a.; senão 0,5% a.m.)</td></tr>
+          </tbody>
+        </table>
+        <h3 class="sub-title">Base legal citada na memória de cálculo</h3>
+        <ul>
+          <li>Resolução TCDF nº 387/2024, art. 2º (adoção do SINDEC);</li>
+          <li>Decisões TCDF nº 2.625/2021 e nº 56/2022;</li>
+          <li>Portaria nº 407/2011;</li>
+          <li>Decisão TCDF nº 3.315/2002.</li>
+        </ul>
+        <div class="box box-info">
+          <strong>Por que o resultado é “oficial”</strong>
+          Cada valor da tabela é exatamente o que o SINDEC devolveu para aquela data e valor. Se você digitar o mesmo lançamento no site do TCDF, com a mesma data para atualização e a mesma regra de juros, obterá o mesmo número.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="abas">
+        <h2 class="sec-title"><span class="num">4</span>Escolhendo a aba: Relação (lote) ou Individual</h2>
+        <p>No topo do módulo há duas abas. O número ao lado do nome mostra quantos lançamentos há em cada uma. Elas são <strong>independentes</strong>: o que está numa não aparece na outra, e cada uma é salva como um registro próprio no histórico.</p>
+        <table class="tbl">
+          <thead><tr><th>Aba</th><th>Use quando</th><th>Como os dados entram</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Relação (lote)</span></td><td>Há uma relação com vários servidores (levantamento DEA, planilha da folha, PDF do relatório).</td><td>Importação de Excel ou PDF; também é possível incluir linhas à mão com <strong>“+ Adicionar linha”</strong>.</td></tr>
+            <tr><td><span class="campo">Individual</span></td><td>É o cálculo de <strong>um único servidor</strong> (um requerimento, um processo específico).</td><td>Você digita os dados do servidor e os lançamentos.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-dica">
+          <strong>Botão “Exportar Excel por servidor”</strong>
+          Só aparece na aba <strong>Relação (lote)</strong>, porque serve para agrupar vários servidores. Na aba Individual ele fica escondido de propósito.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="arquivo">
+        <h2 class="sec-title"><span class="num">5</span>Preparando e importando o arquivo (Excel ou PDF)</h2>
+        <p>O módulo aceita <strong>qualquer planilha</strong> que tenha, no mínimo, as quatro colunas obrigatórias. O cabeçalho é localizado sozinho: o módulo procura, nas primeiras linhas, a linha que contém a palavra <strong>“MATRÍCULA”</strong>. Não importa em qual coluna cada informação esteja.</p>
+        <table class="tbl">
+          <thead><tr><th>Coluna</th><th>Obrigatória?</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">MATRÍCULA</span></td><td>Sim</td><td>É a linha com esta palavra que identifica o cabeçalho.</td></tr>
+            <tr><td><span class="campo">NOME</span></td><td>Sim</td><td>Nome do servidor.</td></tr>
+            <tr><td><span class="campo">DATA DO FATO GERADOR</span></td><td>Sim</td><td>Define o início da correção e o <strong>exercício</strong> em que a linha é agrupada.</td></tr>
+            <tr><td><span class="campo">VALORES DEVIDOS</span></td><td>Sim</td><td>Valor original. Negativos são aceitos.</td></tr>
+            <tr><td>Código / Provento, Fato gerador, Exercício, Processo, Conta contábil, Páginas</td><td>Não</td><td>Se existirem, são lidos e repetidos no Excel e na impressão.</td></tr>
+            <tr><td><span class="campo">DATA INÍCIO JUROS</span></td><td>Não</td><td>Se existir, <strong>prevalece</strong> sobre a regra geral de juros naquela linha.</td></tr>
+          </tbody>
+        </table>
+        <p>Se você não tiver uma planilha pronta, clique em <strong>“⬇ Baixar modelo em branco”</strong>: o módulo gera o modelo no layout DEA, com as colunas no lugar certo e a instrução de preenchimento a partir da linha 11.</p>
+
+        <h3 class="sub-title">Importando</h3>
+        <ol class="passos">
+          <li>Na aba <strong>Relação (lote)</strong>, clique em <strong>“Clique para importar”</strong> (ou arraste o arquivo para a área tracejada).</li>
+          <li>Escolha a planilha (<span class="campo">.xlsx</span>, <span class="campo">.xls</span>, <span class="campo">.csv</span>) ou o <strong>PDF</strong> do levantamento DEA.</li>
+          <li>Aguarde a leitura. No PDF, o módulo lê página por página (um arquivo de mais de 300 páginas leva poucos segundos).</li>
+          <li>Abre-se a <strong>tela de conferência</strong> (seção 6). Revise e clique em <strong>“Confirmar e carregar na relação”</strong>.</li>
+        </ol>
+
+        <h3 class="sub-title">Linhas que não são atualizadas (códigos 20088 e 20827)</h3>
+        <p>O campo <span class="campo">Não atualizar (juros/atualização já lançados)</span> vem preenchido com <strong>20088, 20827</strong>. Na importação, são desconsideradas as linhas:</p>
+        <ul>
+          <li>com o código <strong>20088</strong> (DIF. JUROS DE MORA) ou <strong>20827</strong> (DIF. ATUALIZAÇÃO MONETÁRIA); <strong>ou</strong></li>
+          <li>cuja descrição contenha <strong>“JUROS DE MORA”</strong> ou <strong>“ATUALIZAÇÃO MONETÁRIA”</strong>, ainda que o código seja outro.</li>
+        </ul>
+        <p>Essas linhas já são a própria atualização de um cálculo anterior — atualizá-las de novo seria cobrar juros sobre juros. Se precisar incluir outro código na exclusão, acrescente-o no campo, separado por vírgula, <strong>antes</strong> de importar.</p>
+
+        <h3 class="sub-title">Correção automática de datas</h3>
+        <p>Datas digitadas de forma errada na planilha são corrigidas na importação, e cada correção é mostrada na conferência e marcada na tabela com a etiqueta <span class="campo">aj.</span>:</p>
+        <table class="tbl">
+          <thead><tr><th>Problema encontrado</th><th>Exemplo</th><th>Correção aplicada</th></tr></thead>
+          <tbody>
+            <tr><td>Dia que não existe no mês</td><td>31/04/2019 · 29/02/2021</td><td>Último dia do mês: 30/04/2019 · 28/02/2021</td></tr>
+            <tr><td>Só mês e ano</td><td>201905</td><td>Dia 30 (ou o último dia do mês): 30/05/2019</td></tr>
+            <tr><td>Ano com 3 dígitos</td><td>30/06/218</td><td>Completa pelo ano do exercício da linha: 30/06/2018</td></tr>
+            <tr><td>Separador ausente</td><td>30062018</td><td>30/06/2018</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-atencao">
+          <strong>Data ajustada fica registrada</strong>
+          A data original e o motivo do ajuste aparecem ao passar o mouse sobre <span class="campo">aj.</span>, no filtro <strong>“Datas ajustadas”</strong>, na coluna de observação do Excel (“Data ajustada na importação”) e na impressão. Se o ajuste não estiver correto, edite a data na linha (✎) antes de atualizar.
+        </div>
+        <div class="box box-info">
+          <strong>Órgão lido do arquivo</strong>
+          Se o arquivo trouxer o nome do órgão acima do cabeçalho, ele é usado no Excel e na impressão. Se não trouxer, vale o órgão padrão do Portal.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="conferencia">
+        <h2 class="sec-title"><span class="num">6</span>Tela de conferência da importação</h2>
+        <p>Antes de qualquer linha entrar na relação, o módulo mostra um resumo do que leu. Nada é carregado até você confirmar.</p>
+        <ul>
+          <li><strong>Quantidade lida</strong>, quantidade <strong>a atualizar</strong> e quantidade <strong>desconsiderada</strong> — com o detalhamento por código excluído (20088, 20827 e descrições equivalentes).</li>
+          <li><strong>Datas ajustadas automaticamente</strong>: matrícula, nome, código, data original, data ajustada e motivo.</li>
+          <li><strong>Com pendência</strong>: linhas sem data ou sem valor válidos. Elas entram na relação marcadas para correção — edite-as (✎) antes de atualizar.</li>
+          <li>No PDF, os <strong>totais por exercício</strong> impressos no relatório são comparados com a soma lida (“X/Y exercício(s) conferem ao centavo”), para confirmar que nenhuma linha se perdeu. Se o total impresso não abater os lançamentos negativos, o módulo indica isso.</li>
+          <li>No PDF, as linhas que parecem lançamentos mas não puderam ser lidas aparecem como <strong>“linha(s) do PDF não reconhecida(s)”</strong> — confira-as e, se necessário, inclua-as com “+ Adicionar linha”.</li>
+        </ul>
+        <p>Clique em <strong>“Confirmar e carregar na relação”</strong> para seguir, ou em <strong>“Cancelar”</strong> para escolher outro arquivo ou mudar os códigos excluídos.</p>
+        <div class="box box-atencao">
+          <strong>Relação acima de 300 lançamentos</strong>
+          O módulo avisa e mostra uma estimativa de tempo. A atualização funciona normalmente com milhares de linhas, mas o <strong>“Salvar no histórico”</strong> aceita até cerca de 300 lançamentos por registro (limite de 1 MB por documento do banco de dados). Para relações maiores, use o Excel ao final, ou divida em blocos de até 300 e salve cada um (seção 11).
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="individual">
+        <h2 class="sec-title"><span class="num">7</span>Aba Individual — um servidor</h2>
+        <ol class="passos">
+          <li>Preencha <span class="campo">Matrícula *</span> e <span class="campo">Nome do servidor *</span> (obrigatórios). <span class="campo">CPF</span> e <span class="campo">Processo SEI de origem do crédito/débito</span> são opcionais, mas saem na memória impressa.</li>
+          <li>Clique em <strong>“+ Adicionar lançamento”</strong> para cada parcela devida e preencha: <span class="campo">Cód. SIGRH</span>, <span class="campo">Fato gerador (descrição)</span>, <span class="campo">Data do fato gerador *</span>, <span class="campo">Valor devido (R$) *</span> e, se for o caso, <span class="campo">Início dos juros (opcional)</span> e <span class="campo">Observação</span>.</li>
+          <li>Ajuste os <strong>parâmetros</strong> (seção 8) e clique em <strong>“⟳ Atualizar valores pelo SINDEC”</strong>.</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Início dos juros em branco</strong>
+          Se o campo ficar vazio, vale a regra geral escolhida em “Juros de mora (cód. 20088)”. Preencha só quando aquele lançamento tiver data de juros própria (por exemplo, a data do requerimento).
+        </div>
+        <p><strong>“Limpar servidor”</strong> apaga os dados e lançamentos da aba Individual (não afeta a aba Relação nem o que já foi salvo).</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="parametros">
+        <h2 class="sec-title"><span class="num">8</span>Parâmetros do cálculo</h2>
+        <p>Valem para as duas abas. Qualquer alteração depois do cálculo marca as linhas como <strong>“↻ recalcular”</strong>.</p>
+        <table class="tbl">
+          <thead><tr><th>Campo</th><th>O que preencher</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Data para atualização</span></td><td>Termo final da correção e dos juros. Vem com a data de hoje.</td><td>Se o TCDF ainda não publicou o índice do período, use a véspera ou o botão “Encontrar a última data disponível” (seção 9).</td></tr>
+            <tr><td rowspan="3"><span class="campo">Juros de mora (cód. 20088)</span></td><td><strong>A partir da data do fato gerador</strong> (padrão)</td><td>Cada linha tem juros desde a sua própria data F.G.</td></tr>
+            <tr><td><strong>A partir de uma data única</strong></td><td>Abre o campo <span class="campo">Data de início dos juros</span> — ex.: data do requerimento administrativo.</td></tr>
+            <tr><td><strong>Sem incidência de juros</strong></td><td>Só atualização monetária.</td></tr>
+            <tr><td rowspan="2"><span class="campo">Arredondamento</span></td><td><strong>Preservar parcelas do SINDEC</strong> (padrão)</td><td>Total = devido + correção + juros, exatamente como as parcelas do SINDEC.</td></tr>
+            <tr><td><strong>Preservar total do SINDEC</strong></td><td>Mantém o total devolvido pelo SINDEC; a diferença de centavo vai para os juros.</td></tr>
+            <tr><td><span class="campo">Referência / Processo SEI (opcional)</span></td><td>Número do processo do cálculo.</td><td>Sai no título do Excel, na impressão e no histórico.</td></tr>
+          </tbody>
+        </table>
+        <div class="box box-info">
+          <strong>Por que existe a opção de arredondamento</strong>
+          Em alguns casos o SINDEC arredonda cada parcela e o total separadamente, e a soma das parcelas difere do total em R$ 0,01. O módulo informa isso na coluna Situação. Escolha o critério adotado pela área e mantenha-o em todo o processo.
+        </div>
+        <div class="box box-atencao">
+          <strong>A coluna “DATA INÍCIO JUROS” da planilha prevalece</strong>
+          Quando a linha tem data de juros própria (importada ou digitada), ela é usada em vez da regra geral — inclusive se a regra geral for “Sem incidência de juros”.
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="atualizar">
+        <h2 class="sec-title"><span class="num">9</span>Atualizando pelo SINDEC (pausar, continuar, pendentes)</h2>
+        <ol class="passos">
+          <li>Confira, no topo, a indicação <strong>“SINDEC/TCDF”</strong> com ponto verde (sistema do TCDF acessível).</li>
+          <li>Clique em <strong>“⟳ Atualizar valores pelo SINDEC”</strong>. A barra mostra <em>“Consultando SINDEC… X/Y linha(s)”</em> e o <strong>tempo restante estimado</strong>.</li>
+          <li>Para interromper, clique em <strong>“⏸ Pausar”</strong>; para seguir, <strong>“Continuar”</strong>. O módulo recomeça exatamente de onde parou.</li>
+          <li>Ao terminar, se alguma linha ficou com erro, clique em <strong>“↻ Reprocessar só as pendentes”</strong> — só as que faltam são enviadas de novo.</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Relações grandes: dá para trocar de aba e até fechar o navegador</strong>
+          As consultas são feitas uma a uma, com intervalo, para não sobrecarregar o TCDF. Lançamentos com a mesma data e o mesmo valor são consultados uma só vez. O cálculo continua mesmo com a aba do navegador em segundo plano. O andamento é guardado no próprio computador a cada 50 linhas: se o navegador fechar, ao reabrir o módulo aparece o aviso com o botão <strong>“▶ Continuar de onde parou”</strong>.
+        </div>
+        <h3 class="sub-title">Aviso “Indicadores carecem de atualização”</h3>
+        <p>Significa que o TCDF <strong>ainda não publicou o índice</strong> do período até a data para atualização escolhida (comum nos primeiros dias do mês). Não é falha do módulo nem bloqueio por excesso de consultas. O módulo tenta algumas vezes e, persistindo, mostra o botão <strong>“Encontrar a última data disponível e recalcular tudo”</strong>, que recua a data até a última aceita pelo SINDEC e refaz o cálculo de todas as linhas com essa data.</p>
+        <div class="box box-atencao">
+          <strong>Não feche a página durante o cálculo sem necessidade</strong>
+          O navegador pede confirmação se você tentar sair com o cálculo em andamento. A retomada funciona, mas só no mesmo computador e navegador.
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="tabela">
+        <h2 class="sec-title"><span class="num">10</span>Lendo a tabela de resultados</h2>
+        <table class="tbl">
+          <thead><tr><th>Coluna</th><th>Conteúdo</th></tr></thead>
+          <tbody>
+            <tr><td>Matrícula / Nome do servidor / Processo de origem</td><td>Dados da linha importada ou digitada.</td></tr>
+            <tr><td>Fato gerador / Data F.G. / Início juros</td><td>Descrição e datas usadas. <span class="campo">aj.</span> indica data ajustada na importação.</td></tr>
+            <tr><td>Valores devidos</td><td>Valor original.</td></tr>
+            <tr><td>Atualização monetária</td><td>Parcela do código 20827.</td></tr>
+            <tr><td>Juros de mora</td><td>Parcela do código 20088.</td></tr>
+            <tr><td>Valor total atualizado</td><td>Soma das três anteriores.</td></tr>
+            <tr><td>Situação</td><td>Estado da linha (abaixo).</td></tr>
+          </tbody>
+        </table>
+        <table class="tbl">
+          <thead><tr><th>Situação</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">pendente</span></td><td>Ainda não consultada.</td></tr>
+            <tr><td><span class="campo">consultando…</span></td><td>Consulta em andamento.</td></tr>
+            <tr><td><span class="campo">✓ dd/mm/aaaa</span></td><td>Atualizada até a data indicada. Pode trazer notas: “negativo: sinal reaplicado” ou “ajuste de arredondamento nos juros”.</td></tr>
+            <tr><td><span class="campo">⚠ erro</span></td><td>O SINDEC não calculou; o motivo aparece logo abaixo. Use “Reprocessar só as pendentes”.</td></tr>
+            <tr><td><span class="campo">↻ recalcular</span></td><td>Um parâmetro ou a própria linha mudou depois do cálculo.</td></tr>
+          </tbody>
+        </table>
+        <p>Acima da tabela, o filtro <strong>“Mostrar:”</strong> permite ver <em>Todas as linhas</em>, <em>Pendentes / a recalcular</em>, <em>Com erro</em> ou <em>Datas ajustadas</em>. Relações grandes são exibidas em páginas de 200 linhas (botões « ‹ › »). Em cada linha: <span class="campo">🔍</span> abre a memória de cálculo do SINDEC, <span class="campo">✎</span> edita e <span class="campo">🗑</span> exclui.</p>
+        <div class="box box-info">
+          <strong>Valores negativos</strong>
+          O SINDEC só calcula valores positivos. Para devoluções, o módulo envia o valor sem sinal e reaplica o sinal negativo na correção, nos juros e no total — a linha mostra “negativo: sinal reaplicado”.
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section id="salvar">
+        <h2 class="sec-title"><span class="num">11</span>Exportar, imprimir e salvar no histórico</h2>
+        <table class="tbl">
+          <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td><span class="campo">Exportar Excel</span></td><td>Planilha no layout DEA: linhas agrupadas por exercício (pela data do fato gerador), subtotais por exercício, colunas de atualização monetária (20827), juros (20088) e total, resumo e observações. Inclui uma aba <strong>“Memória SINDEC”</strong> com o passo a passo de cada linha.</td></tr>
+            <tr><td><span class="campo">Exportar Excel por servidor</span></td><td>Só na aba lote. Aba <strong>“Por servidor”</strong>: lançamentos agrupados por matrícula em ordem <strong>crescente</strong>, com a coluna Q <strong>“TOTAL DO SERVIDOR (R$)”</strong> mesclada por servidor. Aba <strong>“Resumo por servidor”</strong>: uma linha por servidor com o total, por fórmula. Se houver linhas pendentes, o módulo avisa antes de gerar.</td></tr>
+            <tr><td><span class="campo">Imprimir</span></td><td>Lote: demonstrativo da relação. Individual: <strong>memória de cálculo no padrão SEI</strong> (identificação, parâmetros, fundamentação, lançamentos, memória detalhada e campos de assinatura).</td></tr>
+            <tr><td><span class="campo">Salvar no histórico</span></td><td>Grava a aba atual no Histórico de acertos, vinculada à sua conta. Cada nova importação ou “Limpar” inicia um <strong>registro novo</strong> — não sobrescreve o anterior.</td></tr>
+            <tr><td><span class="campo">Limpar relação</span> / <span class="campo">Limpar servidor</span></td><td>Pede confirmação e esvazia a aba. Não afeta registros já salvos.</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="sub-title">Excel por servidor — como a matrícula é tratada</h3>
+        <ul>
+          <li>Matrículas grafadas de formas diferentes (ex.: <span class="campo">01929208</span> e <span class="campo">1929208</span>) são reunidas no mesmo servidor, com nota na planilha.</li>
+          <li>A ordenação desconsidera zeros à esquerda; o dígito <strong>X</strong> é ordenado depois do 9.</li>
+          <li>Matrícula com zero à esquerda é mantida como texto, para o Excel não apagar o zero.</li>
+        </ul>
+
+        <h3 class="sub-title">Relações grandes (mais de 300 lançamentos)</h3>
+        <p>O banco de dados do Portal aceita até 1 MB por registro (cerca de 300 lançamentos com a memória de cálculo). Para uma relação de milhares de linhas, você tem duas opções:</p>
+        <ol class="passos">
+          <li><strong>Calcular tudo de uma vez e exportar o Excel</strong> (recomendado para relações muito grandes) — o Excel não tem limite.</li>
+          <li><strong>Dividir em blocos de até 300</strong>: importe o bloco, atualize e salve; importe o próximo bloco (o módulo inicia um registro novo automaticamente) e salve de novo. Cada bloco vira um registro separado no histórico.</li>
+        </ol>
+
+        <h3 class="sub-title">Reabrir e corrigir um cálculo salvo</h3>
+        <p>Abra o registro pelo <strong>Histórico de acertos</strong> (menu lateral). O módulo carrega a aba correspondente (lote ou individual). Ao salvar, o registro é <strong>atualizado</strong>, sem duplicar. Se você abrir o módulo direto pelo menu, é um cálculo novo.</p>
+        <div class="box box-dica">
+          <strong>Dica de impressão</strong>
+          Use “Salvar como PDF” na janela de impressão para juntar a memória ao processo SEI. A tela do Portal não sai no papel.
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="exemplo">
+        <h2 class="sec-title"><span class="num">12</span>Exemplos completos, do início ao fim</h2>
+        <p><em>Os valores de atualização e juros abaixo são ilustrativos — no uso real, eles vêm do SINDEC e dependem dos índices publicados.</em></p>
+
+        <h3 class="sub-title">Exemplo A — relação DEA importada de Excel</h3>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Levantamento DEA com 5 linhas de 2 servidores. Duas linhas são 20088 e 20827 de um cálculo anterior. Uma data está como <span class="campo">31/04/2019</span>.
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Matrícula</th><th>Nome</th><th>Código</th><th>Data F.G.</th><th>Valor devido</th><th>Na importação</th></tr></thead>
+          <tbody>
+            <tr><td>1234567</td><td>SERVIDOR A</td><td class="codigo">10025</td><td>31/04/2019</td><td class="num">1.000,00</td><td>Carregada — data ajustada para 30/04/2019</td></tr>
+            <tr><td>1234567</td><td>SERVIDOR A</td><td class="codigo">20827</td><td>30/04/2019</td><td class="num">150,00</td><td>Desconsiderada (atualização já lançada)</td></tr>
+            <tr><td>1234567</td><td>SERVIDOR A</td><td class="codigo">20088</td><td>30/04/2019</td><td class="num">200,00</td><td>Desconsiderada (juros já lançados)</td></tr>
+            <tr><td>0765432</td><td>SERVIDOR B</td><td class="codigo">10025</td><td>30/11/2021</td><td class="num">500,00</td><td>Carregada</td></tr>
+            <tr><td>0765432</td><td>SERVIDOR B</td><td class="codigo">10025</td><td>30/12/2021</td><td class="num">-50,00</td><td>Carregada (devolução)</td></tr>
+          </tbody>
+        </table>
+        <p>A conferência mostra: <strong>5 lidas · 3 a atualizar · 2 desconsideradas</strong> (20827: 1; 20088: 1) · <strong>1 data ajustada</strong>. Confirma-se e clica-se em “Atualizar valores pelo SINDEC”, com juros a partir do fato gerador.</p>
+        <table class="tbl">
+          <thead><tr><th>Servidor</th><th>Data F.G.</th><th>Devido</th><th>Atualização (20827)</th><th>Juros (20088)</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>SERVIDOR A</td><td>30/04/2019</td><td class="num">1.000,00</td><td class="num">380,00</td><td class="num">420,00</td><td class="num">1.800,00</td></tr>
+            <tr><td>SERVIDOR B</td><td>30/11/2021</td><td class="num">500,00</td><td class="num">110,00</td><td class="num">160,00</td><td class="num">770,00</td></tr>
+            <tr><td>SERVIDOR B</td><td>30/12/2021</td><td class="num">-50,00</td><td class="num">-11,00</td><td class="num">-16,00</td><td class="num">-77,00</td></tr>
+          </tbody>
+        </table>
+        <p>No <strong>Exportar Excel</strong>, as linhas saem em dois exercícios (2019 e 2021), com subtotal de cada um. No <strong>Exportar Excel por servidor</strong>, o SERVIDOR B (0765432) vem antes do A (1234567), e a coluna Q mostra <strong>1.800,00</strong> para o A e <strong>693,00</strong> (770,00 − 77,00) para o B.</p>
+        <div class="box box-dica">
+          <strong>Confira o “bater”</strong>
+          A soma da coluna Q do Excel por servidor (2.493,00) deve ser igual ao total geral do Excel comum e ao total exibido no módulo.
+        </div>
+
+        <h3 class="sub-title">Exemplo B — servidor individual com juros a partir do requerimento</h3>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Servidor requereu em 10/03/2023 diferenças de três meses de 2022. Pela decisão do processo, os juros correm a partir do requerimento.
+        </div>
+        <ol class="passos">
+          <li>Aba <strong>Individual</strong>: matrícula, nome, CPF e processo SEI.</li>
+          <li>Três lançamentos: 31/01/2022, 28/02/2022 e 31/03/2022, cada um com o valor da diferença.</li>
+          <li>Parâmetros: “Juros de mora” = <strong>A partir de uma data única</strong>; “Data de início dos juros” = <strong>10/03/2023</strong>.</li>
+          <li>Atualizar; conferir a memória (🔍) de cada lançamento; <strong>Imprimir</strong> a memória no padrão SEI e <strong>Salvar no histórico</strong>.</li>
+        </ol>
+        <p>Resultado esperado: atualização monetária desde cada data F.G. e juros apenas a partir de 10/03/2023.</p>
+      </section>
+
+      <!-- 13 -->
+      <section id="erros">
+        <h2 class="sec-title"><span class="num">13</span>Erros comuns e perguntas frequentes</h2>
+
+        <h3 class="sub-title">Cliquei em “Clique para importar” e a pasta não abriu</h3>
+        <p>Atualize a página (F5) e tente de novo, ou arraste o arquivo para a área tracejada. O módulo funciona tanto publicado no Portal quanto aberto direto do computador.</p>
+
+        <h3 class="sub-title">A planilha não foi reconhecida</h3>
+        <p>Confira se existe uma linha de cabeçalho com a palavra <strong>MATRÍCULA</strong> e as colunas NOME, DATA DO FATO GERADOR e VALORES DEVIDOS. Se necessário, copie os dados para o <strong>modelo em branco</strong>.</p>
+
+        <h3 class="sub-title">Algumas linhas não entraram na relação</h3>
+        <p>Veja a conferência: provavelmente são 20088/20827 ou têm descrição “JUROS DE MORA”/“ATUALIZAÇÃO MONETÁRIA” — é o comportamento correto. No PDF, confira também o bloco de linhas não reconhecidas.</p>
+
+        <h3 class="sub-title">A data foi ajustada de forma errada</h3>
+        <p>Use o filtro “Datas ajustadas”, edite a linha (✎) e corrija a data. A linha passa a “↻ recalcular”; depois, “Reprocessar só as pendentes”.</p>
+
+        <h3 class="sub-title">Apareceu “Indicadores carecem de atualização”</h3>
+        <p>O índice do período ainda não foi publicado pelo TCDF. Use o botão “Encontrar a última data disponível e recalcular tudo” ou informe a véspera/último dia do mês anterior como data para atualização. Veja a <a href="#atualizar">seção 9</a>.</p>
+
+        <h3 class="sub-title">Algumas linhas ficaram com “⚠ erro”</h3>
+        <p>Pode ser instabilidade momentânea do site do TCDF. Aguarde alguns minutos e clique em “Reprocessar só as pendentes”. Se o motivo indicar data ou valor inválido, corrija a linha.</p>
+
+        <h3 class="sub-title">O total difere R$ 0,01 da soma das parcelas</h3>
+        <p>É o arredondamento do próprio SINDEC. Escolha o critério em “Arredondamento” (seção 8) e use o mesmo em todo o processo.</p>
+
+        <h3 class="sub-title">O ponto do SINDEC no topo ficou vermelho</h3>
+        <p>O site do TCDF não respondeu. Confira a internet e tente mais tarde; nada é perdido enquanto isso.</p>
+
+        <h3 class="sub-title">O navegador fechou no meio de uma relação grande</h3>
+        <p>Reabra o módulo no mesmo computador e navegador e clique em “▶ Continuar de onde parou”.</p>
+
+        <h3 class="sub-title">“Salvar no histórico” recusou a relação</h3>
+        <p>A relação passou do limite de cerca de 300 lançamentos (1 MB). Exporte o Excel ou divida em blocos (seção 11).</p>
+
+        <h3 class="sub-title">Salvei um bloco e, ao importar o próximo, o anterior sumiu?</h3>
+        <p>Não. Cada importação nova (ou “Limpar”) inicia um registro novo; o bloco anterior continua no Histórico.</p>
+
+        <h3 class="sub-title">O botão “Exportar Excel por servidor” não aparece</h3>
+        <p>Ele só existe na aba <strong>Relação (lote)</strong>.</p>
+      </section>
+
+      <!-- 14 -->
+      <section id="checklist">
+        <h2 class="sec-title"><span class="num">14</span>Checklist antes de salvar</h2>
+        <ul class="checklist">
+          <li>A aba correta foi usada (lote para relação; individual para um servidor).</li>
+          <li>Na conferência da importação, as quantidades lidas, a atualizar e desconsideradas fazem sentido; nenhuma linha 20088/20827 entrou na relação.</li>
+          <li>As <strong>datas ajustadas</strong> foram revisadas (filtro “Datas ajustadas”).</li>
+          <li>A <strong>Data para atualização</strong> e a regra de <strong>juros</strong> correspondem ao que o processo determina.</li>
+          <li>O critério de <strong>arredondamento</strong> é o mesmo adotado nos demais cálculos do processo.</li>
+          <li>Nenhuma linha ficou como <strong>pendente</strong>, <strong>⚠ erro</strong> ou <strong>↻ recalcular</strong> (filtro “Pendentes / a recalcular” e “Com erro” vazios).</li>
+          <li>O total do <strong>Excel por servidor</strong> bate com o total do Excel comum.</li>
+          <li>A <strong>Referência / Processo SEI</strong> foi preenchida.</li>
+          <li>Relação com mais de 300 lançamentos: exportou o Excel ou dividiu em blocos.</li>
+          <li>Clicou em <strong>“Salvar no histórico”</strong> e viu a confirmação de sucesso.</li>
+        </ul>
+      </section>
+
+      <p style="color:var(--ink-soft);font-size:.82rem;border-top:1px solid var(--line);padding-top:1rem;">
+        Atualização (SINDEC) - Passivo a Servidores · DIGEP/ASPAG — IBRAM-DF · Este manual reflete a versão atual do módulo e pode ser atualizado sempre que o sistema mudar.
+      </p>
+    </div>
+  </div>
+</div>
+<a href="#" class="voltar-topo" title="Voltar ao topo">↑</a>
+
+<script type="module">
+  import { exigirLogin, checkConnection, observarLogin, logout } from '../assets/firebase-init.js';
+
+  exigirLogin((usuario) => {
+    console.log('Logado como', usuario.email);
+  });
+
+  checkConnection().then((ok) => {
+    const dot = document.getElementById('conn-dot');
+    const text = document.getElementById('conn-text');
+    if (ok) { dot.classList.add('ok'); text.textContent = 'conectado ao banco de dados'; }
+    else { text.textContent = 'sem conexão — configure assets/firebase-config.js'; }
+  });
+
+  observarLogin((usuario) => {
+    if (usuario) {
+      document.getElementById('login-info').style.display = 'flex';
+      document.getElementById('login-text').textContent = usuario.email;
+    }
+  });
+
+  document.getElementById('btn-sair').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await logout();
+    window.location.reload();
+  });
+</script>
+</body>
+</html>

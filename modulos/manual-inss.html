@@ -194,11 +194,12 @@
           <li><a href="#patronal">Anexando o PDF do SIGRH (INSS Patronal por versão)</a></li>
           <li><a href="#codigos">Detalhamento por código de recolhimento (segurado)</a></li>
           <li><a href="#base-calculo">Base de cálculo e valores a recolher</a></li>
-          <li><a href="#maternidade">Dedução salário maternidade</a></li>
+          <li><a href="#maternidade">Salário maternidade</a></li>
           <li><a href="#conferencia">Conferência por versão de folha</a></li>
-          <li><a href="#resultado">Resultado — gerando os 3 DARFs</a></li>
+          <li><a href="#resultado">Resultado — os 3 DARFs</a></li>
           <li><a href="#salvar">Salvar, imprimir e exportar</a></li>
-          <li><a href="#exemplo">Exemplo completo, do início ao fim</a></li>
+          <li><a href="#sicalc">Gerando os DARFs no SICALC</a></li>
+          <li><a href="#exemplo">Exemplos completos, do início ao fim</a></li>
           <li><a href="#erros">Erros comuns e perguntas frequentes</a></li>
           <li><a href="#checklist">Checklist antes de salvar</a></li>
         </ol>
@@ -208,12 +209,25 @@
       <section id="visao-geral">
         <h2 class="sec-title"><span class="num">1</span>O que é este cálculo e para que serve</h2>
         <p>Todo mês, depois que a folha de pagamento do IBRAM fecha, o órgão precisa <strong>pagar ao INSS (Receita Federal)</strong> os encargos que incidem sobre os salários pagos — isso é obrigatório por lei, igual qualquer empregador precisa recolher a parte que cabe a ele e repassar a parte que foi descontada dos próprios servidores. Este módulo é a ferramenta que calcula esses valores e organiza as informações necessárias para gerar as guias de pagamento.</p>
-        <p>Ele <strong>não é</strong> um acerto de contas de um servidor específico (não é dinheiro que um servidor recebe ou devolve) — é um cálculo institucional: pega os relatórios de folha do SIGRH, calcula quanto o IBRAM deve pagar de encargos (RAT e INSS Patronal) e quanto já foi descontado dos servidores (desconto do segurado), e no final gera <strong>três guias de pagamento (DARFs)</strong> — uma para cada tipo de encargo — prontas para pagar no banco.</p>
+        <p>Ele <strong>não é</strong> um acerto de contas de um servidor específico (não é dinheiro que um servidor recebe ou devolve) — é um cálculo institucional: pega os relatórios de folha do SIGRH, calcula quanto o IBRAM deve pagar de encargos (RAT e INSS Patronal) e quanto já foi descontado dos servidores (desconto do segurado), e no final gera <strong>três guias de pagamento (DARFs)</strong> — uma para cada tipo de encargo.</p>
         <div class="box box-info">
           <strong>Quando isso é feito</strong>
-          Uma vez por mês, depois que a folha de pagamento daquele mês (a "competência") está fechada no SIGRH. Normalmente é feito pela mesma pessoa da DIGEP/ASPAG responsável pelos encargos patronais, sempre logo depois de a folha sair.
+          Uma vez por mês, depois que a folha de pagamento daquele mês (a "competência") está fechada no SIGRH. Normalmente é feito pela mesma pessoa da DIGEP/ASPAG responsável pelos encargos patronais, logo depois de a folha sair.
         </div>
-        <p>No final deste manual, a seção <a href="#exemplo">Exemplo completo</a> mostra o processo inteiro do começo ao fim, com números fictícios simples, para você comparar com o que estiver fazendo.</p>
+        <h3 class="sub-title">O caminho em uma olhada</h3>
+        <ol class="passos">
+          <li>Confira a <strong>competência</strong> e os percentuais (seção 3).</li>
+          <li>Anexe o <strong>PDF do SIGRH</strong> de cada versão de folha — o módulo lê os valores sozinho (seção 4).</li>
+          <li>Confira a <strong>Base de cálculo</strong> e o <strong>salário maternidade</strong>, se houver (seções 6 e 7).</li>
+          <li>Veja a <strong>Conferência</strong> e corrija diferenças de centavos com o botão de ajuste (seção 8).</li>
+          <li>Leia o valor dos <strong>3 DARFs</strong>, salve no Portal e imprima o demonstrativo (seções 9 e 10).</li>
+          <li>Se quiser, use o botão do <strong>SICALC</strong> para emitir as guias (seção 11).</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>O que há de novo nesta versão do módulo</strong>
+          Botão <strong>remover PDF</strong> por versão · leitura automática do <strong>salário maternidade</strong> (código 1.0809) · <strong>INSS Patronal arredondado para baixo</strong> em centavos · botão de <strong>ajuste de RAT por versão</strong> na Conferência · Conferência <strong>aberta por padrão</strong> · impressão em <strong>retrato</strong>, com coluna e observação de salário maternidade quando houver · texto pronto para emitir os DARFs no <strong>SICALC</strong> em duas fases.
+        </div>
+        <p>No final deste manual, a seção <a href="#exemplo">Exemplos completos</a> mostra o processo inteiro com números fictícios simples, para você comparar com o que estiver fazendo.</p>
       </section>
 
       <!-- 2 -->
@@ -225,16 +239,19 @@
           <dd>A parte do INSS que o <strong>órgão</strong> (empregador) paga sobre a folha de salários. É diferente do desconto que sai do salário do próprio servidor.</dd>
 
           <dt>Desconto do segurado</dt>
-          <dd>A parte do INSS que já foi <strong>descontada diretamente do salário do servidor</strong> na folha de pagamento. O órgão não paga essa parte do próprio bolso — só repassa à Receita Federal o que já foi descontado.</dd>
+          <dd>A parte do INSS que já foi <strong>descontada diretamente do salário do servidor</strong> na folha. O órgão não paga essa parte do próprio bolso — só repassa à Receita Federal o que já foi descontado.</dd>
 
           <dt>RAT (Riscos Ambientais do Trabalho)</dt>
           <dd>Um percentual extra que o órgão paga, calculado sobre a mesma base do INSS Patronal, usado para custear benefícios como aposentadoria especial. A Receita Federal também chama esse valor de <strong>GILRAT</strong> nas guias.</dd>
+
+          <dt>Ajuste de RAT</dt>
+          <dd>Uma correção de poucos centavos aplicada <strong>somente no RAT</strong> de uma versão, para que o cálculo do módulo bata com o valor que o SIGRH informa. É feita com um botão na Conferência (seção 8).</dd>
 
           <dt>SAT / Agente nocivo</dt>
           <dd>Um adicional que só existe quando há servidores expostos a algo que prejudica a saúde no trabalho (insalubridade/periculosidade). Neste órgão, costuma aparecer zerado (R$ 0,00) na maioria dos meses — isso é normal.</dd>
 
           <dt>RGPS</dt>
-          <dd>Regime Geral de Previdência Social — o regime de aposentadoria pelo INSS. É o regime usado pelos servidores deste módulo (diferente do RPPS, que é o regime próprio de servidor efetivo, tratado em outros módulos do portal).</dd>
+          <dd>Regime Geral de Previdência Social — o regime de aposentadoria pelo INSS. É o regime usado pelos servidores deste módulo (diferente do RPPS, o regime próprio de servidor efetivo, tratado em outros módulos do portal).</dd>
 
           <dt>Competência / Período de apuração</dt>
           <dd>O <strong>mês a que o cálculo se refere</strong> (por exemplo, a folha de agosto/2026) — não é o mês em que você está preenchendo o módulo, e sim o mês da folha que está sendo fechada.</dd>
@@ -243,19 +260,37 @@
           <dd>Identifica se é a <strong>folha normal do mês</strong> (Versão 01) ou uma <strong>reprocessagem/correção posterior</strong> feita pelo SIGRH depois que a folha normal já saiu (Versões 75 e 76). Na maioria dos meses, só a Versão 01 tem valores — 75 e 76 ficam zeradas, e isso é normal.</dd>
 
           <dt>Grupo 53 / Grupo 54</dt>
-          <dd>Duas situações de contrato diferentes dentro da mesma folha: <strong>Grupo 53 = servidores ativos</strong> (RGPS normal) e <strong>Grupo 54 = contrato temporário</strong>. O relatório do SIGRH traz os dois separadamente, mas geralmente no mesmo PDF.</dd>
+          <dd>Duas situações de contrato dentro da mesma folha: <strong>Grupo 53 = servidores ativos</strong> (Folha Normal Ativo-RGPS) e <strong>Grupo 54 = contrato temporário</strong> (Folha Normal Contrato Temporário-RGPS). O relatório do SIGRH traz os dois separadamente, no mesmo PDF.</dd>
 
           <dt>BASE I.N.S.S PATRONAL</dt>
           <dd>O valor total de salários sobre o qual incide o cálculo do INSS Patronal e do RAT, mostrado no relatório do SIGRH. É a partir dele que o "Salário normal" deste módulo é calculado.</dd>
 
           <dt>Código de recolhimento (40910, 30910, 40912, 40949)</dt>
-          <dd>Números que o SIGRH usa para identificar cada tipo de desconto do INSS descontado do servidor. Você não precisa decorar o que cada um significa — o sistema já sabe procurar esses números no PDF.</dd>
+          <dd>Números que o SIGRH usa para identificar cada tipo de desconto do INSS descontado do servidor. Você não precisa decorar o que cada um significa — o módulo já sabe procurar esses números no PDF.</dd>
+
+          <dt>Salário maternidade (código 1.0809)</dt>
+          <dd>Valor pago pela folha às servidoras em licença-maternidade. No relatório do SIGRH aparece com o código <strong>1.0809</strong>. Neste módulo, esse valor é <strong>abatido do DARF Segurado</strong> (código 1082-01).</dd>
+
+          <dt>Compensação</dt>
+          <dd>Valor que a contabilidade manda abater do <strong>DARF Patronal</strong> (por exemplo, por um recolhimento feito a maior antes). Só se preenche quando a contabilidade informar.</dd>
+
+          <dt>Dedução salário-família</dt>
+          <dd>Valor de salário-família pago na folha que é abatido do <strong>DARF Segurado</strong>. Só se preenche quando existir no mês.</dd>
+
+          <dt>Arredondamento para baixo (truncamento)</dt>
+          <dd>Quando o INSS Patronal dá mais de duas casas decimais, o módulo <strong>corta</strong> as casas extras em vez de arredondar para cima. Exemplo: 20% de 628,04 = 125,608 → fica <strong>125,60</strong>.</dd>
+
+          <dt>OCR (leitura de imagem)</dt>
+          <dd>Alguns PDFs do SIGRH são "imagem" e não têm texto que o computador consiga copiar. Nesse caso o módulo "lê" a imagem sozinho, o que é mais lento (pode levar cerca de 1 minuto).</dd>
 
           <dt>DARF</dt>
-          <dd>Documento de Arrecadação de Receitas Federais — é a <strong>guia de pagamento</strong> em si, que efetivamente é paga no banco (pelo SICALC da Receita Federal). Este módulo calcula os valores; o DARF é gerado depois, em outro sistema.</dd>
+          <dd>Documento de Arrecadação de Receitas Federais — é a <strong>guia de pagamento</strong> em si, que efetivamente é paga no banco (emitida pelo SICALC da Receita Federal). Este módulo calcula os valores; o DARF é emitido depois, em outro sistema.</dd>
 
           <dt>Código de receita</dt>
-          <dd>Um número que identifica qual dos três tipos de DARF está sendo gerado: <span class="campo">1138-01</span> (Patronal), <span class="campo">1082-01</span> (Segurado) e <span class="campo">1646-01</span> (RAT).</dd>
+          <dd>Número que identifica qual dos três tipos de DARF está sendo gerado: <span class="campo">1138-01</span> (Patronal), <span class="campo">1082-01</span> (Segurado) e <span class="campo">1646-01</span> (RAT).</dd>
+
+          <dt>SICALC</dt>
+          <dd>Sistema da Receita Federal onde se calcula e emite o DARF, informando código de receita, período e valor.</dd>
 
           <dt>SIGRH / PAGEMP01</dt>
           <dd>SIGRH é o sistema de folha de pagamento do GDF. PAGEMP01 é o nome do relatório específico ("Resumo de Proventos e Descontos") de onde vêm os PDFs usados neste módulo.</dd>
@@ -270,9 +305,9 @@
           <thead><tr><th>Campo</th><th>O que preencher</th><th>De onde vem / o que fazer se tiver dúvida</th></tr></thead>
           <tbody>
             <tr><td><span class="campo">Órgão</span> / <span class="campo">Unidade</span></td><td>Nome e código do órgão.</td><td>Já vem preenchido. Se estiver errado, avise a DIGEP — não altere por conta própria.</td></tr>
-            <tr><td><span class="campo">Competência (folha)</span></td><td>O mês da folha que está sendo fechada.</td><td>Pergunte ao setor de folha/RH qual mês está sendo processado, se tiver dúvida.</td></tr>
-            <tr><td><span class="campo">Data do documento</span></td><td>A data de hoje, normalmente.</td><td>Aparece no rodapé do demonstrativo impresso.</td></tr>
-            <tr><td><span class="campo">RAT (%)</span>, <span class="campo">INSS patronal (%)</span>, <span class="campo">SAT (%)</span></td><td>Percentuais fixos, definidos por legislação federal.</td><td>Não costumam mudar mês a mês. Só altere se a contabilidade/DIGEP confirmar explicitamente uma mudança de alíquota.</td></tr>
+            <tr><td><span class="campo">Competência (folha)</span></td><td>O mês da folha que está sendo fechada.</td><td>Pergunte ao setor de folha/RH qual mês está sendo processado, se tiver dúvida. <strong>É obrigatória</strong> para salvar no Portal e para o texto do SICALC.</td></tr>
+            <tr><td><span class="campo">Data do documento</span></td><td>A data de hoje, normalmente.</td><td>Aparece no rodapé do demonstrativo impresso ("Brasília, data").</td></tr>
+            <tr><td><span class="campo">RAT (%)</span>, <span class="campo">INSS patronal (%)</span>, <span class="campo">SAT (%)</span></td><td>Percentuais fixos, definidos por legislação federal. Valores atuais: RAT 2,8496% · INSS 20% · SAT 6%.</td><td>Não costumam mudar mês a mês. Só altere se a contabilidade/DIGEP confirmar explicitamente uma mudança de alíquota. Ao alterar, tudo é recalculado na hora.</td></tr>
           </tbody>
         </table>
         <div class="box box-dica">
@@ -284,36 +319,45 @@
       <!-- 4 -->
       <section id="patronal">
         <h2 class="sec-title"><span class="num">4</span>Anexando o PDF do SIGRH (INSS Patronal por versão)</h2>
-        <p>Esta é a etapa mais importante: você anexa o relatório do SIGRH e o sistema lê os valores sozinho.</p>
+        <p>Esta é a etapa mais importante: você anexa o relatório do SIGRH e o módulo lê os valores sozinho. <strong>Um único PDF por versão</strong> preenche os dois grupos (53 e 54), os códigos de recolhimento, a conferência e o salário maternidade daquela versão.</p>
         <ol class="passos">
           <li>No SIGRH, gere o relatório <strong>PAGEMP01 — Resumo de Proventos e Descontos</strong> da competência do mês (peça ao setor de folha se você não tiver acesso direto ao SIGRH).</li>
-          <li>Baixe o PDF. Ele normalmente já traz os dois blocos juntos: <strong>Folha Normal Ativo-RGPS</strong> (Grupo 53) e <strong>Folha Normal Contrato Temporário-RGPS</strong> (Grupo 54).</li>
+          <li>Baixe o PDF. Ele normalmente já traz os dois blocos juntos: <strong>Folha Normal Ativo-RGPS</strong> (Grupo 53) e <strong>Folha Normal Contrato Temporário-RGPS</strong> (Grupo 54). Cada bloco pode ocupar mais de uma página — o módulo junta as páginas sozinho.</li>
           <li>No módulo, clique em <strong>"Escolher arquivo"</strong> no card da versão correspondente (na maioria dos meses, é a <strong>Versão 01</strong>) e selecione o PDF.</li>
-          <li>Aguarde — o sistema lê o PDF automaticamente e preenche os dois campos, <strong>Grupo 53 (Ativo)</strong> e <strong>Grupo 54 (Temporário)</strong>, de uma vez só.</li>
+          <li>Aguarde. O nome do arquivo aparece embaixo do botão e cada grupo mostra <strong>"Lendo…"</strong> e depois <strong>"✓ lido do PDF"</strong>, com a quantidade de códigos localizados.</li>
         </ol>
+        <div class="box box-info">
+          <strong>Demorou? Pode ser leitura de imagem (OCR)</strong>
+          Se o PDF não tem texto copiável, o módulo faz a leitura da imagem, o que pode levar cerca de 1 minuto. Espere o "Lendo…" terminar antes de mexer em outra coisa.
+        </div>
+
+        <h3 class="sub-title">Escolhi o PDF errado — como desfazer</h3>
+        <p>Clique no botão vermelho <strong>"remover PDF"</strong>, que aparece ao lado do campo de arquivo assim que um PDF é anexado. Ele limpa <strong>apenas aquela versão</strong>: os valores dos Grupos 53 e 54, os códigos de recolhimento, o "VALOR I.N.S.S. A RECOLHER" da Conferência, o salário maternidade e o ajuste de RAT. As outras versões não são afetadas. Depois é só escolher o arquivo certo.</p>
+
         <div class="box box-info">
           <strong>Versões 75 e 76</strong>
           Só existe PDF para essas versões quando o SIGRH gerou uma reprocessagem/correção da folha naquele mês. Se não houver, deixe os campos zerados — é o normal na maioria dos meses.
         </div>
         <div class="box box-dica">
           <strong>Um valor não bateu ou não apareceu?</strong>
-          Você pode digitar ou corrigir qualquer campo manualmente, a qualquer momento — o preenchimento automático é uma ajuda, não uma obrigação.
+          Você pode digitar ou corrigir manualmente o valor de cada Grupo, a qualquer momento — o preenchimento automático é uma ajuda, não uma obrigação. Se aparecer <em>"Não encontrei este bloco… informe manualmente"</em> ou <em>"Não foi possível ler o PDF"</em>, digite o valor olhando o relatório.
         </div>
       </section>
 
       <!-- 5 -->
       <section id="codigos">
         <h2 class="sec-title"><span class="num">5</span>Detalhamento por código de recolhimento (segurado)</h2>
-        <p>Esta tabela mostra quanto foi descontado do salário dos próprios servidores para o INSS, separado pelos códigos que o SIGRH usa (40910, 30910, 40912, 40949). Ela é preenchida <strong>automaticamente pelo mesmo PDF</strong> anexado na seção anterior — você não precisa mexer aqui na maioria dos meses.</p>
+        <p>Esta tabela mostra quanto foi descontado do salário dos próprios servidores para o INSS, separado pelos códigos que o SIGRH usa (40910, 30910, 40912, 40949), por versão e por grupo. Ela é preenchida <strong>automaticamente pelo mesmo PDF</strong> anexado na seção anterior — você não precisa mexer aqui na maioria dos meses.</p>
         <table class="tbl">
           <thead><tr><th>Código</th><th>Sinal</th><th>O que significa na prática</th></tr></thead>
           <tbody>
             <tr><td class="codigo">40910</td><td>+ soma</td><td>Desconto principal do INSS do segurado.</td></tr>
-            <tr><td class="codigo">30910</td><td>− subtrai</td><td>Um valor que <strong>diminui</strong> o total acima (ex.: uma correção/estorno). Costuma ficar zerado.</td></tr>
+            <tr><td class="codigo">30910</td><td>− subtrai</td><td>Um valor que <strong>diminui</strong> o total (ex.: uma correção/estorno). Costuma ficar zerado.</td></tr>
             <tr><td class="codigo">40912</td><td>+ soma</td><td>Desconto do INSS sobre o 13º salário.</td></tr>
             <tr><td class="codigo">40949</td><td>+ soma</td><td>Desconto do INSS sobre férias.</td></tr>
           </tbody>
         </table>
+        <p>A soma de todos os códigos de uma versão (com o 30910 subtraindo) vira o <strong>Desc. do segurado</strong> daquela versão na Base de cálculo.</p>
         <p>Se um código aparecer com valor <strong>zerado</strong>, na maioria das vezes é porque simplesmente não houve esse tipo de desconto naquele mês — não é erro. Só vale a pena conferir manualmente no PDF (procurando pelo número do código, como <span class="campo">4.0910</span>) se o total final não bater com o esperado.</p>
         <p>Use <strong>"+ adicionar código"</strong> apenas se a contabilidade indicar um código novo que não esteja na lista fixa — os 4 códigos padrão não podem ser removidos.</p>
       </section>
@@ -321,67 +365,101 @@
       <!-- 6 -->
       <section id="base-calculo">
         <h2 class="sec-title"><span class="num">6</span>Base de cálculo e valores a recolher</h2>
-        <p>Esta é a tabela central do módulo — uma linha por versão de folha (01, 75, 76) mais uma linha "Versão 4 - Suplementar". Duas colunas já chegam prontas das seções anteriores:</p>
+        <p>Esta é a tabela central do módulo — uma linha por versão de folha (01, 75, 76), mais uma linha <strong>"Versão 4 - Suplementar"</strong>, mais a linha <strong>Descontos (ajuste manual)</strong> e os totais.</p>
+
+        <h3 class="sub-title">O que chega pronto e o que você pode digitar</h3>
+        <p>Nas linhas das <strong>Versões 01, 75 e 76</strong>, três colunas são alimentadas automaticamente pelo PDF:</p>
         <ul>
-          <li><strong>Salário normal</strong> — vem da soma dos Grupos 53+54 lidos na seção <a href="#patronal">INSS Patronal por versão</a>.</li>
-          <li><strong>Desc. do segurado</strong> — vem da soma dos códigos na seção <a href="#codigos">Detalhamento por código</a>.</li>
+          <li><strong>Salário normal</strong> — soma dos Grupos 53 + 54 da seção <a href="#patronal">INSS Patronal por versão</a>.</li>
+          <li><strong>Desc. do segurado</strong> — soma dos códigos da seção <a href="#codigos">Detalhamento por código</a>.</li>
+          <li><strong>Salário maternidade</strong> — código 1.0809 lido do PDF (veja a <a href="#maternidade">seção 7</a>).</li>
         </ul>
-        <p>A partir daí, o sistema calcula sozinho três colunas:</p>
+        <div class="box box-atencao">
+          <strong>Digitou e o número voltou?</strong>
+          Essas três colunas, nas Versões 01/75/76, são <strong>recalculadas a partir da origem</strong> toda vez que o módulo recalcula (ou seja, a cada alteração em qualquer campo). Se você digitar nelas, o valor do PDF reaparece. Para mudar o resultado, corrija <strong>na origem</strong> (o valor do Grupo, ou o código no Detalhamento) ou use a linha <strong>"Descontos (ajuste manual)"</strong>. A linha <strong>Suplementar</strong> é 100% manual.
+        </div>
+        <p>As demais colunas — <strong>Rem. exp. ag. nocivo</strong>, <strong>13º salário</strong>, <strong>Compensação</strong> e <strong>Ded. salário família</strong> — são digitadas por você e raramente têm valor neste órgão. Só preencha se a contabilidade/RH confirmar que existe esse caso no mês.</p>
+
+        <h3 class="sub-title">Como cada coluna é calculada</h3>
         <table class="tbl">
-          <thead><tr><th>Coluna calculada</th><th>Como é calculada</th></tr></thead>
+          <thead><tr><th>Coluna calculada</th><th>Como é calculada</th><th>Arredondamento</th></tr></thead>
           <tbody>
-            <tr><td><span class="campo">RAT</span></td><td>(Salário normal + Rem. exp. ag. nocivo) × alíquota de RAT</td></tr>
-            <tr><td><span class="campo">INSS patronal</span></td><td>(Salário normal + 13º salário) × alíquota de INSS patronal</td></tr>
-            <tr><td><span class="campo">SAT / ag. nocivo</span></td><td>Rem. exp. ag. nocivo × alíquota de SAT</td></tr>
+            <tr><td><span class="campo">RAT</span></td><td>(Salário normal + Rem. exp. ag. nocivo) × alíquota de RAT + ajuste de RAT da versão</td><td>Arredondamento comum</td></tr>
+            <tr><td><span class="campo">INSS patronal</span></td><td>(Salário normal + 13º salário) × alíquota de INSS patronal</td><td><strong>Para baixo</strong> (corta os centavos extras)</td></tr>
+            <tr><td><span class="campo">SAT / ag. nocivo</span></td><td>Rem. exp. ag. nocivo × alíquota de SAT</td><td>Arredondamento comum</td></tr>
+            <tr><td><span class="campo">Total a recolher</span></td><td>Desc. segurado + RAT + INSS patronal + SAT − Compensação − Sal. maternidade − Ded. salário família</td><td>—</td></tr>
           </tbody>
         </table>
-        <p>As colunas <strong>Rem. exp. ag. nocivo</strong>, <strong>13º salário</strong>, <strong>Compensação</strong>, <strong>Salário maternidade</strong> e <strong>Dedução salário família</strong> raramente têm valor neste órgão — só preencha manualmente se a contabilidade/RH confirmar que existe esse caso específico no mês.</p>
+        <div class="box box-info">
+          <strong>Por que o INSS Patronal difere da minha calculadora?</strong>
+          Porque ele é <strong>truncado</strong>: 20% de 628,04 dá 125,608 e o módulo mostra <strong>125,60</strong> (a calculadora comum mostraria 125,61). É a regra adotada, não um erro.
+        </div>
         <div class="box box-atencao">
           <strong>Linha "Descontos" (ajuste manual)</strong>
-          É uma linha separada para correções pontuais que não se encaixam em nenhuma versão — pode ser um valor negativo. Ela é somada direto no <strong>Total geral</strong>. Não preencha por padrão; use só se a contabilidade pedir um ajuste específico.
+          É uma linha separada para correções pontuais que não se encaixam em nenhuma versão — pode ser um valor negativo. Ela entra direto no <strong>Total geral</strong> e nos DARFs. Não preencha por padrão; use só se a contabilidade pedir um ajuste específico.
         </div>
-        <p>O <strong>Total a recolher</strong> de cada linha, e o <strong>Total geral</strong> no final da tabela, são o que efetivamente vira as guias — veja a seção <a href="#resultado">Resultado</a>.</p>
+        <p>O <strong>Total geral</strong> no final da tabela é o que efetivamente vira as guias — veja a seção <a href="#resultado">Resultado</a>.</p>
       </section>
 
       <!-- 7 -->
       <section id="maternidade">
-        <h2 class="sec-title"><span class="num">7</span>Dedução salário maternidade</h2>
-        <p>Preencha esta seção <strong>somente</strong> se houver alguma servidora em licença-maternidade no mês da competência — pergunte ao RH quem está nessa situação, se tiver dúvida.</p>
-        <ol class="passos">
-          <li>Clique em <strong>"+ adicionar servidora"</strong>.</li>
-          <li>Preencha nome, matrícula e o valor da dedução.</li>
-        </ol>
-        <p>Se não houver nenhuma servidora em licença-maternidade naquele mês, deixe esta seção vazia — ela não afeta nada se estiver em branco.</p>
+        <h2 class="sec-title"><span class="num">7</span>Salário maternidade</h2>
+        <p>Existem dois lugares ligados ao salário maternidade, e eles têm funções diferentes:</p>
+
+        <h3 class="sub-title">a) Coluna "Salário maternidade" da Base de cálculo — automática</h3>
+        <p>Ao anexar o PDF de uma versão, o módulo procura o código <strong>1.0809</strong> em cada bloco (Grupo 53 e Grupo 54) e <strong>soma os valores na coluna "Salário maternidade" daquela versão</strong>. Esse valor:</p>
+        <ul>
+          <li>reduz o <strong>Total a recolher</strong> da versão;</li>
+          <li>reduz o <strong>DARF Segurado (1082-01)</strong>;</li>
+          <li>faz a impressão incluir a coluna <strong>"Sal. maternidade"</strong> e uma observação sobre o DARF Segurado (seção 10).</li>
+        </ul>
+        <p>Se o código 1.0809 não existir no PDF, a coluna fica <strong>0,00</strong> — é o normal na maioria dos meses.</p>
+
+        <h3 class="sub-title">b) Painel "Dedução salário maternidade" — apenas um registro</h3>
+        <p>Este painel (que começa recolhido; clique no título para abrir) é uma lista de <strong>nome, matrícula e valor</strong> das servidoras afastadas. Use <strong>"+ adicionar servidora"</strong> se quiser registrar quem são. Atenção: <strong>ele não altera nenhum cálculo</strong> — o abatimento que vale vem do código 1.0809 do PDF. Os dados da lista são salvos com o acerto e saem na planilha de Excel.</p>
+        <div class="box box-dica">
+          <strong>Não precisa preencher nada para o abatimento funcionar</strong>
+          Basta anexar o PDF. Se você precisar de um valor de maternidade diferente do que o PDF trouxe, use a linha <strong>"Descontos (ajuste manual)"</strong> da Base de cálculo, pois a coluna da versão é recalculada a partir do PDF.
+        </div>
       </section>
 
       <!-- 8 -->
       <section id="conferencia">
         <h2 class="sec-title"><span class="num">8</span>Conferência por versão de folha</h2>
-        <p>Esta seção existe para <strong>bater os valores calculados pelo módulo com os valores que o próprio SIGRH já calculou</strong> no PDF, linha "VALOR I.N.S.S. A RECOLHER" — uma checagem de segurança antes de gerar as guias.</p>
-        <p>O campo <span class="campo">VALOR I.N.S.S. A RECOLHER</span> por versão e grupo é preenchido automaticamente pelo mesmo PDF anexado na seção 4. Logo abaixo, para <strong>cada versão</strong> (01, 75, 76), o sistema compara esse valor com o RAT + INSS Patronal que ele mesmo calculou:</p>
+        <p>Esta seção existe para <strong>bater os valores calculados pelo módulo com os valores que o próprio SIGRH já calculou</strong> no PDF, na linha "VALOR I.N.S.S. A RECOLHER" — uma checagem de segurança antes de gerar as guias. Ela já vem <strong>aberta</strong>; se quiser esconder, clique no título.</p>
+        <p>O campo <span class="campo">VALOR I.N.S.S. A RECOLHER</span> por versão e grupo é preenchido pelo mesmo PDF anexado na seção 4. Logo abaixo, para <strong>cada versão</strong> (01, 75, 76), o módulo compara esse valor (G53 + G54) com o <strong>RAT + INSS Patronal</strong> que ele mesmo calculou:</p>
         <ul>
           <li><strong>Mensagem verde</strong> — os dois valores batem, nada a fazer.</li>
-          <li><strong>Mensagem amarela/vermelha com um botão</strong> — há uma pequena diferença (normalmente centavos, por arredondamento). Clique em <strong>"Aplicar diferença no RAT"</strong> daquela versão para corrigir automaticamente — o ajuste entra no cálculo do RAT só daquela versão específica.</li>
+          <li><strong>Mensagem amarela com um botão</strong> — há diferença (normalmente centavos). Clique em <strong>"Aplicar diferença de R$ … no RAT (Versão …)"</strong> para corrigir. O ajuste entra só no RAT daquela versão, e o <strong>RAT e o Total corrigidos aparecem também na impressão</strong>.</li>
         </ul>
-        <p>Mais abaixo, o bloco <strong>"Conferência total a recolher"</strong> soma o INSS a recolher (do PDF) + SAT + Desconto do segurado (da seção 5), e compara com o <strong>Total a recolher</strong> da <a href="#base-calculo">Base de Cálculo</a>. Também deve bater — se não bater, revise se algum valor de Compensação/Salário maternidade/Dedução salário família foi preenchido manualmente sem necessidade.</p>
+        <div class="box box-info">
+          <strong>Exemplo do ajuste</strong>
+          O SIGRH informa a recolher R$ 34.274,41 e o módulo calculou RAT + INSS = R$ 34.274,40. A diferença é R$ 0,01. Ao clicar no botão, o RAT da versão passa de 4.274,40 para <strong>4.274,41</strong>, a mensagem fica verde e o Total geral sobe R$ 0,01. Se clicar sem querer, use <strong>"remover PDF"</strong> da versão e anexe de novo (isso zera o ajuste junto).
+        </div>
+        <p>Mais abaixo, o bloco <strong>"Conferência total a recolher"</strong> soma o INSS a recolher (do PDF) + SAT + Desconto do segurado, e compara com o <strong>Total a recolher</strong> da <a href="#base-calculo">Base de Cálculo</a>.</p>
+        <div class="box box-atencao">
+          <strong>Aviso amarelo no total quando há deduções</strong>
+          Este bloco <strong>não considera</strong> Compensação, Salário maternidade nem Dedução salário-família. Por isso, se algum deles estiver preenchido, o aviso amarelo de divergência é esperado — e a diferença deve ser <strong>exatamente igual à soma desses valores</strong>. Se a diferença for outra, aí sim revise os lançamentos.
+        </div>
       </section>
 
       <!-- 9 -->
       <section id="resultado">
-        <h2 class="sec-title"><span class="num">9</span>Resultado — gerando os 3 DARFs</h2>
+        <h2 class="sec-title"><span class="num">9</span>Resultado — os 3 DARFs</h2>
         <p>No final da página, três cartões mostram o valor de cada guia a pagar:</p>
         <table class="tbl">
-          <thead><tr><th>DARF</th><th>Código de receita</th><th>O que é</th></tr></thead>
+          <thead><tr><th>DARF</th><th>Código de receita</th><th>Como é calculado</th></tr></thead>
           <tbody>
-            <tr><td>DARF Patronal</td><td class="codigo">1138-01</td><td>INSS Patronal + SAT — a parte que o <strong>órgão</strong> paga.</td></tr>
-            <tr><td>DARF Segurado</td><td class="codigo">1082-01</td><td>O que já foi <strong>descontado dos servidores</strong> e precisa ser repassado.</td></tr>
-            <tr><td>DARF RAT</td><td class="codigo">1646-01</td><td>O adicional de RAT/GILRAT.</td></tr>
+            <tr><td>DARF Patronal</td><td class="codigo">1138-01</td><td>INSS patronal + SAT − Compensação. É a parte que o <strong>órgão</strong> paga.</td></tr>
+            <tr><td>DARF Segurado</td><td class="codigo">1082-01</td><td>Desconto do segurado − Salário maternidade − Ded. salário família. É o que já foi <strong>descontado dos servidores</strong> e precisa ser repassado.</td></tr>
+            <tr><td>DARF RAT</td><td class="codigo">1646-01</td><td>O RAT/GILRAT (já com o ajuste de RAT, se houver).</td></tr>
           </tbody>
         </table>
-        <p>Um quarto cartão mostra o <strong>Total geral a recolher</strong> — a soma dos três.</p>
+        <p>Um quarto cartão mostra o <strong>Total geral a recolher</strong> — a soma dos três, que deve ser igual ao Total geral da Base de cálculo.</p>
+        <p>Embaixo dos cartões há uma observação em tela: <em>diferença de R$ 0,01 na conferência se ajusta pelo RAT</em>. Ela é só um lembrete na tela e <strong>não sai na impressão</strong>.</p>
         <div class="box box-info">
-          <strong>Este módulo só calcula — quem gera o DARF de verdade é o SICALC</strong>
-          Os valores aqui são o que você vai usar para gerar as guias no SICALC (site da Receita Federal). O botão <strong>"Copiar dados para o SICALC"</strong> monta um texto pronto com os 3 códigos, período e valores, para colar no Claude in Chrome (se você usa essa automação) ou para digitar manualmente no site.
+          <strong>Este módulo só calcula — quem emite o DARF é o SICALC</strong>
+          Os valores aqui são o que você vai usar para emitir as guias no SICALC (site da Receita Federal). Veja a <a href="#sicalc">seção 11</a>.
         </div>
       </section>
 
@@ -391,22 +469,77 @@
         <table class="tbl">
           <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
           <tbody>
-            <tr><td><span class="campo">💾 Salvar no Portal</span></td><td>Grava tudo o que está preenchido no banco de dados do portal, vinculado à sua conta. Exige que a <strong>Competência</strong> esteja preenchida.</td></tr>
-            <tr><td><span class="campo">🖨️ Imprimir demonstrativo</span></td><td>Gera uma folha com todos os valores, pronta para imprimir ou salvar em PDF.</td></tr>
-            <tr><td><span class="campo">⬇️ Exportar Excel</span></td><td>Baixa uma planilha com todas as tabelas do módulo.</td></tr>
-            <tr><td><span class="campo">📋 Copiar dados para o SICALC</span></td><td>Copia um texto pronto com os 3 DARFs para colar em outra ferramenta.</td></tr>
-            <tr><td><span class="campo">Limpar / reiniciar</span></td><td>Apaga tudo o que está preenchido na tela. <strong>Não afeta</strong> nada que já tenha sido salvo no Portal.</td></tr>
+            <tr><td><span class="campo">💾 Salvar no Portal</span></td><td>Grava tudo o que está preenchido no banco de dados do portal, vinculado à sua conta. Exige a <strong>Competência</strong> preenchida; sem ela aparece o aviso "Preencha ao menos a competência".</td></tr>
+            <tr><td><span class="campo">🖨️ Imprimir demonstrativo</span></td><td>Abre a impressão (ou "Salvar como PDF") do demonstrativo, em <strong>retrato</strong>.</td></tr>
+            <tr><td><span class="campo">⬇️ Exportar Excel</span></td><td>Baixa uma planilha com as tabelas do módulo (inclui a lista de servidoras do painel de maternidade).</td></tr>
+            <tr><td><span class="campo">📋 Copiar dados para o SICALC</span></td><td>Copia um texto pronto com os 3 DARFs (seção 11).</td></tr>
+            <tr><td><span class="campo">Limpar / reiniciar</span></td><td>Pede confirmação e zera os valores lançados na tela (mantém os códigos fixos). <strong>Não afeta</strong> nada que já tenha sido salvo no Portal.</td></tr>
           </tbody>
         </table>
+
+        <h3 class="sub-title">Reabrir e corrigir um acerto salvo</h3>
+        <p>Abra o acerto pelo <strong>Histórico de acertos</strong> (menu lateral). O módulo carrega os dados salvos e mostra um aviso no topo indicando que você está <strong>editando</strong> um acerto existente. Ao clicar em <strong>Salvar no Portal</strong>, o acerto é <strong>atualizado</strong> (mensagem "Acerto atualizado no portal com sucesso"), sem criar um duplicado. Se abrir o módulo direto pelo menu, é um acerto novo e o salvamento cria um novo registro.</p>
+
+        <h3 class="sub-title">O que sai na impressão</h3>
+        <ol class="passos">
+          <li>Cabeçalho com órgão, unidade e competência.</li>
+          <li><strong>Detalhamento por código</strong> (segurado), por versão e grupo.</li>
+          <li><strong>INSS Patronal por versão</strong> (Grupos 53 e 54).</li>
+          <li><strong>Memória de cálculo por versão de folha</strong> — com o RAT e o Total já considerando o ajuste de RAT. A coluna <strong>"Sal. maternidade"</strong> só aparece quando alguma versão tem valor nela.</li>
+          <li><strong>Parâmetros</strong> (RAT, INSS e SAT).</li>
+          <li><strong>Valores a recolher</strong> — os 3 DARFs e o total. Logo abaixo, <em>só quando há salário maternidade</em>, uma observação informando que o DARF Segurado (1082-01) é apurado já descontando esse valor.</li>
+          <li>Rodapé "Brasília, data".</li>
+        </ol>
+        <div class="box box-dica">
+          <strong>Dica de impressão</strong>
+          Na janela de impressão do navegador, deixe a orientação em <strong>Retrato</strong> e use "Salvar como PDF" se for enviar o demonstrativo a outra área. O módulo imprime só as páginas necessárias; a tela do portal não sai no papel.
+        </div>
       </section>
 
       <!-- 11 -->
+      <section id="sicalc">
+        <h2 class="sec-title"><span class="num">11</span>Gerando os DARFs no SICALC</h2>
+        <p>O botão <strong>"📋 Copiar dados para o SICALC"</strong> <strong>não emite nada sozinho</strong> e não aciona nenhuma extensão. Ele apenas copia um <strong>texto de instruções</strong> com os 3 DARFs (código de receita, período de apuração e valor), para você colar no painel do <strong>Claude in Chrome</strong> — ou para consultar e digitar à mão no site do SICALC. Se algum DARF estiver com valor zero, o texto diz <em>"NÃO gerar"</em> para ele.</p>
+
+        <h3 class="sub-title">Antes de usar (uma vez só): configurar o Chrome</h3>
+        <p>Para que os PDFs dos DARFs sejam baixados direto, sem perguntar a pasta:</p>
+        <ol class="passos">
+          <li>No Chrome: <strong>Configurações → Privacidade e segurança → Configurações do site → Configurações de conteúdo adicionais → Documentos em PDF</strong>. Escolha <strong>"Fazer o download de PDFs"</strong>. (Atalho: cole <code>chrome://settings/content/pdfDocuments</code> na barra de endereços.)</li>
+          <li>Em <strong>Configurações → Downloads</strong>, desligue <strong>"Perguntar onde salvar cada arquivo antes de fazer o download"</strong>. Os PDFs vão para a pasta Downloads.</li>
+        </ol>
+
+        <h3 class="sub-title">Passo a passo</h3>
+        <ol class="passos">
+          <li>Confira os valores da seção Resultado e clique em <strong>"Copiar dados para o SICALC"</strong>. Aparece <em>"Copiado!"</em> abaixo dos botões. (Se o navegador não permitir copiar, o texto aparece selecionado numa caixa — use Ctrl+C.)</li>
+          <li>Abra o painel do <strong>Claude in Chrome</strong> e cole o texto (Ctrl+V).</li>
+          <li><strong>Confirmação geral:</strong> o Claude mostra os 3 DARFs de uma vez e pede <strong>uma</strong> confirmação. Confira código, período e valor.</li>
+          <li><strong>Fase 1 — calcular os 3, sem emitir nenhum:</strong> ele seleciona o contribuinte já cadastrado, preenche código, período e valor de cada DARF e clica em "Calcular". A data de vencimento é preenchida pelo próprio SICALC. No fim, mostra um resumo e pede a <strong>segunda confirmação</strong>.</li>
+          <li><strong>Fase 2 — emitir um de cada vez:</strong> depois da sua confirmação, ele emite o primeiro, baixa o PDF, e repete para o segundo e o terceiro.</li>
+          <li>No final, mostra o resumo dos 3 DARFs emitidos (código, período, vencimento e valor).</li>
+        </ol>
+        <div class="box box-atencao">
+          <strong>Captcha, erro ou algo inesperado: ele para</strong>
+          O SICALC pode pedir um <strong>captcha</strong> logo na primeira tela. Quem resolve é <strong>você</strong>; o Claude para e avisa, e não tenta contornar. O mesmo vale para qualquer erro ou comportamento estranho do site. Além disso, o Claude in Chrome pode, por segurança própria, pedir confirmação em ações financeiras ou ao salvar arquivos — isso vem da extensão e não pode ser desligado pelo texto copiado.
+        </div>
+        <div class="box box-info">
+          <strong>Nada de emissão sem a sua confirmação</strong>
+          O texto instrui o Claude a nunca finalizar a emissão sem confirmação prévia, a emitir os DARFs um de cada vez e a parar diante de qualquer problema. Se preferir, ignore o botão e emita as guias manualmente no SICALC com os valores da tela.
+        </div>
+        <div class="box box-dica">
+          <strong>Preencha a competência antes de copiar</strong>
+          Se a Competência estiver vazia, o texto sai com o aviso "(preencher a competência no app antes de copiar)" no lugar do período. Preencha, e copie de novo.
+        </div>
+      </section>
+
+      <!-- 12 -->
       <section id="exemplo">
-        <h2 class="sec-title"><span class="num">11</span>Exemplo completo, do início ao fim</h2>
+        <h2 class="sec-title"><span class="num">12</span>Exemplos completos, do início ao fim</h2>
         <p><em>Números fictícios e redondos, só para você comparar o raciocínio — não são valores reais.</em></p>
+
+        <h3 class="sub-title">Exemplo A — mês simples, sem salário maternidade</h3>
         <div class="card-mock">
           <div class="rot">Situação</div>
-          Competência 09/2026. Só a Versão 01 tem movimento (75 e 76 ficam zeradas). O PDF anexado traz Ativo (Grupo 53) e Contrato Temporário (Grupo 54).
+          Competência 09/2026. Só a Versão 01 tem movimento (75 e 76 ficam zeradas). O PDF anexado traz Ativo (Grupo 53) e Contrato Temporário (Grupo 54), sem o código 1.0809.
         </div>
         <h3 class="sub-title">1. INSS Patronal por versão (lido do PDF)</h3>
         <table class="tbl">
@@ -428,65 +561,119 @@
         </table>
         <h3 class="sub-title">3. Base de cálculo — Versão 01 (calculado automaticamente)</h3>
         <table class="tbl">
-          <thead><tr><th>Salário normal</th><th>Desc. segurado</th><th>RAT (2,8496%)</th><th>INSS patronal (20%)</th><th>SAT</th><th>Total a recolher</th></tr></thead>
+          <thead><tr><th>Salário normal</th><th>Desc. segurado</th><th>RAT (2,8496%)</th><th>INSS patronal (20%)</th><th>SAT</th><th>Sal. maternidade</th><th>Total a recolher</th></tr></thead>
           <tbody>
-            <tr><td class="num">150.000,00</td><td class="num">12.300,00</td><td class="num">4.274,40</td><td class="num">30.000,00</td><td class="num">0,00</td><td class="num"><strong>46.574,40</strong></td></tr>
+            <tr><td class="num">150.000,00</td><td class="num">12.300,00</td><td class="num">4.274,40</td><td class="num">30.000,00</td><td class="num">0,00</td><td class="num">0,00</td><td class="num"><strong>46.574,40</strong></td></tr>
           </tbody>
         </table>
+        <p>Conta: 150.000,00 × 2,8496% = 4.274,40 · 150.000,00 × 20% = 30.000,00 · 12.300,00 + 4.274,40 + 30.000,00 = 46.574,40.</p>
         <h3 class="sub-title">4. Conferência (também lida do PDF)</h3>
         <p>VALOR I.N.S.S. A RECOLHER: Grupo 53 = R$ 22.849,60 · Grupo 54 = R$ 11.424,80 · <strong>Total = R$ 34.274,40</strong></p>
-        <p>Comparando: RAT (4.274,40) + INSS patronal (30.000,00) = <strong>R$ 34.274,40</strong> → bate exatamente, mensagem verde, nenhum ajuste necessário.</p>
+        <p>Comparando: RAT (4.274,40) + INSS patronal (30.000,00) = <strong>R$ 34.274,40</strong> → bate exatamente, mensagem verde, nenhum ajuste necessário. E no total: 34.274,40 + SAT 0,00 + Desc. segurado 12.300,00 = <strong>46.574,40</strong>, igual ao Total a recolher.</p>
         <h3 class="sub-title">5. Resultado — os 3 DARFs</h3>
         <table class="tbl">
           <thead><tr><th>DARF</th><th>Código</th><th>Valor</th></tr></thead>
           <tbody>
-            <tr><td>Patronal</td><td class="codigo">1138-01</td><td class="num">R$ 30.000,00</td></tr>
-            <tr><td>Segurado</td><td class="codigo">1082-01</td><td class="num">R$ 12.300,00</td></tr>
+            <tr><td>Patronal (30.000,00 + SAT 0,00)</td><td class="codigo">1138-01</td><td class="num">R$ 30.000,00</td></tr>
+            <tr><td>Segurado (12.300,00 − 0,00)</td><td class="codigo">1082-01</td><td class="num">R$ 12.300,00</td></tr>
             <tr><td>RAT</td><td class="codigo">1646-01</td><td class="num">R$ 4.274,40</td></tr>
           </tbody>
           <tfoot><tr><td colspan="2">Total geral</td><td class="num">R$ 46.574,40</td></tr></tfoot>
         </table>
         <div class="box box-dica">
           <strong>Confira o "bater"</strong>
-          Repare que o Total geral dos 3 DARFs (R$ 46.574,40) é <strong>exatamente igual</strong> ao Total a recolher da Base de Cálculo, no passo 3. É esse "bater" que você deve conferir todo mês antes de salvar.
+          O Total geral dos 3 DARFs (R$ 46.574,40) é <strong>exatamente igual</strong> ao Total a recolher da Base de Cálculo, no passo 3. É esse "bater" que você deve conferir todo mês antes de salvar.
         </div>
-      </section>
 
-      <!-- 12 -->
-      <section id="erros">
-        <h2 class="sec-title"><span class="num">12</span>Erros comuns e perguntas frequentes</h2>
+        <h3 class="sub-title">Exemplo B — o mesmo mês, agora com salário maternidade</h3>
+        <div class="card-mock">
+          <div class="rot">Situação</div>
+          Mesmos números do Exemplo A, mas o PDF traz o código <strong>1.0809</strong>: Grupo 53 = R$ 1.500,00 e Grupo 54 = R$ 500,00.
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th>Cálculo</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Salário maternidade (coluna da Versão 01)</td><td>1.500,00 + 500,00</td><td class="num">R$ 2.000,00</td></tr>
+            <tr><td>Total a recolher da Versão 01</td><td>12.300,00 + 4.274,40 + 30.000,00 + 0,00 − 2.000,00</td><td class="num"><strong>R$ 44.574,40</strong></td></tr>
+            <tr><td>DARF Patronal — 1138-01</td><td>sem mudança</td><td class="num">R$ 30.000,00</td></tr>
+            <tr><td>DARF Segurado — 1082-01</td><td>12.300,00 − 2.000,00</td><td class="num"><strong>R$ 10.300,00</strong></td></tr>
+            <tr><td>DARF RAT — 1646-01</td><td>sem mudança</td><td class="num">R$ 4.274,40</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="2">Total geral (30.000,00 + 10.300,00 + 4.274,40)</td><td class="num">R$ 44.574,40</td></tr></tfoot>
+        </table>
+        <p>Na <strong>Conferência por versão</strong>, nada muda (RAT + INSS continuam batendo com o PDF). Já no bloco <strong>"Conferência total a recolher"</strong>, a soma conferida é 34.274,40 + 0,00 + 12.300,00 = 46.574,40, contra 44.574,40 do Total a recolher: aparece o aviso amarelo com diferença de <strong>R$ 2.000,00</strong> — exatamente o salário maternidade, portanto <strong>esperado</strong> (seção 8).</p>
+        <p>Na <strong>impressão</strong>, a tabela "Memória de cálculo por versão de folha" ganha a coluna <strong>Sal. maternidade</strong>, e logo abaixo de "Valores a recolher" aparece a observação sobre o DARF Segurado.</p>
 
-        <h3 class="sub-title">Anexei o PDF e nada preencheu / demorou muito</h3>
-        <p>Alguns relatórios do SIGRH são gerados como "imagem" (não têm texto que o computador consegue ler direto). Nesses casos, o sistema usa <strong>reconhecimento automático de texto</strong>, que pode levar até 1 minuto. Espere um pouco antes de tentar de novo. Se mesmo assim não funcionar, digite os valores manualmente olhando o PDF.</p>
-
-        <h3 class="sub-title">Apareceu "Não encontrei este bloco (Ativo ou Temporário) no PDF"</h3>
-        <p>Confira se o PDF baixado do SIGRH realmente é o relatório PAGEMP01 certo, e se ele contém as seções "Folha Normal Ativo-RGPS" e/ou "Contrato Temporário". Se o PDF só tiver um dos dois blocos, é normal que o outro grupo fique zerado.</p>
-
-        <h3 class="sub-title">Um valor apareceu zerado (0,00), é normal?</h3>
-        <p>Na maioria dos meses, sim. SAT costuma ser sempre zero neste órgão; os códigos 30910 e 40949 às vezes não têm movimento em determinado mês; e as Versões 75/76 só têm valor quando há reprocessagem. Só se preocupe se o total não bater com o esperado na <a href="#conferencia">Conferência</a>.</p>
-
-        <h3 class="sub-title">A Conferência mostra uma diferença de alguns centavos</h3>
-        <p>É normal — costuma ser arredondamento. Use o botão <strong>"Aplicar diferença no RAT"</strong> daquela versão para corrigir automaticamente, sem precisar calcular nada na mão.</p>
-
-        <h3 class="sub-title">Esqueci de anexar o PDF de uma versão (75 ou 76)</h3>
-        <p>Sem problema — se não houve reprocessagem naquele mês, essas versões devem mesmo ficar zeradas. Elas só precisam de PDF quando o SIGRH efetivamente gerar uma versão de correção.</p>
-
-        <h3 class="sub-title">Cliquei em "Limpar / reiniciar" sem querer</h3>
-        <p>Isso apaga tudo o que estava preenchido na tela naquele momento. Não afeta nada que você já tenha salvo no Portal anteriormente — só o que estava sendo digitado nessa sessão.</p>
-
-        <h3 class="sub-title">Cliquei em "Salvar no Portal" e não aconteceu nada / deu erro</h3>
-        <p>Confira se a <strong>Competência</strong> está preenchida — é obrigatória para salvar. Confira também se você está com internet e logado no portal.</p>
+        <h3 class="sub-title">Exemplo C — INSS Patronal truncado</h3>
+        <p>Se a base for R$ 628,04: 628,04 × 20% = 125,608. O módulo mostra <strong>R$ 125,60</strong> (corta, não arredonda). Já o RAT e o SAT usam arredondamento comum.</p>
       </section>
 
       <!-- 13 -->
+      <section id="erros">
+        <h2 class="sec-title"><span class="num">13</span>Erros comuns e perguntas frequentes</h2>
+
+        <h3 class="sub-title">Anexei o PDF e nada preencheu / demorou muito</h3>
+        <p>Alguns relatórios do SIGRH são "imagem" (sem texto copiável). Nesses casos, o módulo usa <strong>leitura de imagem (OCR)</strong>, que pode levar cerca de 1 minuto. Espere o "Lendo…" terminar antes de tentar de novo. Se mesmo assim não funcionar, digite os valores manualmente olhando o PDF.</p>
+
+        <h3 class="sub-title">Escolhi o PDF da versão errada</h3>
+        <p>Clique em <strong>"remover PDF"</strong> naquela versão (limpa Grupos, códigos, conferência, salário maternidade e ajuste de RAT daquela versão) e anexe o arquivo certo. Não é preciso sair do módulo.</p>
+
+        <h3 class="sub-title">Apareceu "Não encontrei este bloco (Ativo ou Temporário) no PDF"</h3>
+        <p>Confira se o PDF é realmente o relatório PAGEMP01 e se contém "Folha Normal Ativo-RGPS" e/ou "Contrato Temporário". Se só houver um dos blocos, é normal o outro grupo ficar zerado.</p>
+
+        <h3 class="sub-title">Um valor apareceu zerado (0,00), é normal?</h3>
+        <p>Na maioria dos meses, sim. SAT costuma ser zero; os códigos 30910 e 40949 às vezes não têm movimento; o salário maternidade só existe quando há servidora afastada; e as Versões 75/76 só têm valor quando há reprocessagem. Só se preocupe se o total não bater na <a href="#conferencia">Conferência</a>.</p>
+
+        <h3 class="sub-title">Digitei no "Salário normal" (ou no Desc. do segurado / Sal. maternidade) e o valor voltou</h3>
+        <p>Nas Versões 01/75/76 essas colunas são recalculadas a partir do PDF. Corrija na origem (valor do Grupo ou código) ou use a linha "Descontos (ajuste manual)". Detalhes na <a href="#base-calculo">seção 6</a>.</p>
+
+        <h3 class="sub-title">O INSS Patronal está R$ 0,01 menor que na minha calculadora</h3>
+        <p>É o arredondamento para baixo (truncamento): 125,608 vira 125,60. Veja o Exemplo C.</p>
+
+        <h3 class="sub-title">A Conferência por versão mostra diferença de centavos</h3>
+        <p>É comum. Use o botão <strong>"Aplicar diferença de R$ … no RAT"</strong> da versão. Se aplicou a versão errada, use "remover PDF" daquela versão e anexe de novo.</p>
+
+        <h3 class="sub-title">A "Conferência total a recolher" ficou amarela</h3>
+        <p>Se você tem Compensação, Salário maternidade ou Dedução salário-família preenchidos, a diferença igual à soma desses valores é esperada (veja a <a href="#conferencia">seção 8</a>). Se for outro valor, revise os lançamentos.</p>
+
+        <h3 class="sub-title">A coluna "Sal. maternidade" não apareceu na impressão</h3>
+        <p>Ela só aparece quando alguma versão tem valor de salário maternidade. Sem o código 1.0809 no PDF, a coluna e a observação do DARF Segurado ficam de fora de propósito.</p>
+
+        <h3 class="sub-title">Esqueci de anexar o PDF de uma versão (75 ou 76)</h3>
+        <p>Sem problema — se não houve reprocessagem naquele mês, essas versões devem ficar zeradas. Só precisam de PDF quando o SIGRH gerar uma versão de correção.</p>
+
+        <h3 class="sub-title">Cliquei em "Limpar / reiniciar" sem querer</h3>
+        <p>Isso zera o que estava na tela. Não afeta o que você já salvou no Portal — se foi um acerto salvo, basta reabri-lo pelo Histórico.</p>
+
+        <h3 class="sub-title">Cliquei em "Salvar no Portal" e não aconteceu nada / deu erro</h3>
+        <p>Confira se a <strong>Competência</strong> está preenchida — é obrigatória. Confira também a internet e se você está logado no portal. A mensagem de erro aparece em texto logo abaixo dos botões.</p>
+
+        <h3 class="sub-title">Salvei duas vezes e ficaram dois registros</h3>
+        <p>Isso acontece quando o módulo é aberto direto pelo menu: cada salvamento cria um registro novo. Para atualizar um acerto, reabra-o pelo <strong>Histórico de acertos</strong> antes de salvar.</p>
+
+        <h3 class="sub-title">O SICALC pediu captcha e o Claude parou</h3>
+        <p>É o comportamento correto. Resolva o captcha você mesmo e, em seguida, peça para ele continuar. O Claude não deve contornar o captcha.</p>
+
+        <h3 class="sub-title">O Chrome continua perguntando onde salvar cada PDF</h3>
+        <p>Refaça a configuração da <a href="#sicalc">seção 11</a> (Documentos em PDF → "Fazer o download de PDFs" e desligar "Perguntar onde salvar cada arquivo"). Se mesmo assim a extensão pedir confirmação, é uma trava de segurança do Claude in Chrome, que não pode ser removida pelo texto.</p>
+
+        <h3 class="sub-title">Cliquei em "Copiar dados para o SICALC" e não colou</h3>
+        <p>Se o navegador bloquear a cópia, o texto aparece numa caixa logo abaixo, já selecionado — use Ctrl+C e cole no Claude in Chrome.</p>
+      </section>
+
+      <!-- 14 -->
       <section id="checklist">
-        <h2 class="sec-title"><span class="num">13</span>Checklist antes de salvar</h2>
+        <h2 class="sec-title"><span class="num">14</span>Checklist antes de salvar</h2>
         <ul class="checklist">
           <li>A <strong>Competência (folha)</strong> está preenchida com o mês correto.</li>
-          <li>O PDF da <strong>Versão 01</strong> foi anexado e os campos mostram "✓ lido do PDF" (e as Versões 75/76 foram conferidas — zeradas se não houver reprocessagem, ou com PDF anexado se houver).</li>
-          <li>Nenhum aviso vermelho ficou sem explicação na seção <strong>Conferência por versão de folha</strong> — diferenças de centavos já foram corrigidas com o botão de ajuste do RAT.</li>
-          <li>Os valores dos <strong>3 DARFs</strong> (Resultado) fazem sentido e o Total geral bate com o Total a recolher da Base de Cálculo.</li>
-          <li>Clicou em <strong>"Salvar no Portal"</strong> e viu a mensagem confirmando que salvou com sucesso.</li>
+          <li>O PDF da <strong>Versão 01</strong> foi anexado e os dois grupos mostram "✓ lido do PDF" (nome do arquivo conferido; se estava errado, usou <strong>remover PDF</strong>). As Versões 75/76 foram conferidas — zeradas se não houve reprocessagem, ou com PDF anexado se houve.</li>
+          <li>Se há servidora em licença-maternidade, a coluna <strong>Salário maternidade</strong> da versão está com o valor do código 1.0809.</li>
+          <li>Compensação, Ded. salário-família e a linha "Descontos" só têm valor se a contabilidade informou.</li>
+          <li>Na <strong>Conferência por versão</strong>, as três versões estão verdes (diferenças de centavos corrigidas com o botão de ajuste do RAT).</li>
+          <li>Na <strong>Conferência total</strong>, qualquer aviso amarelo foi explicado pelas deduções lançadas.</li>
+          <li>Os valores dos <strong>3 DARFs</strong> fazem sentido e o Total geral bate com o Total a recolher da Base de Cálculo.</li>
+          <li>Clicou em <strong>"Salvar no Portal"</strong> e viu a mensagem confirmando que salvou (ou atualizou) com sucesso.</li>
+          <li>Se for imprimir: orientação em <strong>Retrato</strong>; se for emitir as guias, o Chrome está configurado para baixar PDFs e o <strong>captcha do SICALC</strong> será resolvido por você.</li>
         </ul>
       </section>
 
