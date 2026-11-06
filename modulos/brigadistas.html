@@ -121,9 +121,10 @@
     .print-tabela-ferias tbody td:last-child{text-align:right;font-weight:700}
     #print-tabela-competencias th:not(:first-child),
     #print-tabela-competencias td:not(:first-child){text-align:right}
-    #print-tabela-competencias td:nth-child(4),
     #print-tabela-competencias td:nth-child(5),
-    #print-tabela-competencias td:nth-child(6){font-variant-numeric:tabular-nums;color:#555}
+    #print-tabela-competencias td:nth-child(6),
+    #print-tabela-competencias td:nth-child(7),
+    #print-tabela-competencias td:nth-child(8){font-variant-numeric:tabular-nums;color:#555}
     #sigrh-print-tabela th:not(:first-child),
     #sigrh-print-tabela td:not(:first-child){text-align:right}
     .print-ferias-total{font-size:12.5px;font-weight:700;text-align:right;margin:6px 0 0}
@@ -248,8 +249,6 @@
       <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
       <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
       <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
-      <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
-      <a href="atualizacao-sindec-debito.html"><span class="selo" style="background:#BE185D;">DEB</span> Atualização SINDEC - Débito em Apuração</a>
       <div class="divisor"></div>
       <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
       <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
@@ -302,15 +301,17 @@
     </div>
 
     <div id="print-faltas-horas-box" style="display:none;">
-      <h2 class="print-secao-titulo">FALTAS E REPOUSO REMUNERADO — CORREÇÃO POR COMPETÊNCIA</h2>
+      <h2 class="print-secao-titulo">FALTAS, REPOUSO REMUNERADO E HORAS NÃO TRABALHADAS — CORREÇÃO POR COMPETÊNCIA</h2>
       <table class="print-tabela" id="print-tabela-competencias">
         <thead>
           <tr>
             <th>Competência</th>
             <th>Dias de Falta</th>
             <th>Dias de Repouso</th>
+            <th>Horas</th>
             <th>Valor da Falta (R$)</th>
             <th>Valor do Repouso (R$)</th>
+            <th>Valor das Horas (R$)</th>
             <th>INSS a devolver (R$)</th>
           </tr>
         </thead>
@@ -351,7 +352,7 @@
        layout visual do print-only-container do acerto, mas isolado (só um dos
        dois aparece por vez, controlado pela classe "printing-sigrh" no body). -->
   <div class="print-only" id="print-sigrh-container">
-    <h1>LANÇAMENTO SIGRH v09 — CORREÇÃO DE FALTAS/REPOUSO POR COMPETÊNCIA</h1>
+    <h1>LANÇAMENTO SIGRH v09 — CORREÇÃO DE FALTAS/REPOUSO/HORAS POR COMPETÊNCIA</h1>
     <p class="print-subtitulo">Cópia de trabalho para lançamento na folha • Emitido em <span id="sigrh-print-data-emissao"></span></p>
 
     <h2 class="print-secao-titulo">DADOS PESSOAIS</h2>
@@ -363,8 +364,10 @@
           <th>Competência</th>
           <th>Dias de Falta</th>
           <th>Dias de Repouso</th>
+          <th>Horas</th>
           <th>Valor da Falta (R$)</th>
           <th>Valor do Repouso (R$)</th>
+          <th>Valor das Horas (R$)</th>
           <th>INSS a devolver (R$)</th>
         </tr>
       </thead>
@@ -374,8 +377,10 @@
           <td>TOTAL</td>
           <td id="sigrh-print-total-dias-falta"></td>
           <td id="sigrh-print-total-dias-repouso"></td>
+          <td id="sigrh-print-total-horas"></td>
           <td id="sigrh-print-total-valor-falta"></td>
           <td id="sigrh-print-total-valor-repouso"></td>
+          <td id="sigrh-print-total-valor-horas"></td>
           <td id="sigrh-print-total-inss"></td>
         </tr>
       </tfoot>
@@ -663,43 +668,38 @@
   <section class="section">
     <h2>FALTAS E HORAS NÃO TRABALHADAS</h2>
 
-    <div class="row">
-      <div class="col">
-        <div class="form-group">
-          <label for="qtd-horas-nao-trabalhadas">HORAS NÃO TRABALHADAS A DEVOLVER:</label>
-          <input type="number" id="qtd-horas-nao-trabalhadas" placeholder="0" min="0" step="0.01" value="0" class="w-100" />
-        </div>
-      </div>
-    </div>
-
     <details class="info-box">
       <summary>Nota</summary>
       <div class="destaque-content">
         <ul>
-          <li><strong>Faltas e repouso remunerado (códigos 50001/51261):</strong> preenchidos na tabela de correção por competência abaixo</li>
-          <li><strong>Horas não trabalhadas (código 50004):</strong> (Remuneração total ÷ 200) × quantidade de horas</li>
+          <li><strong>Faltas, repouso remunerado e horas não trabalhadas (códigos 50001/51261/50004):</strong> preenchidos na tabela de correção por competência abaixo</li>
+          <li><strong>Horas não trabalhadas (código 50004):</strong> (Remuneração total ÷ 200) × quantidade de horas da competência</li>
+          <li><strong>INSS (código 30910):</strong> cada competência é calculada isoladamente. Em competência anterior ao mês da exoneração a base é a remuneração cheia já recolhida; na competência do próprio mês da exoneração a base é o valor apurado no mês (1ª + 2ª rubrica)</li>
           <li>Todos os valores acima são devoluções (descontados do total do acerto)</li>
         </ul>
       </div>
     </details>
 
-    <h3 style="margin-top:20px;color:#8b0000;font-size:15px;">Correção de INSS de faltas/repouso remunerado por competência</h3>
+    <h3 style="margin-top:20px;color:#8b0000;font-size:15px;">Correção de INSS de faltas, repouso remunerado e horas não trabalhadas por competência</h3>
     <p style="margin-bottom:10px;font-size:13px;">
-      Preencha, mês a mês, os <strong>dias de falta</strong> e os <strong>dias de desconto de repouso
-      remunerado</strong> ocorridos naquela competência (mês/ano). O sistema calcula automaticamente o
-      valor de cada um (dias × remuneração ÷ 30) e o INSS a devolver naquele mês, usando os códigos
-      <strong>50001</strong> (faltas) e <strong>51261</strong> (repouso) — o INSS de cada mês é somado
-      no código 30910.
+      Preencha, mês a mês, os <strong>dias de falta</strong>, os <strong>dias de desconto de repouso
+      remunerado</strong> e as <strong>horas não trabalhadas</strong> ocorridos naquela competência (mês/ano).
+      O sistema calcula automaticamente o valor de cada um (dias × remuneração ÷ 30; horas × remuneração ÷ 200)
+      e o INSS a devolver naquele mês, usando os códigos <strong>50001</strong> (faltas),
+      <strong>51261</strong> (repouso) e <strong>50004</strong> (horas) — o INSS de cada mês é somado
+      no código 30910. A competência é obrigatória: linhas sem mês preenchido são ignoradas.
     </p>
     <div style="overflow-x:auto;">
-      <table class="table-base" style="width:100%;min-width:760px;margin-top:0;">
+      <table class="table-base" style="width:100%;min-width:980px;margin-top:0;">
         <thead>
           <tr>
             <th style="font-size:12px;">Competência</th>
             <th style="font-size:12px;">Dias de Falta</th>
             <th style="font-size:12px;">Dias de Repouso Remunerado</th>
+            <th style="font-size:12px;">Horas Não Trabalhadas</th>
             <th style="font-size:12px;">Valor da Falta (R$)</th>
             <th style="font-size:12px;">Valor do Repouso (R$)</th>
+            <th style="font-size:12px;">Valor das Horas (R$)</th>
             <th style="font-size:12px;">INSS a devolver (R$)</th>
             <th style="font-size:12px;width:40px;"></th>
           </tr>
@@ -709,8 +709,10 @@
                 <td><input type="month" class="correcao-inss-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+                <td><input type="number" class="correcao-inss-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="text" class="correcao-inss-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+                <td><input type="text" class="correcao-inss-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td style="text-align:center;"><button type="button" class="correcao-inss-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
               </tr>
@@ -718,8 +720,10 @@
                 <td><input type="month" class="correcao-inss-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+                <td><input type="number" class="correcao-inss-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="text" class="correcao-inss-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+                <td><input type="text" class="correcao-inss-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td style="text-align:center;"><button type="button" class="correcao-inss-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
               </tr>
@@ -727,8 +731,10 @@
                 <td><input type="month" class="correcao-inss-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="number" class="correcao-inss-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+                <td><input type="number" class="correcao-inss-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
                 <td><input type="text" class="correcao-inss-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+                <td><input type="text" class="correcao-inss-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td><input type="text" class="correcao-inss-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
                 <td style="text-align:center;"><button type="button" class="correcao-inss-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
               </tr>
@@ -859,14 +865,16 @@
       </div>
 
       <div style="overflow-x:auto;margin-top:16px;">
-        <table class="table-base" style="width:100%;min-width:760px;margin-top:0;">
+        <table class="table-base" style="width:100%;min-width:980px;margin-top:0;">
           <thead>
             <tr>
               <th style="font-size:12px;">Competência</th>
               <th style="font-size:12px;">Dias de Falta</th>
               <th style="font-size:12px;">Dias de Repouso Remunerado</th>
+              <th style="font-size:12px;">Horas Não Trabalhadas</th>
               <th style="font-size:12px;">Valor da Falta (R$)</th>
               <th style="font-size:12px;">Valor do Repouso (R$)</th>
+              <th style="font-size:12px;">Valor das Horas (R$)</th>
               <th style="font-size:12px;">INSS a devolver (R$)</th>
               <th style="font-size:12px;width:40px;"></th>
             </tr>
@@ -876,8 +884,10 @@
               <td><input type="month" class="sigrh-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+              <td><input type="number" class="sigrh-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="text" class="sigrh-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+              <td><input type="text" class="sigrh-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td style="text-align:center;"><button type="button" class="sigrh-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
             </tr>
@@ -885,8 +895,10 @@
               <td><input type="month" class="sigrh-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+              <td><input type="number" class="sigrh-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="text" class="sigrh-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+              <td><input type="text" class="sigrh-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td style="text-align:center;"><button type="button" class="sigrh-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
             </tr>
@@ -894,8 +906,10 @@
               <td><input type="month" class="sigrh-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="number" class="sigrh-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+              <td><input type="number" class="sigrh-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
               <td><input type="text" class="sigrh-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+              <td><input type="text" class="sigrh-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td><input type="text" class="sigrh-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
               <td style="text-align:center;"><button type="button" class="sigrh-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
             </tr>
@@ -905,8 +919,10 @@
               <td style="font-size:12px;">TOTAL</td>
               <td id="sigrh-total-dias-falta" style="font-size:12px;"></td>
               <td id="sigrh-total-dias-repouso" style="font-size:12px;"></td>
+              <td id="sigrh-total-horas" style="font-size:12px;"></td>
               <td id="sigrh-total-valor-falta" style="font-size:12px;text-align:right;"></td>
               <td id="sigrh-total-valor-repouso" style="font-size:12px;text-align:right;"></td>
+              <td id="sigrh-total-valor-horas" style="font-size:12px;text-align:right;"></td>
               <td id="sigrh-total-inss" style="font-size:12px;text-align:right;"></td>
               <td></td>
             </tr>
@@ -969,7 +985,6 @@
     res4Desc: $("#res4-descricao"),
     res4Val: $("#res4-valor"),
 
-    qtdHoras: $("#qtd-horas-nao-trabalhadas"),
     resFaltasCod: $("#res-faltas-codigo"),
     resFaltasDesc: $("#res-faltas-descricao"),
     resFaltasVal: $("#res-faltas-valor"),
@@ -1025,6 +1040,8 @@
     sigrhTotalDiasRepouso: $("#sigrh-total-dias-repouso"),
     sigrhTotalValorFalta: $("#sigrh-total-valor-falta"),
     sigrhTotalValorRepouso: $("#sigrh-total-valor-repouso"),
+    sigrhTotalHoras: $("#sigrh-total-horas"),
+    sigrhTotalValorHoras: $("#sigrh-total-valor-horas"),
     sigrhTotalInss: $("#sigrh-total-inss"),
     sigrhPrintDataEmissao: $("#sigrh-print-data-emissao"),
     sigrhPrintDadosPessoais: $("#sigrh-print-dados-pessoais"),
@@ -1033,6 +1050,8 @@
     sigrhPrintTotalDiasRepouso: $("#sigrh-print-total-dias-repouso"),
     sigrhPrintTotalValorFalta: $("#sigrh-print-total-valor-falta"),
     sigrhPrintTotalValorRepouso: $("#sigrh-print-total-valor-repouso"),
+    sigrhPrintTotalHoras: $("#sigrh-print-total-horas"),
+    sigrhPrintTotalValorHoras: $("#sigrh-print-total-valor-horas"),
     sigrhPrintTotalInss: $("#sigrh-print-total-inss"),
     sigrhPrintRodape: $("#sigrh-print-rodape"),
   };
@@ -1504,50 +1523,24 @@
   // não altera nenhum cálculo (o valor definitivo é recalculado ao clicar em
   // "Calcular Acerto").
   const atualizarPreviewCorrecaoInssFaltas = (remTotal, baseHoras) => {
-    const rem = Number(remTotal) || 0;
-    const baseH = Number(baseHoras) || 0;
-    const mesAnoExo = mesAnoExoneracao();
-
     $$(".correcao-inss-linha").forEach(tr => {
       const previewFalta = tr.querySelector(".correcao-inss-preview-falta");
       const previewRepouso = tr.querySelector(".correcao-inss-preview-repouso");
+      const previewHoras = tr.querySelector(".correcao-inss-preview-horas");
       const previewInss = tr.querySelector(".correcao-inss-preview");
-      if (!previewFalta || !previewRepouso || !previewInss) return;
+      if (!previewFalta || !previewRepouso || !previewHoras || !previewInss) return;
 
-      const mes = tr.querySelector(".correcao-inss-mes")?.value || "";
-      const diasFalta = parseFloat(tr.querySelector(".correcao-inss-dias-falta")?.value) || 0;
-      const diasRepouso = parseFloat(tr.querySelector(".correcao-inss-dias-repouso")?.value) || 0;
-      const diasTotal = diasFalta + diasRepouso;
-
-      if (rem <= 0) {
-        previewFalta.value = "0,00";
-        previewRepouso.value = "0,00";
-        previewInss.value = "0,00";
-        return;
-      }
-
-      // ✅ O valor da falta/repouso em R$ sempre usa a remuneração cheia
-      const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
-      const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
-      previewFalta.value = formatarValorTabela(valorFalta);
-      previewRepouso.value = formatarValorTabela(valorRepouso);
-
-      if (diasTotal <= 0) {
-        previewInss.value = "0,00";
-        return;
-      }
-
-      // ✅ A BASE do cálculo de INSS muda se a competência for o próprio mês
-      // da exoneração (mês nunca teve folha rodada com remuneração cheia)
-      const ehMesExoneracao = mesAnoExo && mes === mesAnoExo;
-      const baseInss = ehMesExoneracao ? baseH : rem;
-
-      const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
-      const baseReduzidaMes = Math.max(0, Number((baseInss - valorDevolucaoMes).toFixed(2)));
-      const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(baseInss);
-      const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
-      const diferencaMes = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
-      previewInss.value = formatarValorTabela(diferencaMes);
+      const c = calcularLinhaCompetencia(
+        remTotal, baseHoras,
+        tr.querySelector(".correcao-inss-mes")?.value || "",
+        parseFloat(tr.querySelector(".correcao-inss-dias-falta")?.value) || 0,
+        parseFloat(tr.querySelector(".correcao-inss-dias-repouso")?.value) || 0,
+        parseFloat(tr.querySelector(".correcao-inss-horas")?.value) || 0
+      );
+      previewFalta.value = formatarValorTabela(c.valorFalta);
+      previewRepouso.value = formatarValorTabela(c.valorRepouso);
+      previewHoras.value = formatarValorTabela(c.valorHoras);
+      previewInss.value = formatarValorTabela(c.inss);
     });
   };
 
@@ -1678,12 +1671,14 @@
   // único para eles (removido para evitar duplicidade de preenchimento).
   const calcularFaltasEHoras = (remTotal) => {
     const rem = Number(remTotal) || 0;
-    const qtdHoras = parseFloat(el.qtdHoras.value) || 0;
-
-    // Horas não trabalhadas: (remuneração ÷ 200) × quantidade de horas — código 50004
-    const valorHoras = qtdHoras > 0 ? Number((-(rem / 200) * qtdHoras).toFixed(2)) : 0;
-
     const porMes = obterCorrecaoInssFaltasPorMes();
+
+    // Horas não trabalhadas (código 50004): por competência, (remuneração ÷ 200) × horas,
+    // cada mês arredondado a 2 casas — o total é a soma da coluna "Valor das Horas".
+    const qtdHoras = Number(porMes.reduce((s, l) => s + l.horas, 0).toFixed(2));
+    const somaHoras = porMes.reduce((s, l) => s + (l.horas > 0 ? Number(((rem / 200) * l.horas).toFixed(2)) : 0), 0);
+    const valorHoras = (rem > 0 && qtdHoras > 0) ? Number((-somaHoras).toFixed(2)) : 0;
+
     const qtdFaltas = Number(porMes.reduce((s, l) => s + l.diasFalta, 0).toFixed(2));
     const qtdRepouso = Number(porMes.reduce((s, l) => s + l.diasRepouso, 0).toFixed(2));
     const valorFaltas = (rem > 0 && qtdFaltas > 0) ? Number((-(rem / 30) * qtdFaltas).toFixed(2)) : 0;
@@ -1737,8 +1732,10 @@
       <td><input type="month" class="correcao-inss-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
       <td><input type="number" class="correcao-inss-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
       <td><input type="number" class="correcao-inss-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+      <td><input type="number" class="correcao-inss-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
       <td><input type="text" class="correcao-inss-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
       <td><input type="text" class="correcao-inss-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+      <td><input type="text" class="correcao-inss-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
       <td><input type="text" class="correcao-inss-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
       <td style="text-align:center;"><button type="button" class="correcao-inss-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
     `;
@@ -1755,8 +1752,10 @@
     <td><input type="month" class="sigrh-mes" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="number" class="sigrh-dias-falta" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="number" class="sigrh-dias-repouso" placeholder="0" min="0" max="31" step="1" style="width:100%;font-size:12px;padding:4px 6px;"></td>
+    <td><input type="number" class="sigrh-horas" placeholder="0" min="0" step="0.01" style="width:100%;font-size:12px;padding:4px 6px;"></td>
     <td><input type="text" class="sigrh-preview-falta" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td><input type="text" class="sigrh-preview-repouso" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
+    <td><input type="text" class="sigrh-preview-horas" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td><input type="text" class="sigrh-preview" value="0,00" readonly style="width:100%;font-size:12px;padding:4px 6px;background:#f0f0f0;text-align:right;color:#555;"></td>
     <td style="text-align:center;"><button type="button" class="sigrh-excluir btn-excluir-linha" title="Excluir esta competência">✕</button></td>
   `;
@@ -1777,7 +1776,7 @@
   const sigrhCopiarDaAcerto = () => {
     const origem = obterCorrecaoInssFaltasPorMes();
     if (origem.length === 0) {
-      alert("Não há nenhum lançamento de falta/repouso preenchido na aba \"2. ACERTO DE CONTAS\" para copiar.");
+      alert("Não há nenhum lançamento de falta/repouso/horas preenchido na aba \"2. ACERTO DE CONTAS\" para copiar.");
       return;
     }
     if (!confirm("Isso vai SOBRESCREVER os lançamentos atuais desta aba com os dados da aba \"Acerto de Contas\". Deseja continuar?")) {
@@ -1792,6 +1791,7 @@
       tr.querySelector(".sigrh-mes").value = l.mes;
       tr.querySelector(".sigrh-dias-falta").value = l.diasFalta || "";
       tr.querySelector(".sigrh-dias-repouso").value = l.diasRepouso || "";
+      tr.querySelector(".sigrh-horas").value = l.horas || "";
       el.sigrhBody.appendChild(tr);
     });
     // garante pelo menos 1 linha em branco pronta pra uso
@@ -1809,61 +1809,47 @@
   // mês da exoneração usar v1+v2 em vez da remuneração cheia).
   const atualizarPreviewSigrh = (remTotal, baseHoras) => {
     if (!el.sigrhBody) return;
-    const rem = Number(remTotal) || 0;
-    const baseH = Number(baseHoras) || 0;
-    const mesAnoExo = mesAnoExoneracao();
 
-    let totalDiasFalta = 0, totalDiasRepouso = 0, totalValorFalta = 0, totalValorRepouso = 0, totalInss = 0;
+    let totalDiasFalta = 0, totalDiasRepouso = 0, totalHoras = 0;
+    let totalValorFalta = 0, totalValorRepouso = 0, totalValorHoras = 0, totalInss = 0;
 
     $$(".sigrh-linha").forEach(tr => {
       const previewFalta = tr.querySelector(".sigrh-preview-falta");
       const previewRepouso = tr.querySelector(".sigrh-preview-repouso");
+      const previewHoras = tr.querySelector(".sigrh-preview-horas");
       const previewInss = tr.querySelector(".sigrh-preview");
-      if (!previewFalta || !previewRepouso || !previewInss) return;
+      if (!previewFalta || !previewRepouso || !previewHoras || !previewInss) return;
 
-      const mes = tr.querySelector(".sigrh-mes")?.value || "";
       const diasFalta = parseFloat(tr.querySelector(".sigrh-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".sigrh-dias-repouso")?.value) || 0;
-      const diasTotal = diasFalta + diasRepouso;
+      const horas = parseFloat(tr.querySelector(".sigrh-horas")?.value) || 0;
 
-      if (rem <= 0) {
-        previewFalta.value = "0,00";
-        previewRepouso.value = "0,00";
-        previewInss.value = "0,00";
-        return;
+      const c = calcularLinhaCompetencia(
+        remTotal, baseHoras, tr.querySelector(".sigrh-mes")?.value || "", diasFalta, diasRepouso, horas
+      );
+      previewFalta.value = formatarValorTabela(c.valorFalta);
+      previewRepouso.value = formatarValorTabela(c.valorRepouso);
+      previewHoras.value = formatarValorTabela(c.valorHoras);
+      previewInss.value = formatarValorTabela(c.inss);
+
+      if ((Number(remTotal) || 0) > 0) {
+        totalDiasFalta += diasFalta;
+        totalDiasRepouso += diasRepouso;
+        totalHoras += horas;
+        totalValorFalta += c.valorFalta;
+        totalValorRepouso += c.valorRepouso;
+        totalValorHoras += c.valorHoras;
+        totalInss += c.inss;
       }
-
-      const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
-      const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
-      previewFalta.value = formatarValorTabela(valorFalta);
-      previewRepouso.value = formatarValorTabela(valorRepouso);
-
-      totalDiasFalta += diasFalta;
-      totalDiasRepouso += diasRepouso;
-      totalValorFalta += valorFalta;
-      totalValorRepouso += valorRepouso;
-
-      if (diasTotal <= 0) {
-        previewInss.value = "0,00";
-        return;
-      }
-
-      const ehMesExoneracao = mesAnoExo && mes === mesAnoExo;
-      const baseInss = ehMesExoneracao ? baseH : rem;
-      const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
-      const baseReduzidaMes = Math.max(0, Number((baseInss - valorDevolucaoMes).toFixed(2)));
-      const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(baseInss);
-      const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
-      const diferencaMes = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
-      previewInss.value = formatarValorTabela(diferencaMes);
-      totalInss += diferencaMes;
     });
 
     if (el.sigrhTotalDiasFalta) {
       el.sigrhTotalDiasFalta.textContent = totalDiasFalta;
       el.sigrhTotalDiasRepouso.textContent = totalDiasRepouso;
+      el.sigrhTotalHoras.textContent = Number(totalHoras.toFixed(2));
       el.sigrhTotalValorFalta.textContent = formatarValorTabela(totalValorFalta);
       el.sigrhTotalValorRepouso.textContent = formatarValorTabela(totalValorRepouso);
+      el.sigrhTotalValorHoras.textContent = formatarValorTabela(totalValorHoras);
       el.sigrhTotalInss.textContent = formatarValorTabela(totalInss);
     }
   };
@@ -1873,8 +1859,9 @@
       const mes = tr.querySelector(".correcao-inss-mes")?.value || "";
       const diasFalta = parseFloat(tr.querySelector(".correcao-inss-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".correcao-inss-dias-repouso")?.value) || 0;
-      return { mes, diasFalta, diasRepouso, dias: diasFalta + diasRepouso };
-    }).filter(l => l.mes && l.dias > 0);
+      const horas = parseFloat(tr.querySelector(".correcao-inss-horas")?.value) || 0;
+      return { mes, diasFalta, diasRepouso, horas, dias: diasFalta + diasRepouso };
+    }).filter(l => l.mes && (l.dias > 0 || l.horas > 0));
   };
 
   // ✅ Correção: "horas não trabalhadas" está associada ao mesmo contexto do mês
@@ -1900,77 +1887,65 @@
     return `${ano}-${mes}`;
   };
 
+  // ✅ Cálculo ÚNICO de uma competência (usado na aba 2, na aba SIGRH v09 e nas
+  // impressões, para nunca divergirem). Valor das faltas/repouso: dias × rem ÷ 30;
+  // valor das horas: horas × rem ÷ 200. O INSS devolvido é a diferença entre o
+  // RGPS sobre a base cheia e o RGPS sobre a base reduzida pelo total devolvido
+  // na competência (faltas + repouso + horas). Base:
+  //   - competência anterior ao mês da exoneração: remuneração cheia (folha já fechada);
+  //   - competência do próprio mês da exoneração: valor apurado no mês (v1 + v2).
+  const calcularLinhaCompetencia = (remTotal, baseMesExo, mes, diasFalta, diasRepouso, horas) => {
+    const rem = Number(remTotal) || 0;
+    const out = {
+      valorFalta: 0, valorRepouso: 0, valorHoras: 0, valorDevolucaoMes: 0,
+      ehMesExoneracao: false, baseInss: 0, baseReduzidaMes: 0, inss: 0
+    };
+    if (rem <= 0) return out;
+
+    out.valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
+    out.valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
+    out.valorHoras = horas > 0 ? Number(((rem / 200) * horas).toFixed(2)) : 0;
+
+    const dias = diasFalta + diasRepouso;
+    if (dias <= 0 && out.valorHoras <= 0) return out;
+
+    const mesAnoExo = mesAnoExoneracao();
+    out.ehMesExoneracao = !!(mesAnoExo && mes === mesAnoExo);
+    out.baseInss = out.ehMesExoneracao ? (Number(baseMesExo) || 0) : rem;
+
+    const valorDias = dias > 0 ? Number(((rem / 30) * dias).toFixed(2)) : 0;
+    out.valorDevolucaoMes = Number((valorDias + out.valorHoras).toFixed(2));
+    out.baseReduzidaMes = Math.max(0, Number((out.baseInss - out.valorDevolucaoMes).toFixed(2)));
+    const segCheia = calcularSeguridadeSocialRGPSDetalhado(out.baseInss);
+    const segReduzida = calcularSeguridadeSocialRGPSDetalhado(out.baseReduzidaMes);
+    out.inss = Number((segCheia.total - segReduzida.total).toFixed(2));
+    return out;
+  };
+
+  // DIF. SEGURIDADE SOCIAL (código 30910) sobre faltas, repouso e horas não
+  // trabalhadas: soma das diferenças de INSS de cada competência lançada na tabela.
   const calcularDifSeguridadeFaltasHoras = (remTotal, faltasHoras, baseHoras) => {
     const rem = Number(remTotal) || 0;
-    const baseH = Number(baseHoras) || 0;
-    const valorFaltasRepouso = Number((
-      Math.abs(faltasHoras?.valorFaltas || 0) +
-      Math.abs(faltasHoras?.valorRepouso || 0)
-    ).toFixed(2));
-    const valorHoras = Number(Math.abs(faltasHoras?.valorHoras || 0).toFixed(2));
-
-    // Parcela 1: faltas + repouso remunerado
-    let diferencaFaltasRepouso = 0;
-    let detalheFaltasRepouso = null;
     const porMes = obterCorrecaoInssFaltasPorMes();
-    const mesAnoExo = mesAnoExoneracao();
+    if (!(rem > 0 && porMes.length > 0)) return { codigo: "30910", valor: 0, detalhe: null };
 
-    if (rem > 0 && porMes.length > 0) {
-      // ✅ Cálculo por competência (mês a mês), evitando o teto zerado.
-      // O VALOR da falta/repouso (em R$) é sempre calculado sobre a
-      // remuneração cheia — isso não muda. Mas a BASE usada para o cálculo do
-      // INSS daquele mês muda: se a competência da linha for o próprio mês da
-      // exoneração, aquele mês nunca teve folha rodada com remuneração cheia
-      // (ele está sendo apurado agora, pela primeira vez, neste acerto) — por
-      // isso usa-se o que foi efetivamente apurado para o mês parcial (v1+v2),
-      // em vez da remuneração cheia. Meses anteriores (já fechados, com folha
-      // já processada sobre a remuneração cheia) continuam usando a
-      // remuneração cheia normalmente.
-      const linhasMes = porMes.map(l => {
-        const ehMesExoneracao = mesAnoExo && l.mes === mesAnoExo;
-        const baseInss = ehMesExoneracao ? baseH : rem;
-
-        const valorDevolucaoMes = Number(((rem / 30) * l.dias).toFixed(2));
-        const baseReduzidaMes = Math.max(0, Number((baseInss - valorDevolucaoMes).toFixed(2)));
-        const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(baseInss);
-        const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
-        const diferencaMes = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
-        const [ano, mesNum] = (l.mes || "").split("-");
-        const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : l.mes;
-        return { mes: mesFormatado, dias: l.dias, valorDevolucaoMes, baseInss, baseReduzidaMes, diferencaMes, ehMesExoneracao };
-      });
-      diferencaFaltasRepouso = Number(linhasMes.reduce((s, l) => s + l.diferencaMes, 0).toFixed(2));
-      detalheFaltasRepouso = { porCompetencia: true, base: rem, linhasMes };
-    } else if (rem > 0 && valorFaltasRepouso > 0) {
-      // Sem detalhamento mensal: cálculo agregado simples (como antes)
-      const remReduzida = Math.max(0, Number((rem - valorFaltasRepouso).toFixed(2)));
-      const segCheia = calcularSeguridadeSocialRGPSDetalhado(rem);
-      const segReduzida = calcularSeguridadeSocialRGPSDetalhado(remReduzida);
-      diferencaFaltasRepouso = Number((segCheia.total - segReduzida.total).toFixed(2));
-      detalheFaltasRepouso = { porCompetencia: false, base: rem, valorDevolucao: valorFaltasRepouso, baseReduzida: remReduzida, segCheia, segReduzida };
-    }
-
-    // Parcela 2: horas não trabalhadas sobre a base efetivamente recebida (v1+v2)
-    let diferencaHoras = 0;
-    let detalheHoras = null;
-    if (baseH > 0 && valorHoras > 0) {
-      const baseHReduzida = Math.max(0, Number((baseH - valorHoras).toFixed(2)));
-      const segCheiaH = calcularSeguridadeSocialRGPSDetalhado(baseH);
-      const segReduzidaH = calcularSeguridadeSocialRGPSDetalhado(baseHReduzida);
-      diferencaHoras = Number((segCheiaH.total - segReduzidaH.total).toFixed(2));
-      detalheHoras = { base: baseH, valorDevolucao: valorHoras, baseReduzida: baseHReduzida, segCheia: segCheiaH, segReduzida: segReduzidaH };
-    }
-
-    const valorTotal = Number((diferencaFaltasRepouso + diferencaHoras).toFixed(2));
-
-    if (valorTotal === 0) {
-      return { codigo: "30910", valor: 0, detalhe: null };
-    }
+    const linhasMes = porMes.map(l => {
+      const c = calcularLinhaCompetencia(rem, baseHoras, l.mes, l.diasFalta, l.diasRepouso, l.horas);
+      const [ano, mesNum] = (l.mes || "").split("-");
+      const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : l.mes;
+      return {
+        mes: mesFormatado, dias: l.dias, horas: l.horas, valorHorasMes: c.valorHoras,
+        valorDevolucaoMes: c.valorDevolucaoMes, baseInss: c.baseInss,
+        baseReduzidaMes: c.baseReduzidaMes, diferencaMes: c.inss, ehMesExoneracao: c.ehMesExoneracao
+      };
+    });
+    const valorTotal = Number(linhasMes.reduce((s, l) => s + l.diferencaMes, 0).toFixed(2));
+    if (valorTotal === 0) return { codigo: "30910", valor: 0, detalhe: null };
 
     return {
       codigo: "30910",
       valor: valorTotal,
-      detalhe: { faltasRepouso: detalheFaltasRepouso, horas: detalheHoras, diferencaFaltasRepouso, diferencaHoras }
+      detalhe: { faltasRepouso: { porCompetencia: true, base: rem, linhasMes }, diferencaFaltasRepouso: valorTotal }
     };
   };
 
@@ -2239,7 +2214,6 @@
     ["nome","matricula","cargo","processo-sei","admissao","exoneracao"].forEach(id => $("#"+id).value="");
     el.diasMes.value="0";
     el.avosExcluirFerias.value="0"; el.avosExcluirTreze.value="0";
-    el.qtdHoras.value="0";
     el.adiantamento13.value="0,00";
     el.adiantamento13.dataset.auto = "0";
 
@@ -2260,8 +2234,10 @@
     $$(".correcao-inss-mes").forEach(i=>i.value="");
     $$(".correcao-inss-dias-falta").forEach(i=>i.value="");
     $$(".correcao-inss-dias-repouso").forEach(i=>i.value="");
+    $$(".correcao-inss-horas").forEach(i=>i.value="");
     $$(".correcao-inss-preview-falta").forEach(i=>i.value="0,00");
     $$(".correcao-inss-preview-repouso").forEach(i=>i.value="0,00");
+    $$(".correcao-inss-preview-horas").forEach(i=>i.value="0,00");
     $$(".correcao-inss-preview").forEach(i=>i.value="0,00");
 
     // ✅ Aba "3. LANÇAMENTO SIGRH v09" — "Limpar Tudo" é um reset geral do
@@ -2281,6 +2257,8 @@
       el.sigrhTotalDiasRepouso.textContent = "";
       el.sigrhTotalValorFalta.textContent = "";
       el.sigrhTotalValorRepouso.textContent = "";
+      el.sigrhTotalHoras.textContent = "";
+      el.sigrhTotalValorHoras.textContent = "";
       el.sigrhTotalInss.textContent = "";
     }
 
@@ -2634,9 +2612,9 @@ Total líquido: R$ ${obj.total.toFixed(2)}`;
     if (!d) return "";
     if (d.porCompetencia) {
       const linhas = d.linhasMes.map(l =>
-        `  • ${l.mes}${l.ehMesExoneracao ? " (mês da exoneração — base: valor efetivamente apurado no mês, R$ " + l.baseInss.toFixed(2) + ")" : " (base: remuneração cheia, R$ " + l.baseInss.toFixed(2) + ")"}: ${l.dias} dia(s) -> R$ ${l.valorDevolucaoMes.toFixed(2)} devolvido, base reduzida para R$ ${l.baseReduzidaMes.toFixed(2)} -> diferença de R$ ${formatarMoeda(l.diferencaMes)}`
+        `  • ${l.mes}${l.ehMesExoneracao ? " (mês da exoneração — base: valor efetivamente apurado no mês, R$ " + l.baseInss.toFixed(2) + ")" : " (base: remuneração cheia, R$ " + l.baseInss.toFixed(2) + ")"}: ${l.dias} dia(s)${l.horas > 0 ? " + " + l.horas + " h" : ""} -> R$ ${l.valorDevolucaoMes.toFixed(2)} devolvido, base reduzida para R$ ${l.baseReduzidaMes.toFixed(2)} -> diferença de R$ ${formatarMoeda(l.diferencaMes)}`
       ).join("\n");
-      return `- Faltas/repouso (detalhado por competência):\n${linhas}\n`;
+      return `- Faltas/repouso/horas (detalhado por competência):\n${linhas}\n`;
     }
     return `- Faltas/repouso: recolhido sobre a remuneração cheia (R$ ${d.base.toFixed(2)}), devido sobre a remuneração reduzida em R$ ${d.valorDevolucao.toFixed(2)} (R$ ${d.baseReduzida.toFixed(2)})\n`;
   };
@@ -2732,8 +2710,7 @@ Quantidade de faltas: ${obj.faltasHoras.qtdFaltas} | Valor a devolver (código $
 Dias de desconto de repouso remunerado: ${obj.faltasHoras.qtdRepouso} | Valor a devolver (código ${obj.faltasHoras.codigoRepouso}): R$ ${formatarMoeda(obj.faltasHoras.valorRepouso)}
 Horas não trabalhadas: ${obj.faltasHoras.qtdHoras} | Valor a devolver (código ${obj.faltasHoras.codigoHoras}): R$ ${formatarMoeda(obj.faltasHoras.valorHoras)}
 ${obj.difSegFaltasHoras.valor !== 0 ? `DIF. SEGURIDADE SOCIAL (código ${obj.difSegFaltasHoras.codigo}):
-${textoFaltasRepousoRelatorio(obj.difSegFaltasHoras.detalhe.faltasRepouso)}${obj.difSegFaltasHoras.detalhe.horas ? `- Horas não trabalhadas: recolhido sobre o que foi efetivamente recebido no mês (R$ ${obj.difSegFaltasHoras.detalhe.horas.base.toFixed(2)} = 1ª + 2ª rubrica), devido sobre esse valor reduzido em R$ ${obj.difSegFaltasHoras.detalhe.horas.valorDevolucao.toFixed(2)} (R$ ${obj.difSegFaltasHoras.detalhe.horas.baseReduzida.toFixed(2)}) -> diferença de R$ ${formatarMoeda(obj.difSegFaltasHoras.detalhe.diferencaHoras)}
-` : ``}Total da diferença a devolver ao servidor: R$ ${formatarMoeda(obj.difSegFaltasHoras.valor)}` : ``}
+${textoFaltasRepousoRelatorio(obj.difSegFaltasHoras.detalhe.faltasRepouso)}Total da diferença a devolver ao servidor: R$ ${formatarMoeda(obj.difSegFaltasHoras.valor)}` : ``}
 
 ADIANTAMENTO DE 13º SALÁRIO:
 Mês da exoneração: ${obj.adiantamento13.mesExoneracao || "-"} | Valor recebido: R$ ${obj.adiantamento13.valorInformado.toFixed(2)} | Devolução (código ${obj.adiantamento13.codigo}, sem INSS): R$ ${formatarMoeda(obj.adiantamento13.valor)}
@@ -2818,34 +2795,21 @@ OBSERVAÇÕES:
   // cada um e INSS a devolver naquele mês) — só inclui linhas efetivamente
   // preenchidas.
   const montarCompetenciasFaltasImpressao = (remTotal, baseHoras) => {
-    const rem = Number(remTotal) || 0;
-    const baseH = Number(baseHoras) || 0;
-    const mesAnoExo = mesAnoExoneracao();
     return $$(".correcao-inss-linha").map(tr => {
       const mes = tr.querySelector(".correcao-inss-mes")?.value || "";
       const diasFalta = parseFloat(tr.querySelector(".correcao-inss-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".correcao-inss-dias-repouso")?.value) || 0;
-      if (!mes || (diasFalta <= 0 && diasRepouso <= 0)) return null;
+      const horas = parseFloat(tr.querySelector(".correcao-inss-horas")?.value) || 0;
+      if (!mes || (diasFalta <= 0 && diasRepouso <= 0 && horas <= 0)) return null;
 
       const [ano, mesNum] = mes.split("-");
       const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : mes;
+      const c = calcularLinhaCompetencia(remTotal, baseHoras, mes, diasFalta, diasRepouso, horas);
 
-      const valorFalta = Number(((rem / 30) * diasFalta).toFixed(2));
-      const valorRepouso = Number(((rem / 30) * diasRepouso).toFixed(2));
-
-      const diasTotal = diasFalta + diasRepouso;
-      let inss = 0;
-      if (rem > 0 && diasTotal > 0) {
-        const ehMesExoneracao = mesAnoExo && mes === mesAnoExo;
-        const baseInss = ehMesExoneracao ? baseH : rem;
-        const valorDevolucaoMes = Number(((rem / 30) * diasTotal).toFixed(2));
-        const baseReduzidaMes = Math.max(0, Number((baseInss - valorDevolucaoMes).toFixed(2)));
-        const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(baseInss);
-        const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
-        inss = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
-      }
-
-      return { mes: mesFormatado, diasFalta, diasRepouso, valorFalta, valorRepouso, inss };
+      return {
+        mes: mesFormatado, diasFalta, diasRepouso, horas,
+        valorFalta: c.valorFalta, valorRepouso: c.valorRepouso, valorHoras: c.valorHoras, inss: c.inss
+      };
     }).filter(Boolean);
   };
 
@@ -2952,8 +2916,10 @@ OBSERVAÇÕES:
           <td>${c.mes}</td>
           <td>${c.diasFalta}</td>
           <td>${c.diasRepouso}</td>
+          <td>${c.horas}</td>
           <td>${formatarValorTabela(c.valorFalta)}</td>
           <td>${formatarValorTabela(c.valorRepouso)}</td>
+          <td>${formatarValorTabela(c.valorHoras)}</td>
           <td>${formatarValorTabela(c.inss)}</td>
         </tr>
       `).join("");
@@ -3026,31 +2992,21 @@ OBSERVAÇÕES:
     const v2 = valorDiasTrabalhados2aRubrica(rub);
     atualizarPreviewSigrh(remTotal, v1 + v2);
 
-    const mesAnoExo = mesAnoExoneracao();
     const linhas = $$(".sigrh-linha").map(tr => {
       const mes = tr.querySelector(".sigrh-mes")?.value || "";
       const diasFalta = parseFloat(tr.querySelector(".sigrh-dias-falta")?.value) || 0;
       const diasRepouso = parseFloat(tr.querySelector(".sigrh-dias-repouso")?.value) || 0;
-      if (!mes || (diasFalta <= 0 && diasRepouso <= 0)) return null;
+      const horas = parseFloat(tr.querySelector(".sigrh-horas")?.value) || 0;
+      if (!mes || (diasFalta <= 0 && diasRepouso <= 0 && horas <= 0)) return null;
 
       const [ano, mesNum] = mes.split("-");
       const mesFormatado = (ano && mesNum) ? `${mesNum}/${ano}` : mes;
-      const valorFalta = Number(((remTotal / 30) * diasFalta).toFixed(2));
-      const valorRepouso = Number(((remTotal / 30) * diasRepouso).toFixed(2));
+      const c = calcularLinhaCompetencia(remTotal, v1 + v2, mes, diasFalta, diasRepouso, horas);
 
-      const diasTotal = diasFalta + diasRepouso;
-      let inss = 0;
-      if (remTotal > 0 && diasTotal > 0) {
-        const ehMesExoneracao = mesAnoExo && mes === mesAnoExo;
-        const baseInss = ehMesExoneracao ? (v1 + v2) : remTotal;
-        const valorDevolucaoMes = Number(((remTotal / 30) * diasTotal).toFixed(2));
-        const baseReduzidaMes = Math.max(0, Number((baseInss - valorDevolucaoMes).toFixed(2)));
-        const segCheiaMes = calcularSeguridadeSocialRGPSDetalhado(baseInss);
-        const segReduzidaMes = calcularSeguridadeSocialRGPSDetalhado(baseReduzidaMes);
-        inss = Number((segCheiaMes.total - segReduzidaMes.total).toFixed(2));
-      }
-
-      return { mes: mesFormatado, diasFalta, diasRepouso, valorFalta, valorRepouso, inss };
+      return {
+        mes: mesFormatado, diasFalta, diasRepouso, horas,
+        valorFalta: c.valorFalta, valorRepouso: c.valorRepouso, valorHoras: c.valorHoras, inss: c.inss
+      };
     }).filter(Boolean);
 
     if (linhas.length === 0) {
@@ -3079,8 +3035,10 @@ OBSERVAÇÕES:
         <td>${l.mes}</td>
         <td>${l.diasFalta}</td>
         <td>${l.diasRepouso}</td>
+        <td>${l.horas}</td>
         <td>${formatarValorTabela(l.valorFalta)}</td>
         <td>${formatarValorTabela(l.valorRepouso)}</td>
+        <td>${formatarValorTabela(l.valorHoras)}</td>
         <td>${formatarValorTabela(l.inss)}</td>
       </tr>
     `).join("");
@@ -3088,13 +3046,17 @@ OBSERVAÇÕES:
     const totais = linhas.reduce((acc, l) => ({
       diasFalta: acc.diasFalta + l.diasFalta,
       diasRepouso: acc.diasRepouso + l.diasRepouso,
+      horas: acc.horas + l.horas,
       valorFalta: acc.valorFalta + l.valorFalta,
       valorRepouso: acc.valorRepouso + l.valorRepouso,
+      valorHoras: acc.valorHoras + l.valorHoras,
       inss: acc.inss + l.inss
-    }), { diasFalta: 0, diasRepouso: 0, valorFalta: 0, valorRepouso: 0, inss: 0 });
+    }), { diasFalta: 0, diasRepouso: 0, horas: 0, valorFalta: 0, valorRepouso: 0, valorHoras: 0, inss: 0 });
 
     el.sigrhPrintTotalDiasFalta.textContent = totais.diasFalta;
     el.sigrhPrintTotalDiasRepouso.textContent = totais.diasRepouso;
+    el.sigrhPrintTotalHoras.textContent = Number(totais.horas.toFixed(2));
+    el.sigrhPrintTotalValorHoras.textContent = formatarValorTabela(totais.valorHoras);
     el.sigrhPrintTotalValorFalta.textContent = formatarValorTabela(totais.valorFalta);
     el.sigrhPrintTotalValorRepouso.textContent = formatarValorTabela(totais.valorRepouso);
     el.sigrhPrintTotalInss.textContent = formatarValorTabela(totais.inss);
@@ -3195,6 +3157,7 @@ OBSERVAÇÕES:
         t.classList?.contains("rubrica-valor") ||
         t.classList?.contains("correcao-inss-dias-falta") ||
         t.classList?.contains("correcao-inss-dias-repouso") ||
+        t.classList?.contains("correcao-inss-horas") ||
         t.classList?.contains("correcao-inss-mes") ||
         t === el.diasMes
       ){
@@ -3208,6 +3171,7 @@ OBSERVAÇÕES:
       if(
         t.classList?.contains("sigrh-dias-falta") ||
         t.classList?.contains("sigrh-dias-repouso") ||
+        t.classList?.contains("sigrh-horas") ||
         t.classList?.contains("sigrh-mes")
       ){
         clearTimeout(sigrhDebounceTimer);
@@ -3465,6 +3429,53 @@ OBSERVAÇÕES:
     });
   }
 
+  // ✅ Compatibilidade: acertos salvos antes da coluna "Horas Não Trabalhadas" na
+  // tabela por competência guardavam as horas num campo avulso (id
+  // "qtd-horas-nao-trabalhadas"), que não existe mais. Naquele modelo, a base do
+  // INSS das horas era sempre o valor apurado no mês da exoneração — por isso as
+  // horas antigas são movidas para a linha da competência da exoneração, o que
+  // reproduz exatamente o cálculo original. Usa cliques/eventos reais nos
+  // elementos (as funções vivem no outro bloco <script>).
+  function migrarHorasAvulsasAntigas(entradas) {
+    const horasAntigas = parseFloat(entradas && entradas['id:qtd-horas-nao-trabalhadas']);
+    if (!(horasAntigas > 0)) return;
+
+    const jaTemHorasNaTabela = Object.keys(entradas).some((k) =>
+      k.indexOf('input.correcao-inss-horas') !== -1 && parseFloat(entradas[k]) > 0);
+    if (jaTemHorasNaTabela) return;
+
+    const mesExo = String(entradas['id:exoneracao'] || '').slice(0, 7); // AAAA-MM
+    if (!/^\d{4}-\d{2}$/.test(mesExo)) return;
+
+    const corpo = document.getElementById('correcao-inss-faltas-body');
+    const botao = document.getElementById('adicionar-linha-correcao-inss');
+    if (!corpo || !botao) return;
+
+    const linhas = () => Array.from(corpo.querySelectorAll('.correcao-inss-linha'));
+    let alvo = linhas().find((tr) => tr.querySelector('.correcao-inss-mes').value === mesExo);
+    if (!alvo) {
+      alvo = linhas().find((tr) =>
+        !tr.querySelector('.correcao-inss-mes').value &&
+        !tr.querySelector('.correcao-inss-dias-falta').value &&
+        !tr.querySelector('.correcao-inss-dias-repouso').value);
+    }
+    if (!alvo) {
+      botao.click();
+      const todas = linhas();
+      alvo = todas[todas.length - 1];
+    }
+    if (!alvo) return;
+
+    const campoMes = alvo.querySelector('.correcao-inss-mes');
+    const campoHoras = alvo.querySelector('.correcao-inss-horas');
+    campoMes.value = mesExo;
+    campoHoras.value = String(horasAntigas);
+    [campoMes, campoHoras].forEach((c) => {
+      c.dispatchEvent(new Event('input', { bubbles: true }));
+      c.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const idEdicao = params.get('editar');
 
@@ -3475,6 +3486,7 @@ OBSERVAÇÕES:
       if (registro && registro.dados && registro.dados.entradas) {
         garantirLinhasParaRestauracao(registro.dados.entradas);
         restaurarEntradas(registro.dados.entradas);
+        migrarHorasAvulsasAntigas(registro.dados.entradas);
         banner.textContent = 'Editando acerto salvo — campos preenchidos automaticamente. Recalcule e clique em "Salvar no Portal" (dentro da aba/seção de resultado) para atualizar este mesmo registro.';
       } else {
         banner.textContent = 'Este acerto foi salvo antes da função de edição existir — não é possível recarregar os campos automaticamente. Ao salvar de novo, será criado um registro novo.';
