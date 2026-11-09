@@ -614,7 +614,7 @@
     <details class="info-box">
       <summary>Nota</summary>
       <div class="destaque-content">
-        As duas primeiras rubricas (Salário Contrato Temporário e Adicional Periculosidade) têm código e descrição fixos para este tipo de acerto — apenas o valor é editável. O Adicional Periculosidade não entra na base de cálculo das férias e do 1/3 de férias (apenas na remuneração total e nos demais cálculos).
+        As duas primeiras rubricas (Salário Contrato Temporário e Adicional Periculosidade) têm código e descrição fixos para este tipo de acerto — apenas o valor é editável. O Adicional Periculosidade integra a base de cálculo das férias e do 1/3 de férias, assim como o 13º salário e a Seguridade Social (remuneração total).
       </div>
     </details>
 
@@ -2340,11 +2340,11 @@
     const codigoSegSocial13 = inss13.codigo;
     const vSegSocial13 = inss13.valor;
 
-    // ✅ Ponto 3: o Adicional Periculosidade (2ª rubrica, código fixo 11119) NÃO
-    // entra na base de cálculo das férias nem do 1/3 de férias — só na
-    // remuneração total (usada no 13º, na Seguridade Social, no adiantamento etc.).
-    const remSemPericulosidade = Math.max(0, remTotal - (Number(r2.valor) || 0));
-    const valorUmAvoFerias = remSemPericulosidade / 12;
+    // ✅ Base das férias e do 1/3: remuneração TOTAL (salário + Adicional
+    // Periculosidade + demais rubricas), conforme o SIGRH. (Regra anterior, que
+    // excluía a periculosidade da base de férias, foi revogada.)
+    const remFerias = remTotal;
+    const valorUmAvoFerias = remFerias / 12;
 
     // ✅ Ponto 1: alocação FIFO dos dias de férias usufruídos.
     // O total de dias usufruídos (de todos os períodos lançados) é consumido
@@ -2359,18 +2359,18 @@
     const diasFeriasVencidasDevidos = diasDevidosVencidas - diasUsufruidosVencidas;
     let vFeriasVenc = 0;
     if (diasFeriasVencidasDevidos > 0) {
-      vFeriasVenc = Number(((remSemPericulosidade / 30) * diasFeriasVencidasDevidos).toFixed(2));
+      vFeriasVenc = Number(((remFerias / 30) * diasFeriasVencidasDevidos).toFixed(2));
     }
 
     // ✅ Ponto 1: apenas os dias RESTANTES (após quitar as vencidas) entram no
     // cálculo do saldo das férias proporcionais
-    const ferProp = feriasProporcionaisComplexo(remSemPericulosidade, avos, diasUsufruidosRestantes);
+    const ferProp = feriasProporcionaisComplexo(remFerias, avos, diasUsufruidosRestantes);
     const vFerProp = Number(ferProp.valorFeriasProporcionais);
 
     // ✅ Pontos 1 e 4: 1/3 calculado de forma combinada (vencidas + proporcionais),
     // abatendo apenas UMA VEZ o valor fixo de 12 avos quando "Recebeu 1/3?" estiver
     // marcado — o restante do total combinado vai integralmente para a proporcional.
-    // ✅ Ponto 3: usa valorUmAvoFerias (sem periculosidade), não o valorUmAvo cheio.
+    // ✅ Usa valorUmAvoFerias (= remuneração total ÷ 12, com periculosidade).
     const avosProporcionalDeDireito = Math.max(0, Math.min(12, Number(avos.avosFeriasProporcionais) || 0));
     const terco = calcularTercoCombinado(valorUmAvoFerias, avos.avosFeriasVencidas, avosProporcionalDeDireito, vFeriasVenc);
     const vTercoVenc = terco.vTercoVenc;
@@ -2400,7 +2400,7 @@
     return {
       nome, mat, cargo: el.cargo.value || "", processoSei: el.processoSei.value.trim(),
       admissao: el.admissao.value, exoneracao: el.exoneracao.value,
-      rub, r1, r2, remTotal, remSemPericulosidade, diasMes, diasPagos, v1, v2,
+      rub, r1, r2, remTotal, remFerias, diasMes, diasPagos, v1, v2,
       baseSeg, codigoSegSocial, vSegSocial,
       inss13, codigoSegSocial13, vSegSocial13,
       avos, diasUsuf, valorUmAvo, valorUmAvoFerias, v13, v13Bruto, correcao13,
@@ -2526,16 +2526,16 @@
       ` : ``}
       - Seguridade Social sobre o 13º (código ${obj.codigoSegSocial13}): R$ ${obj.vSegSocial13.toFixed(2)}<br><br>
 
-      <strong>Cálculo das Férias Vencidas (sem Adicional Periculosidade):</strong><br>
-      - Remuneração para fins de férias (total − Adicional Periculosidade): R$ ${obj.remSemPericulosidade.toFixed(2)}<br>
+      <strong>Cálculo das Férias Vencidas (base: remuneração total, com Adicional Periculosidade):</strong><br>
+      - Remuneração para fins de férias (remuneração total): R$ ${obj.remFerias.toFixed(2)}<br>
       - Avos vencidos: ${obj.avos.avosFeriasVencidas} avos<br>
       - Dias de férias vencidas devidos: ${obj.avos.avosFeriasVencidas} × 2,5 = ${obj.diasDevidosVencidas.toFixed(1)} dias<br>
       - Total de dias usufruídos (todos os períodos lançados): ${obj.diasUsuf} dias<br>
       - Dias usufruídos alocados às vencidas (FIFO, período mais antigo primeiro): ${obj.diasUsufruidosVencidas.toFixed(1)} dias<br>
       ${obj.diasFeriasVencidasDevidos > 0 ? `
         - Dias a indenizar: ${obj.diasFeriasVencidasDevidos.toFixed(1)} dias<br>
-        - Valor por dia: R$ ${obj.remSemPericulosidade.toFixed(2)} ÷ 30 = R$ ${(obj.remSemPericulosidade/30).toFixed(2)}<br>
-        - Cálculo férias vencidas: ${obj.diasFeriasVencidasDevidos.toFixed(1)} × R$ ${(obj.remSemPericulosidade/30).toFixed(2)} = R$ ${obj.vFeriasVenc.toFixed(2)}<br>
+        - Valor por dia: R$ ${obj.remFerias.toFixed(2)} ÷ 30 = R$ ${(obj.remFerias/30).toFixed(2)}<br>
+        - Cálculo férias vencidas: ${obj.diasFeriasVencidasDevidos.toFixed(1)} × R$ ${(obj.remFerias/30).toFixed(2)} = R$ ${obj.vFeriasVenc.toFixed(2)}<br>
         - 1/3 sobre férias vencidas: R$ ${obj.vFeriasVenc.toFixed(2)} ÷ 3 = R$ ${obj.vTercoVenc.toFixed(2)}<br>
       ` : `- Não há férias vencidas a receber (dias usufruídos ≥ dias devidos)<br>`}
       ${obj.diasUsufruidosRestantes > 0 ? `- Dias usufruídos restantes (aplicados ao saldo das proporcionais): ${obj.diasUsufruidosRestantes.toFixed(1)} dias<br>` : ``}
@@ -2686,7 +2686,7 @@ Dias de férias usufruídos: ${obj.diasUsuf} dias
 
 REMUNERAÇÃO:
 Total (soma das rubricas): R$ ${obj.remTotal.toFixed(2)}
-Remuneração para fins de férias e 1/3 (sem Adicional Periculosidade): R$ ${obj.remSemPericulosidade.toFixed(2)}
+Remuneração para fins de férias e 1/3 (remuneração total, com Adicional Periculosidade): R$ ${obj.remFerias.toFixed(2)}
 Diferença 1ª rubrica: R$ ${obj.v1.toFixed(2)}
 Diferença 2ª rubrica (dias trabalhados): R$ ${obj.v2.toFixed(2)}
 Seguridade Social sobre a remuneração: ${textoSegSocial}
