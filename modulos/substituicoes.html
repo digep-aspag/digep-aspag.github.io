@@ -94,7 +94,7 @@
   .btn-sm{padding:4px 9px; font-size:.72rem; border-radius:5px;}
 
   .table-scroll{overflow-x:auto; border-radius:var(--radius);}
-  table.subst{border-collapse:separate; border-spacing:0; width:100%; min-width:2900px; font-size:.78rem;}
+  table.subst{border-collapse:separate; border-spacing:0; width:100%; min-width:3050px; font-size:.78rem;}
   table.subst thead th{
     position:sticky; top:0; z-index:3;
     background:var(--azul-800); color:#fff; font-weight:600;
@@ -280,8 +280,6 @@
       <a href="correcao-folha-v09.html"><span class="selo" style="background:#C1560C;">CF</span> Correção de folha (v09)</a>
       <a href="inss.html"><span class="selo" style="background:#B45309;">INSS</span> Memória de Cálculo — INSS</a>
       <a href="atualizacao-lpa.html"><span class="selo" style="background:#0F766E;">LPA</span> Atualização LPA</a>
-      <a href="atualizacao-sindec.html"><span class="selo" style="background:#4338CA;">DEA</span> Atualização (SINDEC) - Passivo a Servidores</a>
-      <a href="atualizacao-sindec-debito.html"><span class="selo" style="background:#BE185D;">DEB</span> Atualização SINDEC - Débito em Apuração</a>
       <div class="divisor"></div>
       <a href="historico.html"><span class="selo" style="background:#E8A33D;color:var(--sidebar);">⏱</span> Histórico de acertos</a>
       <a href="manual-instrucao.html"><span class="selo" style="background:#7C93A2;">📘</span> Manual de Instrução</a>
@@ -418,7 +416,7 @@
               <th colspan="6">Substituído</th>
               <th colspan="4">Período</th>
               <th colspan="5">Valores da substituição</th>
-              <th colspan="3">Publicação (DODF)</th>
+              <th colspan="4">Lançamento e publicação</th>
               <th></th>
             </tr>
             <tr>
@@ -445,6 +443,7 @@
               <th>13º proporcional (20607)</th>
               <th>Férias proporcionais (21480)</th>
               <th>1/3 de férias (21485)</th>
+              <th>Data do lançamento</th>
               <th>Nº do DODF</th>
               <th>Data de publicação</th>
               <th>Nº do processo</th>
@@ -617,6 +616,7 @@ function blankRow(){
     subMat:"", subNome:"", subCodigo:"", subCargo:"", subVenc:0, subRepres:0,
     tioMat:"", tioNome:"", tioCodigo:"", tioCargo:"", tioVenc:0, tioRepres:0,
     inicio:"", fim:"",
+    dataLancamento:"",
     dodfNum:"", dodfData:"", processo:""
   };
 }
@@ -899,6 +899,7 @@ function migrateRow(r){
       tioVenc: tioCargoRef ? tioCargoRef.venc : 0,
       tioRepres: parseFloat(r.tioValor)||0,
       inicio: r.inicio||"", fim: r.fim||"",
+      dataLancamento: r.dataLancamento||"",
       dodfNum: r.dodfNum||"", dodfData: r.dodfData||"", processo: r.processo||""
     };
   }
@@ -906,6 +907,7 @@ function migrateRow(r){
   if(!r.id) r.id = gerarIdLinha();
   if(r.subCodigo === undefined) r.subCodigo = "";
   if(r.tioCodigo === undefined) r.tioCodigo = "";
+  if(r.dataLancamento === undefined) r.dataLancamento = "";
   return r;
 }
 
@@ -1082,7 +1084,7 @@ async function abrirArquivo(chave, dataHora){
   wrap.className = 'arquivo-view-wrap';
   const table = document.createElement('table');
   table.className = 'arquivo-view';
-  const headers = ['Fator','Matr. substituto','Nome substituto','Cargo','Matr. substituído','Nome substituído','Cargo','Início','Fim','Diferença','Valor a receber','13º (20607)','Férias (21480)','1/3 (21485)','DODF','Data DODF','Processo'];
+  const headers = ['Fator','Matr. substituto','Nome substituto','Cargo','Matr. substituído','Nome substituído','Cargo','Início','Fim','Diferença','Valor a receber','13º (20607)','Férias (21480)','1/3 (21485)','Data lançamento','DODF','Data DODF','Processo'];
   const thead = document.createElement('thead');
   const trh = document.createElement('tr');
   headers.forEach(h=>{ const th=document.createElement('th'); th.textContent=h; trh.appendChild(th); });
@@ -1098,7 +1100,7 @@ async function abrirArquivo(chave, dataHora){
       fmtDate(r.inicio), fmtDate(r.fim),
       'R$ '+fmtMoney(c.integral), 'R$ '+fmtMoney(c.aReceber), 'R$ '+fmtMoney(c.decimoTerceiro),
       'R$ '+fmtMoney(c.feriasProp), 'R$ '+fmtMoney(c.tercoFerias),
-      r.dodfNum, fmtDate(r.dodfData), r.processo
+      fmtDate(r.dataLancamento), r.dodfNum, fmtDate(r.dodfData), r.processo
     ];
     vals.forEach(v=>{ const tdEl=document.createElement('td'); tdEl.textContent = v || '—'; tr.appendChild(tdEl); });
     tbody.appendChild(tr);
@@ -1723,7 +1725,9 @@ function buildRowEl(row){
   const inTerco = makeInput({value:'', cls:'num', readOnly:true});
   tr.appendChild(tdMoney(inTerco));
 
-  // ---- Publicação ----
+  // ---- Lançamento e publicação ----
+  const inDataLanc = makeInput({value:r.dataLancamento, type:'date', cls:'date', oninput:()=>{r.dataLancamento=inDataLanc.value; scheduleSave();}});
+  tr.appendChild(td(inDataLanc));
   const inDodfNum = makeInput({value:r.dodfNum, oninput:()=>{r.dodfNum=inDodfNum.value; scheduleSave();}});
   tr.appendChild(td(inDodfNum));
   const inDodfData = makeInput({value:r.dodfData, type:'date', cls:'date', oninput:()=>{r.dodfData=inDodfData.value; scheduleSave();}});
@@ -1767,7 +1771,7 @@ function matchesBusca(r){
   const alvo = [
     r.subNome, r.subMat, r.subCargo,
     r.tioNome, r.tioMat, r.tioCargo,
-    r.dodfNum, r.processo
+    r.dodfNum, r.processo, r.dataLancamento, fmtDate(r.dataLancamento)
   ].join(' ').toLowerCase();
   return alvo.includes(buscaTabela.toLowerCase());
 }
@@ -1905,7 +1909,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
     "Matrícula Substituído","Nome Substituído","Código Substituído","Cargo Substituído","Vencimento Substituído (R$)","Representação Substituído (R$)",
     "Início","Fim","Dias","Avos 13º","Avos Férias",
     "Diferença (R$)","Valor a Receber (R$)","13º Proporcional (20607) (R$)","Férias Proporcionais (21480) (R$)","1/3 de Férias (21485) (R$)",
-    "Nº do DODF","Data de Publicação","Nº do Processo"
+    "Data do Lançamento","Nº do DODF","Data de Publicação","Nº do Processo"
   ];
   const data = [headers];
   linhas.forEach((r,i)=>{
@@ -1916,7 +1920,7 @@ async function exportarExcelGenerico(linhas, nomeArquivoBase){
       r.tioMat, r.tioNome, r.tioCodigo, r.tioCargo, round2(parseFloat(r.tioVenc)||0), round2(parseFloat(r.tioRepres)||0),
       fmtDate(r.inicio), fmtDate(r.fim), c.dias, c.avosDecimo, c.avosFerias,
       round2(c.integral), round2(c.aReceber), round2(c.decimoTerceiro), round2(c.feriasProp), round2(c.tercoFerias),
-      r.dodfNum, fmtDate(r.dodfData), r.processo
+      fmtDate(r.dataLancamento), r.dodfNum, fmtDate(r.dodfData), r.processo
     ]);
   });
 
@@ -2057,8 +2061,9 @@ function printRow(row){
     </div>
 
     <div class="doc-section">
-      <h3>Publicação</h3>
+      <h3>Lançamento e publicação</h3>
       <div class="doc-grid">
+        <div class="doc-field full"><label>Data do lançamento</label><div>${fmtDate(r.dataLancamento)}</div></div>
         <div class="doc-field"><label>DODF nº</label><div>${escapeHtml(r.dodfNum)||'—'}</div></div>
         <div class="doc-field"><label>Data de publicação</label><div>${fmtDate(r.dodfData)}</div></div>
         <div class="doc-field full"><label>Nº do processo</label><div>${escapeHtml(r.processo)||'—'}</div></div>
